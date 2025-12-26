@@ -296,17 +296,17 @@ document.addEventListener('DOMContentLoaded', function() {
         strengthFill.style.width = `${percentage}%`;
         
         let strength = 'Weak';
-        let color = '#FF6B6B';
+        let color = '#7C3AED';
         
         if (percentage >= 80) {
             strength = 'Strong';
-            color = '#00F5D4';
+            color = '#06B6D4';
         } else if (percentage >= 60) {
             strength = 'Good';
-            color = '#22D3EE';
+            color = '#1CA7EC';
         } else if (percentage >= 40) {
             strength = 'Fair';
-            color = '#00C6FF';
+            color = '#1CA7EC';
         }
         
         strengthFill.style.background = `linear-gradient(90deg, ${color}, ${color}99)`;
@@ -414,12 +414,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    function showErrorModal(message) {
-        document.getElementById('errorMessage').textContent = message;
-        document.getElementById('errorModal').classList.add('active');
-        document.body.classList.add('no-scroll');
-    }
-    
     function hideModal(modalId) {
         document.getElementById(modalId).classList.remove('active');
         document.body.classList.remove('no-scroll');
@@ -482,20 +476,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ------------------ Initialize ------------------
     showStep(1);
-});
-
-
-document.getElementById('continueBtn').addEventListener('click', function () {
-    hideModal('successModal');
-
-    // Move flow based on current step
-    if (currentStep === 1) {
-        showStep(2); // Email → OTP
-    } 
-    else if (currentStep === 2) {
-        showStep(3); // OTP → New Password
-    } 
-    else if (currentStep === 3) {
-        showStep(4); // Password → Success
-    }
 });
