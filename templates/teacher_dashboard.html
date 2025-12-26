@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MirrorMind - Teacher Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/css/teacher_dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -26,7 +26,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">
-                        <i class="fas fa-brain"></i>
+                      <img src="/static/images/123.jpg" alt="MirrorMind Logo" class="step-logo">
                     </div>
                     <h2>MirrorMind</h2>
                 </div>
@@ -47,7 +47,13 @@
                     <li>
                         <a href="#">
                             <i class="fas fa-chalkboard-teacher"></i>
-                            <span>My Classes</span>
+                            <span>Live Class</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Attendance</span>
                         </a>
                     </li>
                     <li>
@@ -58,21 +64,14 @@
                     </li>
                     <li>
                         <a href="#">
-                            <i class="fas fa-users"></i>
-                            <span>Students</span>
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
                         </a>
                     </li>
                     <li>
                         <a href="#">
-                            <i class="fas fa-bell"></i>
-                            <span>Notifications</span>
-                            <span class="notification-badge">5</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
                         </a>
                     </li>
                 </ul>
@@ -84,10 +83,7 @@
             <!-- Top Navbar -->
             <header class="top-navbar">
                 <div class="navbar-left">
-                    <div class="welcome-text">
-                        <h1>Welcome back, <span class="teacher-name">Dr. Chen</span></h1>
-                        <p>AI-powered classroom insights for today</p>
-                    </div>
+                    <h1 class="page-title">Teacher Dashboard</h1>
                 </div>
                 <div class="navbar-right">
                     <div class="notification-icon">
@@ -100,7 +96,7 @@
                             <img src="https://ui-avatars.com/api/?name=Dr+Chen&background=7C3AED&color=fff" alt="Dr. Chen">
                         </div>
                         <div class="profile-info">
-                            <span class="profile-name">Dr. Chen</span>
+                            <span class="profile-name">k.k.bele</span>
                             <span class="profile-role">Computer Science</span>
                         </div>
                         <i class="fas fa-chevron-down"></i>
@@ -108,254 +104,361 @@
                 </div>
             </header>
 
-            <!-- KPI Cards -->
-            <section class="kpi-section">
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
-                            <i class="fas fa-chalkboard-teacher"></i>
+            <!-- Start Class Card -->
+            <section class="start-class-section">
+                <div class="start-class-card">
+                    <div class="class-card-content">
+                        <div class="class-card-left">
+                            <div class="status-indicator">
+                                <div class="status-dot online"></div>
+                                <span class="status-text">System Online</span>
+                            </div>
+                            <h2 class="class-card-title">Ready to Start Teaching</h2>
+                            <p class="class-card-subtitle">AI-powered classroom monitoring is active and ready</p>
+                            <div class="class-stats">
+                                <div class="stat">
+                                    <span class="stat-value">8</span>
+                                    <span class="stat-label">Active Classes</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value">214</span>
+                                    <span class="stat-label">Total Students</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="kpi-content">
-                            <h3 class="kpi-value" data-target="8">0</h3>
-                            <p class="kpi-label">Active Classes</p>
-                        </div>
-                        <div class="kpi-trend up">
-                            <i class="fas fa-arrow-up"></i> 2
+                        <div class="class-card-right">
+                            <button class="start-class-btn" id="startClassBtn">
+                                <div class="btn-content">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span>Start Live Class</span>
+                                </div>
+                                <div class="btn-pulse"></div>
+                            </button>
+                            <div class="next-class">
+                                <p><i class="fas fa-clock"></i> Next class in: <span id="classCountdown">45:30</span></p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
+                </div>
+            </section>
+
+            <!-- Quick Stats -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-users"></i>
                         </div>
-                        <div class="kpi-content">
-                            <h3 class="kpi-value" data-target="214">0</h3>
-                            <p class="kpi-label">Total Students</p>
+                        <div class="stat-content">
+                            <h3 class="stat-value" data-target="214">0</h3>
+                            <p class="stat-label">Total Students</p>
                         </div>
-                        <div class="kpi-trend up">
+                        <div class="stat-trend up">
                             <i class="fas fa-arrow-up"></i> 12
                         </div>
                     </div>
                     
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" data-target="198">0</h3>
+                            <p class="stat-label">Present Today</p>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i> 3%
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-brain"></i>
                         </div>
-                        <div class="kpi-content">
-                            <h3 class="kpi-value" data-target="86">0</h3>
-                            <p class="kpi-label">Avg Engagement %</p>
+                        <div class="stat-content">
+                            <h3 class="stat-value" data-target="86">0</h3>
+                            <p class="stat-label">Avg Engagement %</p>
                         </div>
-                        <div class="kpi-trend neutral">
+                        <div class="stat-trend neutral">
                             <i class="fas fa-minus"></i> 0.5%
                         </div>
                     </div>
                     
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
-                            <i class="fas fa-exclamation-circle"></i>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-smile"></i>
                         </div>
-                        <div class="kpi-content">
-                            <h3 class="kpi-value" data-target="7">0</h3>
-                            <p class="kpi-label">Attention Alerts</p>
+                        <div class="stat-content">
+                            <h3 class="stat-value" data-target="78">0</h3>
+                            <p class="stat-label">Emotion Score</p>
                         </div>
-                        <div class="kpi-trend down">
-                            <i class="fas fa-arrow-down"></i> 3
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i> 2.3%
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Charts Section -->
-            <section class="charts-section">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>Class Engagement Overview</h3>
-                        <div class="chart-period">
-                            <span class="active">Today</span>
-                            <span>This Week</span>
-                            <span>This Month</span>
+            <!-- Main Content Area -->
+            <section class="main-content-area">
+                <!-- Left Column -->
+                <div class="content-column">
+                    <!-- Attendance Overview -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3>Student Attendance Overview</h3>
+                            <button class="view-all">View All</button>
                         </div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="engagement-ring">
-                            <svg class="progress-ring" width="200" height="200">
-                                <circle class="progress-ring-bg" cx="100" cy="100" r="80" stroke-width="12"></circle>
-                                <circle class="progress-ring-fill" cx="100" cy="100" r="80" stroke-width="12" stroke-dasharray="502.4" stroke-dashoffset="502.4"></circle>
-                            </svg>
-                            <div class="ring-center">
-                                <span class="ring-value">86%</span>
-                                <span class="ring-label">Avg Engagement</span>
+                        <div class="attendance-table">
+                            <div class="table-header">
+                                <span class="col-student">Student</span>
+                                <span class="col-status">Status</span>
+                                <span class="col-time">Check-in</span>
                             </div>
-                        </div>
-                        <div class="engagement-stats">
-                            <div class="stat-item">
-                                <div class="stat-indicator high"></div>
-                                <div class="stat-info">
-                                    <span class="stat-value">3</span>
-                                    <span class="stat-label">High (>90%)</span>
+                            <div class="table-body">
+                                <div class="table-row">
+                                    <div class="col-student">
+                                        <div class="student-avatar">
+                                            <img src="https://ui-avatars.com/api/?name=Alex+Morgan&background=1CA7EC&color=fff" alt="Alex Morgan">
+                                        </div>
+                                        <div class="student-info">
+                                            <span class="student-name">vinayak Gore</span>
+                                            <span class="student-id">CS201-001</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-status">
+                                        <span class="status-badge present">Present</span>
+                                    </div>
+                                    <div class="col-time">08:45 AM</div>
+                                </div>
+                                
+                                <div class="table-row">
+                                    <div class="col-student">
+                                        <div class="student-avatar">
+                                            <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=7C3AED&color=fff" alt="Sarah Chen">
+                                        </div>
+                                        <div class="student-info">
+                                            <span class="student-name">Nilesh Ingle</span>
+                                            <span class="student-id">CS201-002</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-status">
+                                        <span class="status-badge present">Present</span>
+                                    </div>
+                                    <div class="col-time">08:50 AM</div>
+                                </div>
+                                
+                                <div class="table-row">
+                                    <div class="col-student">
+                                        <div class="student-avatar">
+                                            <img src="https://ui-avatars.com/api/?name=James+Wilson&background=06B6D4&color=fff" alt="James Wilson">
+                                        </div>
+                                        <div class="student-info">
+                                            <span class="student-name">Om lothe</span>
+                                            <span class="student-id">CS201-003</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-status">
+                                        <span class="status-badge absent">Absent</span>
+                                    </div>
+                                    <div class="col-time">-</div>
+                                </div>
+                                
+                                <div class="table-row">
+                                    <div class="col-student">
+                                        <div class="student-avatar">
+                                            <img src="https://ui-avatars.com/api/?name=Maya+Patel&background=FF6B6B&color=fff" alt="Maya Patel">
+                                        </div>
+                                        <div class="student-info">
+                                            <span class="student-name">Prajwal Chipade</span>
+                                            <span class="student-id">CS201-004</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-status">
+                                        <span class="status-badge late">Late</span>
+                                    </div>
+                                    <div class="col-time">09:15 AM</div>
+                                </div>
+                                
+                                <div class="table-row">
+                                    <div class="col-student">
+                                        <div class="student-avatar">
+                                            <img src="https://ui-avatars.com/api/?name=David+Kim&background=48BB78&color=fff" alt="David Kim">
+                                        </div>
+                                        <div class="student-info">
+                                            <span class="student-name">Prathmesh Rahate</span>
+                                            <span class="student-id">CS201-005</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-status">
+                                        <span class="status-badge present">Present</span>
+                                    </div>
+                                    <div class="col-time">08:55 AM</div>
                                 </div>
                             </div>
-                            <div class="stat-item">
-                                <div class="stat-indicator medium"></div>
-                                <div class="stat-info">
-                                    <span class="stat-value">4</span>
-                                    <span class="stat-label">Medium (70-90%)</span>
-                                </div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-indicator low"></div>
-                                <div class="stat-info">
-                                    <span class="stat-value">1</span>
-                                    <span class="stat-label">Low (<70%)</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3>Weekly Performance Trend</h3>
-                        <div class="chart-period">
-                            <span class="active">Engagement</span>
-                            <span>Attendance</span>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="performanceChart" width="400" height="200"></canvas>
-                    </div>
-                </div>
-            </section>
 
-            <!-- Bottom Section -->
-            <section class="bottom-section">
-                <div class="classes-card">
-                    <div class="card-header">
-                        <h3>Today's Schedule</h3>
-                        <div class="time-display">
-                            <i class="fas fa-clock"></i>
-                            <span id="currentTime">10:30 AM</span>
+                    <!-- Engagement Alerts -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3>Engagement Alerts</h3>
+                            <button class="mark-read">Mark All Read</button>
                         </div>
-                    </div>
-                    <div class="classes-list">
-                        <div class="class-item completed">
-                            <div class="class-time">
-                                <span class="time">8:30 - 10:00</span>
-                                <span class="status-badge completed">Completed</span>
-                            </div>
-                            <div class="class-details">
-                                <h4>Data Structures CS201</h4>
-                                <p>Room 304 • 42 Students</p>
-                            </div>
-                            <div class="class-engagement">
-                                <div class="engagement-score">
-                                    <div class="score-bar">
-                                        <div class="score-fill" style="width: 92%"></div>
-                                    </div>
-                                    <span>92%</span>
+                        <div class="alerts-list">
+                            <div class="alert-item unread">
+                                <div class="alert-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="class-item live">
-                            <div class="class-time">
-                                <span class="time">10:15 - 11:45</span>
-                                <span class="status-badge live">Live Now</span>
-                            </div>
-                            <div class="class-details">
-                                <h4>Artificial Intelligence CS401</h4>
-                                <p>Virtual Classroom • 38 Students</p>
-                            </div>
-                            <div class="class-engagement">
-                                <div class="engagement-score">
-                                    <div class="score-bar">
-                                        <div class="score-fill live-fill"></div>
-                                    </div>
-                                    <span class="live-text">Live Tracking</span>
+                                <div class="alert-content">
+                                    <h4>Low Engagement Detected</h4>
+                                    <p>CS201 - Group B showing 45% engagement in last 15 mins</p>
+                                    <span class="alert-time">15 minutes ago</span>
                                 </div>
+                                <button class="alert-dismiss">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                        </div>
-                        
-                        <div class="class-item upcoming">
-                            <div class="class-time">
-                                <span class="time">13:00 - 14:30</span>
-                                <span class="status-badge upcoming">Upcoming</span>
-                            </div>
-                            <div class="class-details">
-                                <h4>Machine Learning CS501</h4>
-                                <p>Lab 205 • 35 Students</p>
-                            </div>
-                            <div class="class-engagement">
-                                <div class="engagement-score">
-                                    <div class="score-bar">
-                                        <div class="score-fill" style="width: 85%"></div>
-                                    </div>
-                                    <span>85%</span>
+                            
+                            <div class="alert-item unread">
+                                <div class="alert-icon">
+                                    <i class="fas fa-user-clock"></i>
                                 </div>
+                                <div class="alert-content">
+                                    <h4>Sleepy Pattern Detected</h4>
+                                    <p>3 students showing signs of fatigue in current session</p>
+                                    <span class="alert-time">30 minutes ago</span>
+                                </div>
+                                <button class="alert-dismiss">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="alert-item">
+                                <div class="alert-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4>Engagement Drop</h4>
+                                    <p>CS301 engagement dropped 15% after 45 minutes</p>
+                                    <span class="alert-time">2 hours ago</span>
+                                </div>
+                                <button class="alert-dismiss">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="alert-item">
+                                <div class="alert-icon">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4>AI Recommendation</h4>
+                                    <p>Try interactive quiz to boost engagement in CS401</p>
+                                    <span class="alert-time">4 hours ago</span>
+                                </div>
+                                <button class="alert-dismiss">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="notifications-card">
-                    <div class="card-header">
-                        <h3>Attention Alerts</h3>
-                        <button class="mark-read">Mark all as read</button>
+
+                <!-- Right Column -->
+                <div class="content-column">
+                    <!-- Emotion Average Visual -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3>Emotion Analysis</h3>
+                            <div class="time-filter">
+                                <span class="active">Today</span>
+                                <span>Week</span>
+                                <span>Month</span>
+                            </div>
+                        </div>
+                        <div class="emotion-chart">
+                            <div class="chart-container">
+                                <canvas id="emotionChart" width="300" height="200"></canvas>
+                            </div>
+                            <div class="emotion-stats">
+                                <div class="emotion-stat">
+                                    <div class="emotion-label focused">
+                                        <div class="color-dot"></div>
+                                        <span>Focused</span>
+                                    </div>
+                                    <div class="emotion-value">42%</div>
+                                </div>
+                                <div class="emotion-stat">
+                                    <div class="emotion-label neutral">
+                                        <div class="color-dot"></div>
+                                        <span>Neutral</span>
+                                    </div>
+                                    <div class="emotion-value">35%</div>
+                                </div>
+                                <div class="emotion-stat">
+                                    <div class="emotion-label bored">
+                                        <div class="color-dot"></div>
+                                        <span>Bored</span>
+                                    </div>
+                                    <div class="emotion-value">18%</div>
+                                </div>
+                                <div class="emotion-stat">
+                                    <div class="emotion-label happy">
+                                        <div class="color-dot"></div>
+                                        <span>Happy</span>
+                                    </div>
+                                    <div class="emotion-value">5%</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="notifications-list">
-                        <div class="notification-item unread">
-                            <div class="notification-icon alert">
-                                <i class="fas fa-exclamation-triangle"></i>
+
+                    <!-- Next Class Scheduled -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3>Next Class Scheduled</h3>
+                            <div class="reminder-badge">
+                                <i class="fas fa-bell"></i>
                             </div>
-                            <div class="notification-content">
-                                <h4>Low Engagement Alert</h4>
-                                <p>CS201 - Student group showing 45% engagement in last 15 minutes</p>
-                                <span class="notification-time">15 minutes ago</span>
-                            </div>
-                            <button class="notification-dismiss">
-                                <i class="fas fa-times"></i>
-                            </button>
                         </div>
-                        
-                        <div class="notification-item unread">
-                            <div class="notification-icon warning">
-                                <i class="fas fa-user-clock"></i>
+                        <div class="next-class-card">
+                            <div class="class-info">
+                                <div class="class-subject">
+                                    <h4>Artificial Intelligence</h4>
+                                    <p>CS401 - Advanced Topics</p>
+                                </div>
+                                <div class="class-time">
+                                    <i class="fas fa-clock"></i>
+                                    <span>10:15 - 11:45 AM</span>
+                                </div>
+                                <div class="class-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Virtual Classroom</span>
+                                </div>
                             </div>
-                            <div class="notification-content">
-                                <h4>Attendance Drop Detected</h4>
-                                <p>CS301 - 3 students absent consecutively for 2 sessions</p>
-                                <span class="notification-time">2 hours ago</span>
+                            <div class="class-countdown">
+                                <div class="countdown-title">Starts in:</div>
+                                <div class="countdown-timer">
+                                    <div class="time-unit">
+                                        <span class="time-value" id="hours">01</span>
+                                        <span class="time-label">Hours</span>
+                                    </div>
+                                    <div class="time-separator">:</div>
+                                    <div class="time-unit">
+                                        <span class="time-value" id="minutes">30</span>
+                                        <span class="time-label">Minutes</span>
+                                    </div>
+                                    <div class="time-separator">:</div>
+                                    <div class="time-unit">
+                                        <span class="time-value" id="seconds">45</span>
+                                        <span class="time-label">Seconds</span>
+                                    </div>
+                                </div>
                             </div>
-                            <button class="notification-dismiss">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="notification-item">
-                            <div class="notification-icon success">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="notification-content">
-                                <h4>Engagement Improvement</h4>
-                                <p>CS401 - 15% increase in engagement after interactive module</p>
-                                <span class="notification-time">1 day ago</span>
-                            </div>
-                            <button class="notification-dismiss">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="notification-item">
-                            <div class="notification-icon info">
-                                <i class="fas fa-lightbulb"></i>
-                            </div>
-                            <div class="notification-content">
-                                <h4>AI Recommendation</h4>
-                                <p>Try breakout rooms for CS201 based on engagement patterns</p>
-                                <span class="notification-time">2 days ago</span>
-                            </div>
-                            <button class="notification-dismiss">
-                                <i class="fas fa-times"></i>
+                            <button class="prepare-class-btn">
+                                <i class="fas fa-cog"></i>
+                                Prepare Class
                             </button>
                         </div>
                     </div>
@@ -364,25 +467,6 @@
         </main>
     </div>
 
-    <!-- Floating AI Assistant -->
-    <div class="ai-assistant" id="aiAssistant">
-        <div class="assistant-icon">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div class="assistant-popup">
-            <div class="popup-header">
-                <h4>AI Classroom Assistant</h4>
-                <button class="popup-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="popup-content">
-                <p>Detected optimal teaching moments in your last class. Want insights?</p>
-                <button class="ai-insight-btn">View Insights</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="scripts.js"></script>
+    <script src="/static/js/teacher_dashboard.js"></script>
 </body>
 </html>

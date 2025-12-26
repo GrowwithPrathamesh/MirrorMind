@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MirrorMind - Live Class</title>
+    <link rel="stylesheet" href="/static/css/liveclass.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Page Loader -->
+    <div class="loader" id="pageLoader">
+        <div class="loader-content">
+            <div class="live-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-core"></div>
+                <div class="spinner-pulse"></div>
+            </div>
+            <div class="loader-text">Connecting to Live Class</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="live-class-container">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <div class="class-info">
+                    <h1 class="class-title">Artificial Intelligence - CS401</h1>
+                    <div class="class-section">
+                        <i class="fas fa-users"></i>
+                        <span>Section A • 38 Students</span>
+                    </div>
+                </div>
+                <div class="live-status">
+                    <div class="status-indicator">
+                        <div class="pulse-dot"></div>
+                        <span class="status-text">LIVE</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="class-timer">
+                    <i class="fas fa-clock"></i>
+                    <span id="classTimer">45:30</span>
+                </div>
+                <button class="end-class-btn" id="endClassBtn">
+                    <i class="fas fa-stop-circle"></i>
+                    <span>End Class</span>
+                </button>
+                <div class="user-avatar">
+                    <img src="https://ui-avatars.com/api/?name=Dr+Chen&background=7C3AED&color=fff" alt="Dr. Chen">
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="main-grid">
+            <!-- Left: Live Video Panel -->
+            <section class="video-panel">
+                <div class="video-container" id="videoContainer">
+                    <div class="video-placeholder">
+                        <div class="placeholder-content">
+                            <i class="fas fa-video"></i>
+                            <h3>Live Class Feed</h3>
+                            <p>AI monitoring is active and analyzing classroom engagement</p>
+                            <div class="video-stats">
+                                <div class="stat">
+                                    <span class="stat-value">85%</span>
+                                    <span class="stat-label">Engagement</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value">38/38</span>
+                                    <span class="stat-label">Active</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value">92%</span>
+                                    <span class="stat-label">Attendance</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-controls">
+                        <button class="control-btn" id="toggleVideo">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="control-btn" id="toggleAudio">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="control-btn" id="screenShare">
+                            <i class="fas fa-desktop"></i>
+                        </button>
+                        <button class="control-btn record-btn" id="recordClass">
+                            <div class="record-indicator"></div>
+                            <i class="fas fa-circle"></i>
+                        </button>
+                    </div>
+                    <div class="video-overlay">
+                        <div class="ai-analysis">
+                            <i class="fas fa-brain"></i>
+                            <span>AI Monitoring Active</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Student Monitoring Panel -->
+            <section class="monitoring-panel">
+                <!-- Attendance Status Card -->
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <h3>Attendance Status</h3>
+                        <div class="last-updated">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Just now</span>
+                        </div>
+                    </div>
+                    <div class="attendance-stats">
+                        <div class="attendance-total">
+                            <div class="total-count">
+                                <span class="count-value" id="totalStudents">38</span>
+                                <span class="count-label">Total Students</span>
+                            </div>
+                            <div class="attendance-breakdown">
+                                <div class="breakdown-item present">
+                                    <div class="breakdown-icon">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="breakdown-info">
+                                        <span class="breakdown-value" id="presentCount">35</span>
+                                        <span class="breakdown-label">Present</span>
+                                    </div>
+                                </div>
+                                <div class="breakdown-item absent">
+                                    <div class="breakdown-icon">
+                                        <i class="fas fa-user-times"></i>
+                                    </div>
+                                    <div class="breakdown-info">
+                                        <span class="breakdown-value" id="absentCount">2</span>
+                                        <span class="breakdown-label">Absent</span>
+                                    </div>
+                                </div>
+                                <div class="breakdown-item late">
+                                    <div class="breakdown-icon">
+                                        <i class="fas fa-user-clock"></i>
+                                    </div>
+                                    <div class="breakdown-info">
+                                        <span class="breakdown-value" id="lateCount">1</span>
+                                        <span class="breakdown-label">Late</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="attendance-chart">
+                            <div class="chart-visual">
+                                <div class="chart-bar present" style="width: 80%"></div>
+                                <div class="chart-bar absent" style="width: 10%"></div>
+                                <div class="chart-bar late" style="width: 5%"></div>
+                            </div>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color present"></div>
+                                    <span>Present</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color absent"></div>
+                                    <span>Absent</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color late"></div>
+                                    <span>Late</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Engagement Alerts Card -->
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <h3>Engagement Alerts</h3>
+                        <button class="view-all-btn">View All</button>
+                    </div>
+                    <div class="alerts-container">
+                        <div class="alert-item unread">
+                            <div class="alert-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h4>Low Engagement Detected</h4>
+                                <p>Student group showing 45% engagement</p>
+                                <span class="alert-time">2 minutes ago</span>
+                            </div>
+                            <button class="alert-action">View</button>
+                        </div>
+                        <div class="alert-item unread">
+                            <div class="alert-icon">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h4>Sleepy Pattern Detected</h4>
+                                <p>3 students showing signs of fatigue</p>
+                                <span class="alert-time">5 minutes ago</span>
+                            </div>
+                            <button class="alert-action">View</button>
+                        </div>
+                        <div class="alert-item">
+                            <div class="alert-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h4>Engagement Drop</h4>
+                                <p>Overall engagement dropped 15%</p>
+                                <span class="alert-time">15 minutes ago</span>
+                            </div>
+                            <button class="alert-action">View</button>
+                        </div>
+                    </div>
+                    <div class="alert-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Active Alerts</span>
+                            <span class="summary-value">3</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">AI Insights</span>
+                            <span class="summary-value">12</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emotion Average Card -->
+                <div class="monitoring-card">
+                    <div class="card-header">
+                        <h3>Emotion Average</h3>
+                        <div class="refresh-control">
+                            <i class="fas fa-redo"></i>
+                            <span>Auto-refresh</span>
+                        </div>
+                    </div>
+                    <div class="emotion-container">
+                        <div class="emotion-chart">
+                            <canvas id="emotionChart" width="200" height="200"></canvas>
+                            <div class="chart-center">
+                                <span class="center-value">78%</span>
+                                <span class="center-label">Avg Focus</span>
+                            </div>
+                        </div>
+                        <div class="emotion-stats">
+                            <div class="emotion-stat focused">
+                                <div class="stat-label">
+                                    <div class="color-indicator"></div>
+                                    <span>Focused</span>
+                                </div>
+                                <div class="stat-value">42%</div>
+                                <div class="stat-bar">
+                                    <div class="bar-fill" style="width: 42%"></div>
+                                </div>
+                            </div>
+                            <div class="emotion-stat neutral">
+                                <div class="stat-label">
+                                    <div class="color-indicator"></div>
+                                    <span>Neutral</span>
+                                </div>
+                                <div class="stat-value">35%</div>
+                                <div class="stat-bar">
+                                    <div class="bar-fill" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            <div class="emotion-stat bored">
+                                <div class="stat-label">
+                                    <div class="color-indicator"></div>
+                                    <span>Bored</span>
+                                </div>
+                                <div class="stat-value">18%</div>
+                                <div class="stat-bar">
+                                    <div class="bar-fill" style="width: 18%"></div>
+                                </div>
+                            </div>
+                            <div class="emotion-stat happy">
+                                <div class="stat-label">
+                                    <div class="color-indicator"></div>
+                                    <span>Happy</span>
+                                </div>
+                                <div class="stat-value">5%</div>
+                                <div class="stat-bar">
+                                    <div class="bar-fill" style="width: 5%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Panel -->
+        <footer class="bottom-panel">
+            <!-- Real-time Chat -->
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <h3>Class Chat</h3>
+                    <div class="chat-status">
+                        <div class="typing-indicator" id="typingIndicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="online-count">24 online</span>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message teacher">
+                        <div class="message-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Dr+Chen&background=7C3AED&color=fff" alt="Dr. Chen">
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="sender">Dr. Chen</span>
+                                <span class="time">14:30</span>
+                            </div>
+                            <div class="message-text">
+                                Welcome everyone! Today we'll be covering neural networks.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message student">
+                        <div class="message-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Alex+Morgan&background=1CA7EC&color=fff" alt="Alex">
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="sender">Alex Morgan</span>
+                                <span class="time">14:32</span>
+                            </div>
+                            <div class="message-text">
+                                Excited for today's topic! I have a question about backpropagation.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="message system">
+                        <div class="message-content">
+                            <div class="message-text">
+                                <i class="fas fa-info-circle"></i>
+                                AI detected increased engagement during Q&A session
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Type your message..." id="chatInput">
+                    <button class="send-btn" id="sendMessage">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Action Bar -->
+            <div class="action-bar">
+                <div class="action-header">
+                    <h3>Quick Actions</h3>
+                    <div class="action-indicator">
+                        <div class="live-dot"></div>
+                        <span>Live Controls</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn" id="muteAllBtn">
+                        <div class="btn-icon">
+                            <i class="fas fa-volume-mute"></i>
+                        </div>
+                        <span class="btn-label">Mute All</span>
+                    </button>
+                    <button class="action-btn" id="takeAttendanceBtn">
+                        <div class="btn-icon">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <span class="btn-label">Take Attendance</span>
+                    </button>
+                    <button class="action-btn active" id="shareScreenBtn">
+                        <div class="btn-icon">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                        <span class="btn-label">Share Screen</span>
+                    </button>
+                    <button class="action-btn danger" id="endClassActionBtn">
+                        <div class="btn-icon">
+                            <i class="fas fa-stop-circle"></i>
+                        </div>
+                        <span class="btn-label">End Class</span>
+                    </button>
+                </div>
+                <div class="action-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-signal"></i>
+                        <span>Connection: <strong>Excellent</strong></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-memory"></i>
+                        <span>CPU: <strong>42%</strong></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-wifi"></i>
+                        <span>Latency: <strong>28ms</strong></span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>End Live Class</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h4>Are you sure you want to end this class?</h4>
+                <p>This will disconnect all students and save the session data. This action cannot be undone.</p>
+                <div class="session-stats">
+                    <div class="session-stat">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value" id="modalDuration">45:30</span>
+                    </div>
+                    <div class="session-stat">
+                        <span class="stat-label">Active Students</span>
+                        <span class="stat-value">35/38</span>
+                    </div>
+                    <div class="session-stat">
+                        <span class="stat-label">Avg Engagement</span>
+                        <span class="stat-value">85%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelEnd">Cancel</button>
+                <button class="btn-danger" id="confirmEnd">
+                    <span>End Class</span>
+                    <i class="fas fa-stop-circle"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/static/js/liveclass.js"></script>
+</body>
+</html>
