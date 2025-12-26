@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MirrorMind - Student Dashboard</title>
+    <link rel="stylesheet" href="/static/css/student_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Page Loader -->
+    <div class="loader" id="pageLoader">
+        <div class="loader-content">
+            <div class="ai-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-core"></div>
+            </div>
+            <div class="loader-text">MirrorMind Initializing</div>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h2>MirrorMind</h2>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="#">
+                            <i class="fas fa-th-large"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <div class="active-indicator"></div>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Engagement</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>Classes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                            <span class="notification-badge">3</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="navbar-left">
+                    <div class="welcome-text">
+                        <h1>Welcome back, <span class="student-name">Alex Morgan</span></h1>
+                        <p>Here's your learning analytics for today</p>
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <div class="pulse-dot"></div>
+                        <span class="notification-count">3</span>
+                    </div>
+                    <div class="user-profile">
+                        <div class="avatar">
+                            <img src="https://ui-avatars.com/api/?name=Alex+Morgan&background=1CA7EC&color=fff" alt="Alex Morgan">
+                        </div>
+                        <div class="profile-info">
+                            <span class="profile-name">Alex Morgan</span>
+                            <span class="profile-role">Computer Science</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPI Cards -->
+            <section class="kpi-section">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-value" data-target="94">0</h3>
+                            <p class="kpi-label">Attendance %</p>
+                        </div>
+                        <div class="kpi-trend up">
+                            <i class="fas fa-arrow-up"></i> 2.5%
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-value" data-target="87">0</h3>
+                            <p class="kpi-label">Engagement Score</p>
+                        </div>
+                        <div class="kpi-trend up">
+                            <i class="fas fa-arrow-up"></i> 1.8%
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-value" data-target="42">0</h3>
+                            <p class="kpi-label">Total Classes</p>
+                        </div>
+                        <div class="kpi-trend neutral">
+                            <i class="fas fa-minus"></i> 0%
+                        </div>
+                    </div>
+                    
+                    <div class="kpi-card">
+                        <div class="kpi-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-value" data-target="3">0</h3>
+                            <p class="kpi-label">Active Alerts</p>
+                        </div>
+                        <div class="kpi-trend down">
+                            <i class="fas fa-arrow-down"></i> 1
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Attendance Overview</h3>
+                        <div class="chart-period">
+                            <span class="active">This Week</span>
+                            <span>This Month</span>
+                            <span>All Time</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="attendance-ring">
+                            <svg class="progress-ring" width="200" height="200">
+                                <circle class="progress-ring-bg" cx="100" cy="100" r="80" stroke-width="12"></circle>
+                                <circle class="progress-ring-fill" cx="100" cy="100" r="80" stroke-width="12" stroke-dasharray="502.4" stroke-dashoffset="502.4"></circle>
+                            </svg>
+                            <div class="ring-center">
+                                <span class="ring-value">94%</span>
+                                <span class="ring-label">Attendance</span>
+                            </div>
+                        </div>
+                        <div class="attendance-stats">
+                            <div class="stat-item">
+                                <div class="stat-indicator present"></div>
+                                <div class="stat-info">
+                                    <span class="stat-value">18</span>
+                                    <span class="stat-label">Present</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-indicator absent"></div>
+                                <div class="stat-info">
+                                    <span class="stat-value">1</span>
+                                    <span class="stat-label">Absent</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-indicator late"></div>
+                                <div class="stat-info">
+                                    <span class="stat-value">0</span>
+                                    <span class="stat-label">Late</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Engagement Analytics</h3>
+                        <div class="chart-period">
+                            <span class="active">Weekly</span>
+                            <span>Monthly</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="engagementChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom Section -->
+            <section class="bottom-section">
+                <div class="classes-card">
+                    <div class="card-header">
+                        <h3>Today's Classes</h3>
+                        <div class="time-display">
+                            <i class="fas fa-clock"></i>
+                            <span id="currentTime">10:30 AM</span>
+                        </div>
+                    </div>
+                    <div class="classes-list">
+                        <div class="class-item completed">
+                            <div class="class-time">
+                                <span class="time">9:00 - 10:00</span>
+                                <span class="status-badge completed">Completed</span>
+                            </div>
+                            <div class="class-details">
+                                <h4>Data Structures & Algorithms</h4>
+                                <p>Prof. Wilson • Room 304</p>
+                            </div>
+                            <div class="class-engagement">
+                                <div class="engagement-score">
+                                    <div class="score-bar">
+                                        <div class="score-fill" style="width: 92%"></div>
+                                    </div>
+                                    <span>92%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="class-item live">
+                            <div class="class-time">
+                                <span class="time">10:15 - 11:45</span>
+                                <span class="status-badge live">Live Now</span>
+                            </div>
+                            <div class="class-details">
+                                <h4>Artificial Intelligence</h4>
+                                <p>Dr. Chen • Virtual Classroom</p>
+                            </div>
+                            <div class="class-engagement">
+                                <div class="engagement-score">
+                                    <div class="score-bar">
+                                        <div class="score-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span>85%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="class-item upcoming">
+                            <div class="class-time">
+                                <span class="time">13:00 - 14:30</span>
+                                <span class="status-badge upcoming">Upcoming</span>
+                            </div>
+                            <div class="class-details">
+                                <h4>Machine Learning</h4>
+                                <p>Dr. Rodriguez • Lab 205</p>
+                            </div>
+                            <div class="class-engagement">
+                                <div class="engagement-score">
+                                    <div class="score-bar">
+                                        <div class="score-fill" style="width: 78%"></div>
+                                    </div>
+                                    <span>78%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notifications-card">
+                    <div class="card-header">
+                        <h3>Recent Notifications</h3>
+                        <button class="mark-read">Mark all as read</button>
+                    </div>
+                    <div class="notifications-list">
+                        <div class="notification-item unread">
+                            <div class="notification-icon alert">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4>Low Engagement Alert</h4>
+                                <p>Your engagement dropped below 70% in Calculus class yesterday</p>
+                                <span class="notification-time">2 hours ago</span>
+                            </div>
+                            <button class="notification-dismiss">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="notification-item unread">
+                            <div class="notification-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4>Attendance Milestone</h4>
+                                <p>Perfect attendance this week! Keep up the good work.</p>
+                                <span class="notification-time">5 hours ago</span>
+                            </div>
+                            <button class="notification-dismiss">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-icon info">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4>New Assignment Posted</h4>
+                                <p>"AI Ethics Paper" due next Monday in Artificial Intelligence</p>
+                                <span class="notification-time">1 day ago</span>
+                            </div>
+                            <button class="notification-dismiss">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="notification-icon calendar">
+                                <i class="fas fa-calendar-plus"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h4>Class Schedule Update</h4>
+                                <p>Data Structures class moved to Room 415 starting tomorrow</p>
+                                <span class="notification-time">2 days ago</span>
+                            </div>
+                            <button class="notification-dismiss">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/student_dashboard.js"></script>
+</body>
+</html>
