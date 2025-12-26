@@ -16,11 +16,8 @@ from django.http import HttpResponseRedirect
 
 otp_storage = {}
 
-
-from django.contrib.auth import authenticate, login as auth_login
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.contrib import messages
+def home(request):
+    return render(request, "index.html")
 
 def login_view(request):
     if request.method == "POST":
