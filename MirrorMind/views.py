@@ -11,6 +11,12 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
 from django.http import HttpResponseRedirect
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+
+
+User = get_user_model()
 
 
 
@@ -19,20 +25,92 @@ otp_storage = {}
 def home(request):
     return render(request, "index.html")
 
-def login_view(request):
+
+
+def teacher_signup(request):
+    if request.method == "GET":
+        return render(request, "teacher_signup.html")
+
     if request.method == "POST":
-        username = request.POST.get("email")
+        email = request.POST.get("email")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
+        mobile = request.POST.get("mobile")
+
+        # ✅ Required field validation
+        if not all([email, first_name, last_name, password, confirm_password]):
+            return JsonResponse({"error": "All required fields must be filled"}, status=400)
+
+        if password != confirm_password:
+            return JsonResponse({"error": "Passwords do not match"}, status=400)
+
+        # 🔐 OTP verified?
+        if request.session.get("email_verified") != email:
+            return JsonResponse({"error": "Email OTP verification required"}, status=403)
+
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Email already registered"}, status=400)
+
+        # ✅ Create user
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            mobile=mobile,
+            is_email_verified=True
+        )
+
+        # ✅ Assign Teacher Group
+        teacher_group = Group.objects.get(name="Teacher")
+        user.groups.add(teacher_group)
+
+        request.session.pop("email_verified", None)
+
+        return JsonResponse({"success": "Teacher account created successfully"})
+    return render(request, "teacher_signup.html")
+
+
+
+
+
+
+def login_view(request):
+    if request.method == "GET":
+        return render(request, "login.html")
+
+    if request.method == "POST":
+        email = request.POST.get("email")
         password = request.POST.get("password")
 
-        user = authenticate(request, username=username, password=password)
+        if not email or not password:
+            messages.error(request, "Email and password required")
+            return redirect("login")
 
-        if user is not None:
-            auth_login(request, user)
-            return HttpResponseRedirect("/dashboard/")
+        user = authenticate(request, username=email, password=password)
+
+        if user is None:
+            messages.error(request, "Invalid email or password")
+            return redirect("login")
+
+        if not user.is_email_verified:
+            messages.error(request, "Email not verified")
+            return redirect("login")
+
+        auth_login(request, user)
+
+        # 🔁 Group-based redirect
+        if user.groups.filter(name="Teacher").exists():
+            return redirect("teacher_dashboard")
+
+        elif user.groups.filter(name="Student").exists():
+            return redirect("student_dashboard")
+
         else:
-            messages.error(request, "Invalid email or password.")
-            return HttpResponseRedirect("/login/")
-
+            messages.error(request, "No group assigned")
+            return redirect("login")
     return render(request, "login.html")
 
 
