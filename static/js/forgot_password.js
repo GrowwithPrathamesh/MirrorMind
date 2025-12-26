@@ -483,3 +483,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // ------------------ Initialize ------------------
     showStep(1);
 });
+
+
+document.getElementById('continueBtn').addEventListener('click', function () {
+    hideModal('successModal');
+
+    // Move flow based on current step
+    if (currentStep === 1) {
+        showStep(2); // Email → OTP
+    } 
+    else if (currentStep === 2) {
+        showStep(3); // OTP → New Password
+    } 
+    else if (currentStep === 3) {
+        showStep(4); // Password → Success
+    }
+});
