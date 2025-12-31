@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Accounts',
     'rest_framework',
-    'Attendance',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +75,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'MirrorMind.wsgi.application'
+
+AUTH_USER_MODEL = "Accounts.User"
 
 
 # Database

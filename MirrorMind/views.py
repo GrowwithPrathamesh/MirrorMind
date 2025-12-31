@@ -22,8 +22,17 @@ User = get_user_model()
 
 otp_storage = {}
 
+
+
 def home(request):
     return render(request, "index.html")
+
+
+
+
+def student_signup(request):
+    return render(request, "student_signup.html")
+
 
 
 
@@ -76,7 +85,6 @@ def teacher_signup(request):
 
 
 
-
 def login_view(request):
     if request.method == "GET":
         return render(request, "login.html")
@@ -115,6 +123,21 @@ def login_view(request):
 
 
 
+def student_dashboard(request):
+    return render(request, "student_dashboard.html")
+
+
+
+def teacher_dashboard(request):
+    return render(request, "teacher_dashboard.html")
+
+
+
+def attendence(request):
+    return render(request, "attendence.html")
+
+
+
 
 
 def forgot_password(request):
@@ -148,9 +171,7 @@ def forgot_password(request):
     return JsonResponse({"error": "Invalid request method."}, status=405)
 
 
-# ----------------------------
-# EMAIL OTP SENDER
-# ----------------------------
+
 def send_email_otp(receiver_email, otp, purpose="signup"):
     sender_email = "rakshak.connect@gmail.com"
     sender_password = "vpxiebniktusbtxk"
@@ -173,9 +194,7 @@ def send_email_otp(receiver_email, otp, purpose="signup"):
         return False
 
 
-# ----------------------------
-# OTP HANDLER
-# ----------------------------
+
 @csrf_exempt
 def email_otp_handler(request):
     if request.method != "POST":

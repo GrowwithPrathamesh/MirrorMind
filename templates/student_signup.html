@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MirrorMind - Student Registration</title>
+    <link rel="stylesheet" href="/static/css/student_signup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-background">
+        <div class="particle-layer"></div>
+        <div class="grid-layer"></div>
+        <div class="orbs-layer">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+        <div class="wave-layer"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Logo Header -->
+        <div class="logo-header">
+            <div class="logo-gradient">
+                <h1 class="logo-text">MirrorMind</h1>
+            </div>
+            <p class="tagline">AI-Powered Smart Classroom Registration</p>
+        </div>
+
+        <!-- Scrollable Form Container -->
+        <div class="form-scroll-container">
+            <div class="form-wrapper">
+                <div class="form-container">
+                    <div class="signup-card">
+                        <div class="card-header">
+                            <h2>Student Registration</h2>
+                            <p>Create your MirrorMind account</p>
+                        </div>
+                        
+                        <!-- Progress Indicator -->
+                        <div class="progress-indicator">
+                            <div class="step active" data-step="1">
+                                <div class="step-circle">1</div>
+                                <span>Details</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" data-step="2">
+                                <div class="step-circle">2</div>
+                                <span>Face Capture</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" data-step="3">
+                                <div class="step-circle">3</div>
+                                <span>Verify</span>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step" data-step="4">
+                                <div class="step-circle">4</div>
+                                <span>Security</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Steps -->
+                        <form id="studentSignupForm">
+                            <!-- Step 1: Basic Details -->
+                            <div class="form-step active" id="step1">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="input-with-icon">
+                                            <label for="first_name">First Name</label>
+                                            <i class="fas fa-user input-icon"></i>
+                                            <input type="text" id="first_name" name="first_name" required placeholder="Enter your first name">
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                        </div>
+                                        <div class="input-with-icon">
+                                            <label for="last_name">Last Name</label>
+                                            <i class="fas fa-user input-icon"></i>
+                                            <input type="text" id="last_name" name="last_name" required placeholder="Enter your last name">
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="input-with-icon">
+                                        <label for="email">Email Address</label>
+                                        <i class="fas fa-envelope input-icon"></i>
+                                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                                        <div class="input-effects">
+                                            <div class="focus-border"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="input-with-icon">
+                                        <label for="enrollment_no">Enrollment Number</label>
+                                        <i class="fas fa-id-card input-icon"></i>
+                                        <input type="text" id="enrollment_no" name="enrollment_no" required placeholder="Enter enrollment number">
+                                        <div class="input-effects">
+                                            <div class="focus-border"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="input-with-icon">
+                                            <label for="department">Course / Department</label>
+                                            <i class="fas fa-graduation-cap input-icon"></i>
+                                            <select id="department" name="department" required>
+                                                <option value="">Select department</option>
+                                                <option value="computer_science">Computer Science</option>
+                                                <option value="information_tech">Information Technology</option>
+                                                <option value="electronics">Electronics & Communication</option>
+                                                <option value="mechanical">Mechanical Engineering</option>
+                                                <option value="civil">Civil Engineering</option>
+                                                <option value="business">Business Administration</option>
+                                                <option value="humanities">Humanities</option>
+                                            </select>
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                        </div>
+                                        <div class="input-with-icon dob-container">
+                                            <label for="dob">Date of Birth</label>
+                                            <i class="fas fa-calendar-alt input-icon"></i>
+                                            <input type="text" id="dob" name="dob" required placeholder="Select your date of birth" readonly>
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                            <div class="age-display" id="ageDisplay"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Parent/Guardian Section (Hidden by default) -->
+                                <div class="parent-section" id="parentSection">
+                                    <div class="section-header">
+                                        <h3><i class="fas fa-user-shield"></i> Parent/Guardian Verification</h3>
+                                        <p class="section-note">Parental consent is required for students below 10 years.</p>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="input-with-icon">
+                                            <label for="parent_name">Parent/Guardian Full Name</label>
+                                            <i class="fas fa-user-friends input-icon"></i>
+                                            <input type="text" id="parent_name" name="parent_name" placeholder="Enter parent/guardian full name">
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="form-row">
+                                            <div class="input-with-icon">
+                                                <label for="parent_email">Parent Email</label>
+                                                <i class="fas fa-envelope input-icon"></i>
+                                                <input type="email" id="parent_email" name="parent_email" placeholder="Enter parent email address">
+                                                <div class="input-effects">
+                                                    <div class="focus-border"></div>
+                                                </div>
+                                            </div>
+                                            <div class="input-with-icon">
+                                                <label for="parent_mobile">Parent Mobile Number</label>
+                                                <i class="fas fa-phone input-icon"></i>
+                                                <input type="tel" id="parent_mobile" name="parent_mobile" placeholder="Enter parent mobile number">
+                                                <div class="input-effects">
+                                                    <div class="focus-border"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-buttons">
+                                    <button type="button" class="btn-primary btn-next" data-next="2">
+                                        Continue
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Face Capture -->
+                            <div class="form-step" id="step2">
+                                <div class="face-capture-container">
+                                    <div class="webcam-preview" id="webcamPreview">
+                                        <div class="webcam-placeholder">
+                                            <i class="fas fa-camera"></i>
+                                            <p>Face capture preview</p>
+                                        </div>
+                                        <div class="face-frame">
+                                            <div class="frame-corner tl"></div>
+                                            <div class="frame-corner tr"></div>
+                                            <div class="frame-corner bl"></div>
+                                            <div class="frame-corner br"></div>
+                                        </div>
+                                        <div class="webcam-glow"></div>
+                                        <div class="pulse-scan"></div>
+                                    </div>
+                                    
+                                    <div class="capture-instruction">
+                                        <p><i class="fas fa-info-circle"></i> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
+                                    </div>
+                                    
+                                    <button type="button" class="btn-primary btn-capture" id="captureFaceBtn">
+                                        <i class="fas fa-camera"></i>
+                                        Capture Face
+                                    </button>
+                                    
+                                    <div class="capture-success" id="captureSuccess">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Face captured successfully!</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-buttons step-nav">
+                                    <button type="button" class="btn-secondary btn-prev" data-prev="1">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn-primary btn-next" data-next="3" id="continueAfterCapture" disabled>
+                                        Continue
+                                        <i class="fas fa-arrow-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: OTP Verification -->
+                            <div class="form-step" id="step3">
+                                <div class="otp-container">
+                                    <div class="otp-header">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <h3>Verify Your Email</h3>
+                                        <p>Enter the 4-digit code sent to your email</p>
+                                    </div>
+                                    
+                                    <div class="otp-inputs">
+                                        <input type="text" class="otp-digit" maxlength="1" data-index="0">
+                                        <input type="text" class="otp-digit" maxlength="1" data-index="1">
+                                        <input type="text" class="otp-digit" maxlength="1" data-index="2">
+                                        <input type="text" class="otp-digit" maxlength="1" data-index="3">
+                                    </div>
+                                    <input type="hidden" id="otp" name="otp">
+                                    
+                                    <div class="otp-timer">
+                                        <p>Code expires in: <span id="countdown">02:00</span></p>
+                                    </div>
+                                    
+                                    <div class="otp-actions">
+                                        <button type="button" class="btn-secondary btn-resend" id="resendOtpBtn" disabled>
+                                            Resend Code
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-buttons step-nav">
+                                    <button type="button" class="btn-secondary btn-prev" data-prev="2">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back
+                                    </button>
+                                    <button type="button" class="btn-primary btn-next" data-next="4" id="verifyOtpBtn">
+                                        <span>Verify & Continue</span>
+                                        <div class="spinner hidden"></div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4: Security & Consent -->
+                            <div class="form-step" id="step4">
+                                <div class="security-container">
+                                    <div class="security-header">
+                                        <i class="fas fa-lock"></i>
+                                        <h3>Security & Consent</h3>
+                                        <p>Set up your password and accept terms</p>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="input-with-icon">
+                                            <label for="password">Password</label>
+                                            <i class="fas fa-lock input-icon"></i>
+                                            <input type="password" id="password" name="password" required placeholder="Create password">
+                                            <button type="button" class="toggle-password" data-target="password">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                            <div class="password-strength" id="passwordStrength">
+                                                <div class="strength-bar"></div>
+                                                <div class="strength-text"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="input-with-icon">
+                                            <label for="confirm_password">Confirm Password</label>
+                                            <i class="fas fa-lock input-icon"></i>
+                                            <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm password">
+                                            <button type="button" class="toggle-password" data-target="confirm_password">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                            <div class="password-match" id="passwordMatch">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span>Passwords match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="terms-container" id="termsContainer">
+                                        <div class="terms-checkbox">
+                                            <input type="checkbox" id="terms" name="terms" required>
+                                            <label for="terms">
+                                                I agree to BrightAI's <a href="#" class="terms-link" id="termsLink">Terms & Conditions</a> and <a href="#" class="terms-link" id="privacyLink">Privacy Policy</a>
+                                            </label>
+                                        </div>
+                                        <div class="terms-error" id="termsError">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            <span>You must accept the terms to continue</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-buttons step-nav">
+                                    <button type="button" class="btn-secondary btn-prev" data-prev="3">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back
+                                    </button>
+                                    <button type="submit" class="btn-primary" id="submitForm">
+                                        <i class="fas fa-user-plus"></i>
+                                        Complete Registration
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="card-footer">
+                            <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Picker Modal -->
+    <div class="modal-overlay" id="calendarModal">
+        <div class="calendar-modal">
+            <div class="calendar-header">
+                <h3>Select Date of Birth</h3>
+                <button class="calendar-close" id="closeCalendar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-nav">
+                    <button class="nav-btn" id="prevMonth">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="month-year" id="currentMonthYear"></div>
+                    <button class="nav-btn" id="nextMonth">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="calendar-weekdays">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+            </div>
+            <div class="calendar-footer">
+                <button class="btn-secondary" id="clearDate">
+                    Clear
+                </button>
+                <button class="btn-primary" id="selectDate">
+                    Select Date
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div class="modal-overlay" id="termsModal">
+        <div class="terms-modal">
+            <div class="terms-header">
+                <h3>Terms & Conditions</h3>
+                <button class="terms-close" id="closeTerms">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="terms-body">
+                <div class="terms-content">
+                    <h4>BrightAI - Terms & Conditions</h4>
+                    <p>Welcome to BrightAI, the AI-powered smart classroom monitoring system. Please read these terms carefully before using our services.</p>
+                    
+                    <h5>1. Acceptance of Terms</h5>
+                    <p>By registering for and using BrightAI services, you agree to be bound by these Terms and Conditions.</p>
+                    
+                    <h5>2. Data Collection & Privacy</h5>
+                    <p>We collect facial recognition data for attendance tracking and liveness detection. All data is encrypted and stored securely.</p>
+                    
+                    <h5>3. Student Responsibilities</h5>
+                    <p>Students must maintain accurate information and notify administrators of any changes to their registration details.</p>
+                    
+                    <h5>4. System Usage</h5>
+                    <p>The system is for educational purposes only. Any misuse may result in account termination.</p>
+                    
+                    <h5>5. Parental Consent</h5>
+                    <p>For students under 10 years, parental consent is mandatory. Parents/guardians will receive email notifications about system usage.</p>
+                    
+                    <h5>6. Limitation of Liability</h5>
+                    <p>BrightAI is not liable for any technical issues, data loss, or system downtime beyond our control.</p>
+                    
+                    <h5>7. Changes to Terms</h5>
+                    <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance of changes.</p>
+                </div>
+            </div>
+            <div class="terms-footer">
+                <button class="btn-primary" id="acceptTerms">
+                    I Accept Terms
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content">
+            <div class="modal-header success">
+                <div class="modal-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Registration Successful!</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="success-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h2 id="welcomeMessage">Welcome to MirrorMind</h2>
+                <p>Your account has been successfully created. You can now access the smart classroom monitoring system.</p>
+                
+                <div class="modal-features">
+                    <div class="modal-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Face registration completed</span>
+                    </div>
+                    <div class="modal-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Email verified successfully</span>
+                    </div>
+                    <div class="modal-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Attendance automation activated</span>
+                    </div>
+                    <div class="modal-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Parental consent processed</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn primary" id="goToDashboard">
+                    <i class="fas fa-rocket"></i>
+                    Go to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script src="/static/js/student_signup.js"></script>
+</body>
+</html>
