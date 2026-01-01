@@ -88,6 +88,30 @@ function initFormNavigation() {
         currentStep = step;
         updateProgress(step);
         
+        // FIX 2: Scroll to top when moving between steps
+        setTimeout(() => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // Focus on first input for accessibility
+            if (step === 2) {
+                setTimeout(() => {
+                    const captureBtn = document.getElementById('captureFaceBtn');
+                    if (captureBtn) captureBtn.focus();
+                }, 100);
+            } else if (step === 3) {
+                setTimeout(() => {
+                    document.querySelector('.otp-digit[data-index="0"]').focus();
+                }, 100);
+            } else if (step === 4) {
+                setTimeout(() => {
+                    document.getElementById('password').focus();
+                }, 100);
+            }
+        }, 300);
+        
         if (step === 3) {
             setTimeout(() => {
                 document.querySelector('.otp-digit[data-index="0"]').focus();
@@ -774,6 +798,7 @@ function initOTPHandling() {
     const otpField = document.getElementById('otp');
     const resendOtpBtn = document.getElementById('resendOtpBtn');
     const countdownElement = document.getElementById('countdown');
+    const otpLoading = document.getElementById('otpLoading');
     
     updateCountdown();
     
@@ -880,8 +905,6 @@ function initOTPHandling() {
         
         sendOTP();
         
-        showToast('New OTP code sent to your email', 'success');
-        
         setTimeout(() => {
             this.textContent = 'Resend Code';
             this.style.background = '';
@@ -891,20 +914,28 @@ function initOTPHandling() {
     });
     
     function sendOTP() {
-        const age = window.calculatedAge || 0;
-        if (age < 10) {
-            showToast(
-                "Verification code has been sent to your parent/guardian's email.",
-                "info"
-            );
-        } else {
-            showToast(
-                "Verification code has been sent to your email.",
-                "info"
-            );
-        }
+        otpLoading.classList.add('visible');
+        resendOtpBtn.style.display = 'none';
+        
+        setTimeout(() => {
+            otpLoading.classList.remove('visible');
+            resendOtpBtn.style.display = 'block';
+            
+            const age = window.calculatedAge || 0;
+            if (age < 10) {
+                showToast(
+                    "Email OTP sent successfully to your parent/guardian's email.",
+                    "success"
+                );
+            } else {
+                showToast(
+                    "Email OTP sent successfully.",
+                    "success"
+                );
+            }
 
-        startOTPTimer();
+            startOTPTimer();
+        }, 1500);
     }
     
     function verifyOTP(otp) {

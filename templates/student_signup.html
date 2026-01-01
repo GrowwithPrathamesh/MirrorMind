@@ -125,410 +125,415 @@
                                     <input type="text" id="enrollment_no" name="enrollment_no" required placeholder="Enter enrollment number">
                                 </div>
                                 <div class="input-effects">
-                                    <div class="focus-border"></div>
-                                </div>
-                                <div class="validation-error" id="enrollment_no_error"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <div class="form-row">
-                                <div class="input-with-icon">
-                                    <label for="department" class="form-label">Course / Department</label>
-                                    <div class="input-field">
-                                        <div class="input-icon-container">
-                                            <svg class="input-icon" viewBox="0 0 24 24">
-                                                <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
-                                            </svg>
-                                        </div>
-                                        <select id="department" name="department" required>
-                                            <option value="">Select department</option>
-                                            <option value="computer_science">Computer Science</option>
-                                            <option value="information_tech">Information Technology</option>
-                                            <option value="electronics">Electronics & Communication</option>
-                                            <option value="mechanical">Mechanical Engineering</option>
-                                            <option value="civil">Civil Engineering</option>
-                                            <option value="business">Business Administration</option>
-                                            <option value="humanities">Humanities</option>
-                                        </select>
-                                    </div>
-                                    <div class="input-effects">
                                         <div class="focus-border"></div>
                                     </div>
-                                    <div class="validation-error" id="department_error"></div>
-                                </div>
-                                <div class="input-with-icon dob-container">
-                                    <label for="dob" class="form-label">Date of Birth</label>
-                                    <div class="input-field">
-                                        <div class="input-icon-container">
-                                            <svg class="input-icon" viewBox="0 0 24 24">
-                                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-                                            </svg>
-                                        </div>
-                                        <input type="text" id="dob" name="dob" required placeholder="Select your date of birth" readonly>
-                                    </div>
-                                    <div class="input-effects">
-                                        <div class="focus-border"></div>
-                                    </div>
-                                    <div class="age-display" id="ageDisplay"></div>
-                                    <div class="validation-error" id="dob_error"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="parent-section" id="parentSection">
-                            <div class="section-header">
-                                <h3><svg class="section-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg> Parent/Guardian Verification</h3>
-                                <p class="section-note">Parental consent is required for students below 10 years.</p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <div class="input-with-icon">
-                                    <label for="parent_name" class="form-label">Parent/Guardian Full Name</label>
-                                    <div class="input-field">
-                                        <div class="input-icon-container">
-                                            <svg class="input-icon" viewBox="0 0 24 24">
-                                                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-                                            </svg>
-                                        </div>
-                                        <input type="text" id="parent_name" name="parent_name" placeholder="Enter parent/guardian full name">
-                                    </div>
-                                    <div class="input-effects">
-                                        <div class="focus-border"></div>
-                                    </div>
-                                    <div class="validation-error" id="parent_name_error"></div>
+                                    <div class="validation-error" id="enrollment_no_error"></div>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <div class="form-row">
                                     <div class="input-with-icon">
-                                        <label for="parent_email" class="form-label">Parent Email</label>
+                                        <label for="department" class="form-label">Course / Department</label>
                                         <div class="input-field">
                                             <div class="input-icon-container">
                                                 <svg class="input-icon" viewBox="0 0 24 24">
-                                                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
                                                 </svg>
                                             </div>
-                                            <input type="email" id="parent_email" name="parent_email" placeholder="Enter parent email address">
+                                            <select id="department" name="department" required>
+                                                <option value="">Select department</option>
+                                                <option value="computer_science">Computer Science</option>
+                                                <option value="information_tech">Information Technology</option>
+                                                <option value="electronics">Electronics & Communication</option>
+                                                <option value="mechanical">Mechanical Engineering</option>
+                                                <option value="civil">Civil Engineering</option>
+                                                <option value="business">Business Administration</option>
+                                                <option value="humanities">Humanities</option>
+                                            </select>
                                         </div>
                                         <div class="input-effects">
                                             <div class="focus-border"></div>
                                         </div>
-                                        <div class="validation-error" id="parent_email_error"></div>
+                                        <div class="validation-error" id="department_error"></div>
                                     </div>
+                                    <div class="input-with-icon dob-container">
+                                        <label for="dob" class="form-label">Date of Birth</label>
+                                        <div class="input-field">
+                                            <div class="input-icon-container">
+                                                <svg class="input-icon" viewBox="0 0 24 24">
+                                                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                                                </svg>
+                                            </div>
+                                            <input type="text" id="dob" name="dob" required placeholder="Select your date of birth" readonly>
+                                        </div>
+                                        <div class="input-effects">
+                                            <div class="focus-border"></div>
+                                        </div>
+                                        <div class="age-display" id="ageDisplay"></div>
+                                        <div class="validation-error" id="dob_error"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="parent-section" id="parentSection">
+                                <div class="section-header">
+                                    <h3><svg class="section-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg> Parent/Guardian Verification</h3>
+                                    <p class="section-note">Parental consent is required for students below 10 years.</p>
+                                </div>
+                                
+                                <div class="form-group">
                                     <div class="input-with-icon">
-                                        <label for="parent_mobile" class="form-label">Parent Mobile Number</label>
+                                        <label for="parent_name" class="form-label">Parent/Guardian Full Name</label>
                                         <div class="input-field">
                                             <div class="input-icon-container">
                                                 <svg class="input-icon" viewBox="0 0 24 24">
-                                                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                                                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
                                                 </svg>
                                             </div>
-                                            <input type="tel" id="parent_mobile" name="parent_mobile" placeholder="Enter parent mobile number">
+                                            <input type="text" id="parent_name" name="parent_name" placeholder="Enter parent/guardian full name">
                                         </div>
                                         <div class="input-effects">
                                             <div class="focus-border"></div>
                                         </div>
-                                        <div class="validation-error" id="parent_mobile_error"></div>
+                                        <div class="validation-error" id="parent_name_error"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="input-with-icon">
+                                            <label for="parent_email" class="form-label">Parent Email</label>
+                                            <div class="input-field">
+                                                <div class="input-icon-container">
+                                                    <svg class="input-icon" viewBox="0 0 24 24">
+                                                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                                    </svg>
+                                                </div>
+                                                <input type="email" id="parent_email" name="parent_email" placeholder="Enter parent email address">
+                                            </div>
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                            <div class="validation-error" id="parent_email_error"></div>
+                                        </div>
+                                        <div class="input-with-icon">
+                                            <label for="parent_mobile" class="form-label">Parent Mobile Number</label>
+                                            <div class="input-field">
+                                                <div class="input-icon-container">
+                                                    <svg class="input-icon" viewBox="0 0 24 24">
+                                                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                                                    </svg>
+                                                </div>
+                                                <input type="tel" id="parent_mobile" name="parent_mobile" placeholder="Enter parent mobile number">
+                                            </div>
+                                            <div class="input-effects">
+                                                <div class="focus-border"></div>
+                                            </div>
+                                            <div class="validation-error" id="parent_mobile_error"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="action-buttons">
-                            <button type="button" class="btn-primary btn-next" data-next="2">
-                                Continue
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-step" id="step2">
-                        <div class="face-capture-container">
-                            <div class="webcam-preview" id="webcamPreview">
-                                <div class="webcam-placeholder">
-                                    <svg class="camera-icon" viewBox="0 0 24 24">
-                                        <path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/>
-                                    </svg>
-                                    <p>Face capture preview</p>
-                                </div>
-                                <div class="face-frame">
-                                    <div class="frame-corner tl"></div>
-                                    <div class="frame-corner tr"></div>
-                                    <div class="frame-corner bl"></div>
-                                    <div class="frame-corner br"></div>
-                                </div>
-                                <div class="webcam-glow"></div>
-                                <div class="pulse-scan"></div>
-                            </div>
                             
-                            <div class="capture-instruction">
-                                <p><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
-                            </div>
-                            
-                            <button type="button" class="btn-primary btn-capture" id="captureFaceBtn">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                                Capture Face
-                            </button>
-                            
-                            <div class="capture-success" id="captureSuccess">
-                                <svg class="success-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                <span>Face captured successfully!</span>
-                            </div>
-                        </div>
-                        
-                        <div class="action-buttons step-nav">
-                            <button type="button" class="btn-secondary btn-prev" data-prev="1">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                                Back
-                            </button>
-                            <button type="button" class="btn-primary btn-next" data-next="3" id="continueAfterCapture" disabled>
-                                Continue
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-step" id="step3">
-                        <div class="otp-container">
-                            <div class="otp-header">
-                                <svg class="otp-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                                <h3>Verify Your Email</h3>
-                                <p>Enter the 6-digit code sent to your email</p>
-                            </div>
-                            
-                            <div class="otp-inputs">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="0">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="1">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="2">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="3">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="4">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="5">
-                            </div>
-                            <input type="hidden" id="otp" name="otp">
-                            <div class="validation-error" id="otp_error"></div>
-                            
-                            <div class="otp-timer">
-                                <p>Code expires in: <span id="countdown">02:00</span></p>
-                            </div>
-                            
-                            <div class="otp-actions">
-                                <button type="button" class="btn-secondary btn-resend" id="resendOtpBtn" disabled>
-                                    Resend Code
+                            <!-- FIX 1: Added specific class for Details page continue button spacing -->
+                            <div class="action-buttons details-page">
+                                <button type="button" class="btn-primary btn-next" data-next="2">
+                                    Continue
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
                                 </button>
                             </div>
                         </div>
                         
-                        <div class="action-buttons step-nav">
-                            <button type="button" class="btn-secondary btn-prev" data-prev="2">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                                Back
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-step" id="step4">
-                        <div class="security-container">
-                            <div class="security-header">
-                                <svg class="security-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                                <h3>Security & Consent</h3>
-                                <p>Set up your password and accept terms</p>
-                            </div>
-                            
-                            <div class="form-group">
-                                <div class="input-with-icon">
-                                    <label for="password" class="form-label">Password</label>
-                                    <div class="input-field">
-                                        <div class="input-icon-container">
-                                            <svg class="input-icon" viewBox="0 0 24 24">
-                                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-                                            </svg>
-                                        </div>
-                                        <input type="password" id="password" name="password" required placeholder="Create password">
-                                        <button type="button" class="toggle-password" data-target="password">
-                                            <svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                                        </button>
+                        <div class="form-step" id="step2">
+                            <div class="face-capture-container">
+                                <div class="webcam-preview" id="webcamPreview">
+                                    <div class="webcam-placeholder">
+                                        <svg class="camera-icon" viewBox="0 0 24 24">
+                                            <path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/>
+                                        </svg>
+                                        <p>Face capture preview</p>
                                     </div>
-                                    
-                                    <div class="input-effects">
-                                        <div class="focus-border"></div>
+                                    <div class="face-frame">
+                                        <div class="frame-corner tl"></div>
+                                        <div class="frame-corner tr"></div>
+                                        <div class="frame-corner bl"></div>
+                                        <div class="frame-corner br"></div>
                                     </div>
-                                    <div class="password-strength" id="passwordStrength">
-                                        <div class="strength-bar"></div>
-                                        <div class="strength-text"></div>
-                                    </div>
-                                    <div class="validation-error" id="password_error"></div>
+                                    <div class="webcam-glow"></div>
+                                    <div class="pulse-scan"></div>
+                                </div>
+                                
+                                <div class="capture-instruction">
+                                    <p><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
+                                </div>
+                                
+                                <button type="button" class="btn-primary btn-capture" id="captureFaceBtn">
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                                    Capture Face
+                                </button>
+                                
+                                <div class="capture-success" id="captureSuccess">
+                                    <svg class="success-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                    <span>Face captured successfully!</span>
                                 </div>
                             </div>
                             
-                            <div class="form-group">
-                                <div class="input-with-icon">
-                                    <label for="confirm_password" class="form-label">Confirm Password</label>
-                                    <div class="input-field">
-                                        <div class="input-icon-container">
-                                            <svg class="input-icon" viewBox="0 0 24 24">
-                                                <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-                                            </svg>
-                                        </div>
-                                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm password">
-                                        <button type="button" class="toggle-password" data-target="confirm_password">
-                                            <svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                                        </button>
-                                    </div>
-                                    <div class="input-effects">
-                                        <div class="focus-border"></div>
-                                    </div>
-                                    <div class="password-match" id="passwordMatch">
-                                        <svg class="match-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                        <span>Passwords match</span>
-                                    </div>
-                                    <div class="validation-error" id="confirm_password_error"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="terms-container" id="termsContainer">
-                                <div class="terms-checkbox">
-                                    <input type="checkbox" id="terms" name="terms" required>
-                                    <label for="terms" class="terms-label">
-                                        I agree to MirrorMind's <a href="#" class="terms-link" id="termsLink">Terms & Conditions</a> and <a href="#" class="terms-link" id="privacyLink">Privacy Policy</a>
-                                    </label>
-                                </div>
-                                <div class="terms-error" id="termsError">
-                                    <svg class="error-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg>
-                                    <span>You must accept the terms to continue</span>
-                                </div>
+                            <div class="action-buttons step-nav">
+                                <button type="button" class="btn-secondary btn-prev btn-wider" data-prev="1">
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                                    Back
+                                </button>
+                                <button type="button" class="btn-primary btn-next btn-wider" data-next="3" id="continueAfterCapture" disabled>
+                                    Continue
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                                </button>
                             </div>
                         </div>
                         
-                        <div class="action-buttons step-nav">
-                            <button type="button" class="btn-secondary btn-prev" data-prev="3">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                                Back
-                            </button>
-                            <button type="submit" class="btn-primary" id="submitForm">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                                Complete Registration
-                            </button>
+                        <div class="form-step" id="step3">
+                            <div class="otp-container">
+                                <div class="otp-header">
+                                    <svg class="otp-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                                    <h3>Verify Your Email</h3>
+                                    <p>Enter the 6-digit code sent to your email</p>
+                                </div>
+                                
+                                <div class="otp-inputs">
+                                    <input type="text" class="otp-digit" maxlength="1" data-index="0">
+                                    <input type="text" class="otp-digit" maxlength="1" data-index="1">
+                                    <input type="text" class="otp-digit" maxlength="1" data-index="2">
+                                    <input type="text" class="otp-digit" maxlength="1" data-index="3">
+                                    <input type="text" class="otp-digit" maxlength="1" data-index="4">
+                                    <input type="text" class="otp-digit" maxlength="1" data-index="5">
+                                </div>
+                                <input type="hidden" id="otp" name="otp">
+                                <div class="validation-error" id="otp_error"></div>
+                                
+                                <div class="otp-timer">
+                                    <p>Code expires in: <span id="countdown">02:00</span></p>
+                                </div>
+                                
+                                <div class="otp-actions">
+                                    <div class="otp-loading" id="otpLoading">
+                                        <div class="spinner small"></div>
+                                        <span>Sending OTP...</span>
+                                    </div>
+                                    <button type="button" class="btn-secondary btn-resend btn-wider" id="resendOtpBtn" disabled>
+                                        Resend Code
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons step-nav">
+                                <button type="button" class="btn-secondary btn-prev btn-wider" data-prev="2">
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                                    Back
+                                </button>
+                            </div>
                         </div>
+                        
+                        <div class="form-step" id="step4">
+                            <div class="security-container">
+                                <div class="security-header">
+                                    <svg class="security-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                                    <h3>Security & Consent</h3>
+                                    <p>Set up your password and accept terms</p>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="input-with-icon">
+                                        <label for="password" class="form-label">Password</label>
+                                        <div class="input-field">
+                                            <div class="input-icon-container">
+                                                <svg class="input-icon" viewBox="0 0 24 24">
+                                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                                </svg>
+                                            </div>
+                                            <input type="password" id="password" name="password" required placeholder="Create password">
+                                            <button type="button" class="toggle-password" data-target="password">
+                                                <svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="input-effects">
+                                            <div class="focus-border"></div>
+                                        </div>
+                                        <div class="password-strength" id="passwordStrength">
+                                            <div class="strength-bar"></div>
+                                            <div class="strength-text"></div>
+                                        </div>
+                                        <div class="validation-error" id="password_error"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="input-with-icon">
+                                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                                        <div class="input-field">
+                                            <div class="input-icon-container">
+                                                <svg class="input-icon" viewBox="0 0 24 24">
+                                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                                </svg>
+                                            </div>
+                                            <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm password">
+                                            <button type="button" class="toggle-password" data-target="confirm_password">
+                                                <svg class="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                                            </button>
+                                        </div>
+                                        <div class="input-effects">
+                                            <div class="focus-border"></div>
+                                        </div>
+                                        <div class="password-match" id="passwordMatch">
+                                            <svg class="match-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                            <span>Passwords match</span>
+                                        </div>
+                                        <div class="validation-error" id="confirm_password_error"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="terms-container" id="termsContainer">
+                                    <div class="terms-checkbox">
+                                        <input type="checkbox" id="terms" name="terms" required>
+                                        <label for="terms" class="terms-label">
+                                            I agree to MirrorMind's <a href="#" class="terms-link" id="termsLink">Terms & Conditions</a> and <a href="#" class="terms-link" id="privacyLink">Privacy Policy</a>
+                                        </label>
+                                    </div>
+                                    <div class="terms-error" id="termsError">
+                                        <svg class="error-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg>
+                                        <span>You must accept the terms to continue</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons step-nav">
+                                <button type="button" class="btn-secondary btn-prev btn-wider" data-prev="3">
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                                    Back
+                                </button>
+                                <button type="submit" class="btn-primary btn-full-width" id="submitForm">
+                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    Complete Registration
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="card-footer">
+                        <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
                     </div>
-                </form>
-                
-                <div class="card-footer">
-                    <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal-overlay" id="calendarModal">
-        <div class="calendar-modal">
-            <div class="calendar-header">
-                <h3>Select Date of Birth</h3>
-                <button class="calendar-close" id="closeCalendar">
-                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </button>
-            </div>
-            <div class="calendar-body">
-                <div class="calendar-nav">
-                    <button class="nav-btn" id="prevYear">
-                        <svg viewBox="0 0 24 24"><path d="M18.41 7.41L17 6l-6 6 6 6 1.41-1.41L13.83 12l4.58-4.59zM6 6h2v12H6z"/></svg>
-                    </button>
-                    <button class="nav-btn" id="prevMonth">
-                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"/></svg>
-                    </button>
-                    <div class="month-year" id="currentMonthYear"></div>
-                    <button class="nav-btn" id="nextMonth">
-                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                    </button>
-                    <button class="nav-btn" id="nextYear">
-                        <svg viewBox="0 0 24 24"><path d="M5.59 7.41L7 6l6 6-6 6-1.41-1.41L10.17 12 5.59 7.41zM16 6h2v12h-2z"/></svg>
+        <div class="modal-overlay" id="calendarModal">
+            <div class="calendar-modal">
+                <div class="calendar-header">
+                    <h3>Select Date of Birth</h3>
+                    <button class="calendar-close" id="closeCalendar">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                     </button>
                 </div>
-                <div class="year-selector">
-                    <select id="yearSelect"></select>
-                    <select id="monthSelect">
-                        <option value="0">January</option>
-                        <option value="1">February</option>
-                        <option value="2">March</option>
-                        <option value="3">April</option>
-                        <option value="4">May</option>
-                        <option value="5">June</option>
-                        <option value="6">July</option>
-                        <option value="7">August</option>
-                        <option value="8">September</option>
-                        <option value="9">October</option>
-                        <option value="10">November</option>
-                        <option value="11">December</option>
-                    </select>
+                <div class="calendar-body">
+                    <div class="calendar-nav">
+                        <button class="nav-btn" id="prevYear">
+                            <svg viewBox="0 0 24 24"><path d="M18.41 7.41L17 6l-6 6 6 6 1.41-1.41L13.83 12l4.58-4.59zM6 6h2v12H6z"/></svg>
+                        </button>
+                        <button class="nav-btn" id="prevMonth">
+                            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"/></svg>
+                        </button>
+                        <div class="month-year" id="currentMonthYear"></div>
+                        <button class="nav-btn" id="nextMonth">
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </button>
+                        <button class="nav-btn" id="nextYear">
+                            <svg viewBox="0 0 24 24"><path d="M5.59 7.41L7 6l6 6-6 6-1.41-1.41L10.17 12 5.59 7.41zM16 6h2v12h-2z"/></svg>
+                        </button>
+                    </div>
+                    <div class="year-selector">
+                        <select id="yearSelect"></select>
+                        <select id="monthSelect">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
                 </div>
-                <div class="calendar-weekdays">
-                    <div>Sun</div>
-                    <div>Mon</div>
-                    <div>Tue</div>
-                                    <div>Wed</div>
-                    <div>Thu</div>
-                    <div>Fri</div>
-                    <div>Sat</div>
+                <div class="calendar-footer">
+                    <button class="btn-secondary" id="clearDate">
+                        Clear
+                    </button>
+                    <button class="btn-primary" id="selectDate">
+                        Select Date
+                    </button>
                 </div>
-                <div class="calendar-days" id="calendarDays"></div>
-            </div>
-            <div class="calendar-footer">
-                <button class="btn-secondary" id="clearDate">
-                    Clear
-                </button>
-                <button class="btn-primary" id="selectDate">
-                    Select Date
-                </button>
             </div>
         </div>
-    </div>
 
-    <div class="modal-overlay" id="termsModal">
-        <div class="terms-modal">
-            <div class="terms-header">
-                <h3>Terms & Conditions</h3>
-                <button class="terms-close" id="closeTerms">
-                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </button>
-            </div>
-            <div class="terms-body">
-                <div class="terms-content">
-                    <h4>BrightAI - Terms & Conditions</h4>
-                    <p>Welcome to BrightAI, the AI-powered smart classroom monitoring system. Please read these terms carefully before using our services.</p>
-                    
-                    <h5>1. Acceptance of Terms</h5>
-                    <p>By registering for and using BrightAI services, you agree to be bound by these Terms and Conditions.</p>
-                    
-                    <h5>2. Data Collection & Privacy</h5>
-                    <p>We collect facial recognition data for attendance tracking and liveness detection. All data is encrypted and stored securely.</p>
-                    
-                    <h5>3. Student Responsibilities</h5>
-                    <p>Students must maintain accurate information and notify administrators of any changes to their registration details.</p>
-                    
-                    <h5>4. System Usage</h5>
-                    <p>The system is for educational purposes only. Any misuse may result in account termination.</p>
-                    
-                    <h5>5. Parental Consent</h5>
-                    <p>For students under 10 years, parental consent is mandatory. Parents/guardians will receive email notifications about system usage.</p>
-                    
-                    <h5>6. Limitation of Liability</h5>
-                    <p>BrightAI is not liable for any technical issues, data loss, or system downtime beyond our control.</p>
-                    
-                    <h5>7. Changes to Terms</h5>
-                    <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance of changes.</p>
+        <div class="modal-overlay" id="termsModal">
+            <div class="terms-modal">
+                <div class="terms-header">
+                    <h3>Terms & Conditions</h3>
+                    <button class="terms-close" id="closeTerms">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="terms-body">
+                    <div class="terms-content">
+                        <h4>BrightAI - Terms & Conditions</h4>
+                        <p>Welcome to BrightAI, the AI-powered smart classroom monitoring system. Please read these terms carefully before using our services.</p>
+                        
+                        <h5>1. Acceptance of Terms</h5>
+                        <p>By registering for and using BrightAI services, you agree to be bound by these Terms and Conditions.</p>
+                        
+                        <h5>2. Data Collection & Privacy</h5>
+                        <p>We collect facial recognition data for attendance tracking and liveness detection. All data is encrypted and stored securely.</p>
+                        
+                        <h5>3. Student Responsibilities</h5>
+                        <p>Students must maintain accurate information and notify administrators of any changes to their registration details.</p>
+                        
+                        <h5>4. System Usage</h5>
+                        <p>The system is for educational purposes only. Any misuse may result in account termination.</p>
+                        
+                        <h5>5. Parental Consent</h5>
+                        <p>For students under 10 years, parental consent is mandatory. Parents/guardians will receive email notifications about system usage.</p>
+                        
+                        <h5>6. Limitation of Liability</h5>
+                        <p>BrightAI is not liable for any technical issues, data loss, or system downtime beyond our control.</p>
+                        
+                        <h5>7. Changes to Terms</h5>
+                        <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance of changes.</p>
+                    </div>
+                </div>
+                <div class="terms-footer">
+                    <button class="btn-primary" id="acceptTerms">
+                        I Accept Terms
+                    </button>
                 </div>
             </div>
-            <div class="terms-footer">
-                <button class="btn-primary" id="acceptTerms">
-                    I Accept Terms
-                </button>
-            </div>
         </div>
-    </div>
 
-    <div id="toastContainer"></div>
+        <div id="toastContainer"></div>
 
-    <script src="/static/js/student_signup.js"></script>
-</body>
-</html>
+        <script src="/static/js/student_signup.js"></script>
+    </body>
+    </html>

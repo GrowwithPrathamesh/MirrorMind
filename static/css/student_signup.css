@@ -205,10 +205,12 @@ body.no-scroll {
 }
 
 .logo-text {
-    font-size: 48px;
+    font-size: 60px;
     font-weight: 700;
     letter-spacing: 1px;
     text-shadow: 0 2px 10px rgba(0, 198, 255, 0.3);
+    filter: none;
+    -webkit-filter: none;
 }
 
 .tagline {
@@ -220,7 +222,7 @@ body.no-scroll {
 }
 
 .form-container {
-    width: 1200px;
+    width: 1100px;
     max-width: 1500px;
 }
 
@@ -231,10 +233,10 @@ body.no-scroll {
     border-radius: 24px;
     padding: 50px 70px 70px;
     box-shadow:
-        10px 20px 40px rgba(0, 0, 0, 0.5),   /* bottom */
-        10px -20px 40px rgba(126, 162, 212, 0.4),  /* top */
-        20px 0 40px rgba(0, 0, 0, 0.6),    /* right */
-        -20px 0 40px rgba(0, 0, 0, 0.6);   /* left */
+        10px 20px 40px rgba(0, 0, 0, 0.5),
+        10px -20px 40px rgba(126, 162, 212, 0.4),
+        20px 0 40px rgba(0, 0, 0, 0.6),
+        -20px 0 40px rgba(0, 0, 0, 0.6);
     position: relative;
     overflow: visible;
     margin-bottom: 40px;
@@ -418,7 +420,6 @@ body.no-scroll {
     display: grid;
     grid-template-rows: auto 1fr;
 }
-
 
 .form-label {
     display: block;
@@ -798,7 +799,7 @@ body.no-scroll {
 
 .btn-capture {
     margin: 0 auto 30px;
-    min-width: 240px;
+    min-width: 280px;
     padding: 18px 32px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -912,6 +913,27 @@ body.no-scroll {
 
 .otp-actions {
     margin-top: 24px;
+}
+
+.otp-loading {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    color: #00C6FF;
+    font-weight: 500;
+}
+
+.otp-loading.visible {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.spinner.small {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
 }
 
 .security-container {
@@ -1125,6 +1147,11 @@ body.no-scroll {
     fill: currentColor;
 }
 
+/* FIX 1: Increased top margin for Details page Continue button only */
+.action-buttons.details-page {
+    margin-top: 60px; /* Increased from 40px */
+}
+
 .action-buttons {
     display: flex;
     justify-content: center;
@@ -1157,6 +1184,44 @@ body.no-scroll {
     box-shadow: 
         0 8px 20px rgba(0, 198, 255, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.btn-wider {
+    min-width: 200px;
+}
+
+.btn-full-width {
+    width: 100%;
+    min-width: auto;
+    background: linear-gradient(135deg, #00C6FF, #00F5D4, #8B5CF6);
+    background-size: 200% auto;
+    animation: gradientShift 3s ease infinite;
+    padding: 20px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    border: none;
+    border-radius: 14px;
+    color: #0F172A;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 25px rgba(0, 198, 255, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.btn-full-width:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 15px 35px rgba(0, 198, 255, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.15);
+    animation: gradientShift 1.5s ease infinite;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1748,29 +1813,95 @@ body.no-scroll {
     }
 }
 
+.logo-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-img:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 198, 255, 0.3);
+}
+
+.input-with-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
 @media (max-width: 1200px) {
     .container {
-        max-width: 900px;
+        max-width: 100%;
+        padding: 30px 20px;
+    }
+    
+    .form-container {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .signup-card {
+        padding: 40px 50px;
+        width: 100%;
+        margin: 0 auto;
+    }
+    
+    .logo-text {
+        font-size: 42px;
     }
 }
 
 @media (max-width: 992px) {
     .container {
-        max-width: 700px;
+        padding: 25px 15px;
     }
     
     .logo-text {
-        font-size: 36px;
+        font-size: 38px;
+    }
+    
+    .tagline {
+        font-size: 16px;
+        letter-spacing: 1px;
     }
     
     .signup-card {
-        padding: 32px;
+        padding: 35px 40px;
+    }
+    
+    .card-header h2 {
+        font-size: 26px;
+    }
+    
+    .progress-track {
+        left: 70px;
+        right: 70px;
+    }
+    
+    .form-group {
+        margin-bottom: 28px;
+    }
+    
+    .btn-primary, .btn-secondary, .btn-capture {
+        font-size: 15px;
+        padding: 16px 30px;
+    }
+    
+    .btn-wider {
+        min-width: 180px;
     }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 20px 15px;
+        padding: 20px 12px;
+    }
+    
+    .logo-header {
+        margin-bottom: 25px;
     }
     
     .logo-text {
@@ -1778,16 +1909,55 @@ body.no-scroll {
     }
     
     .tagline {
-        font-size: 16px;
+        font-size: 14px;
+        letter-spacing: 0.8px;
     }
     
     .signup-card {
-        padding: 24px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .card-header h2 {
+        font-size: 24px;
+    }
+    
+    .card-header p {
+        font-size: 15px;
+    }
+    
+    .progress-indicator {
+        padding: 0 10px;
+        margin-bottom: 30px;
+    }
+    
+    .progress-track {
+        display: none;
+    }
+    
+    .step span {
+        font-size: 13px;
     }
     
     .form-row {
         flex-direction: column;
         gap: 0;
+    }
+    
+    .input-with-icon {
+        margin-bottom: 24px;
+    }
+    
+    .form-group {
+        margin-bottom: 24px;
+    }
+    
+    .btn-capture {
+        min-width: 240px;
+    }
+    
+    .btn-wider {
+        min-width: 160px;
     }
     
     .webcam-preview {
@@ -1801,51 +1971,6 @@ body.no-scroll {
         font-size: 28px;
     }
     
-    .calendar-modal,
-    .terms-modal {
-        max-width: 90%;
-        padding: 24px;
-    }
-    
-    .progress-track {
-        left: 60px;
-        right: 60px;
-    }
-}
-
-@media (max-width: 576px) {
-    .logo-text {
-        font-size: 28px;
-    }
-    
-    .tagline {
-        font-size: 14px;
-    }
-    
-    .card-header h2 {
-        font-size: 24px;
-    }
-    
-    .progress-indicator {
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 0 10px;
-    }
-    
-    .progress-track {
-        display: none;
-    }
-    
-    .otp-inputs {
-        gap: 10px;
-    }
-    
-    .otp-digit {
-        width: 45px;
-        height: 60px;
-        font-size: 24px;
-    }
-    
     .action-buttons {
         flex-direction: column;
         gap: 16px;
@@ -1855,22 +1980,121 @@ body.no-scroll {
         flex-direction: row;
     }
     
-    .btn-primary,
-    .btn-secondary {
-        width: 100%;
-        min-width: auto;
+    .calendar-modal,
+    .terms-modal {
+        max-width: 90%;
+        padding: 24px;
     }
 }
 
-.logo-img{
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-bottom: 20px;
+@media (max-width: 576px) {
+    .container {
+        padding: 15px 10px;
+    }
+    
+    .logo-text {
+        font-size: 28px;
+    }
+    
+    .tagline {
+        font-size: 13px;
+    }
+    
+    .signup-card {
+        padding: 25px;
+    }
+    
+    .card-header h2 {
+        font-size: 22px;
+    }
+    
+    .progress-indicator {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .step {
+        flex: 0 0 calc(50% - 20px);
+        margin-bottom: 10px;
+    }
+    
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .step span {
+        font-size: 12px;
+    }
+    
+    .btn-capture {
+        min-width: 200px;
+        padding: 14px 25px;
+    }
+    
+    .btn-wider {
+        min-width: 140px;
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+    
+    .btn-full-width {
+        padding: 18px;
+        font-size: 16px;
+    }
+    
+    .otp-inputs {
+        gap: 8px;
+    }
+    
+    .otp-digit {
+        width: 40px;
+        height: 55px;
+        font-size: 24px;
+    }
+    
+    .action-buttons {
+        gap: 12px;
+    }
+    
+    .webcam-preview {
+        width: 250px;
+        height: 250px;
+    }
 }
 
-.input-with-icon {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+@media (max-width: 400px) {
+    .logo-text {
+        font-size: 24px;
+    }
+    
+    .tagline {
+        font-size: 12px;
+    }
+    
+    .signup-card {
+        padding: 20px 15px;
+    }
+    
+    .btn-wider {
+        min-width: 120px;
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+    
+    .btn-capture {
+        min-width: 180px;
+    }
+    
+    .webcam-preview {
+        width: 220px;
+        height: 220px;
+    }
+    
+    .otp-digit {
+        width: 35px;
+        height: 50px;
+        font-size: 20px;
+    }
 }
