@@ -15,6 +15,8 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
+from MirrorMind.models import Accounts
+
 
 User = get_user_model()
 
@@ -59,11 +61,11 @@ def teacher_signup(request):
         if request.session.get("email_verified") != email:
             return JsonResponse({"error": "Email OTP verification required"}, status=403)
 
-        if User.objects.filter(email=email).exists():
+        if Accounts.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email already registered"}, status=400)
 
         # ✅ Create user
-        user = User.objects.create_user(
+        user = Accounts.objects.create_user(
             email=email,
             password=password,
             first_name=first_name,
@@ -159,10 +161,10 @@ def forgot_password(request):
             return JsonResponse({"error": "Passwords do not match."}, status=400)
 
         try:
-            user = User.objects.get(email=email)
+            user = Accounts.objects.get(email=email)
             user.set_password(new_password)
             user.save()
-        except User.DoesNotExist:
+        except Accounts.DoesNotExist:
             return JsonResponse({"error": "User not found."}, status=404)
 
         request.session.pop("reset_email_verified", None)
@@ -206,10 +208,10 @@ def email_otp_handler(request):
     purpose = data.get("purpose")
 
     if action == "send_otp":
-        if purpose == "signup" and User.objects.filter(email=email).exists():
+        if purpose == "signup" and Accounts.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email already registered"}, status=400)
 
-        if purpose == "forgot" and not User.objects.filter(email=email).exists():
+        if purpose == "forgot" and not Accounts.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email not registered"}, status=400)
 
         otp = str(random.randint(100000, 999999))

@@ -86,8 +86,8 @@ function initFormNavigation() {
         document.getElementById(`step${step}`).classList.add('active');
         
         currentStep = step;
-        updateProgress(step);
         
+        // Special handling for specific steps
         if (step === 3) {
             setTimeout(() => {
                 document.querySelector('.otp-digit[data-index="0"]').focus();
@@ -774,6 +774,7 @@ function initOTPHandling() {
     const otpField = document.getElementById('otp');
     const resendOtpBtn = document.getElementById('resendOtpBtn');
     const countdownElement = document.getElementById('countdown');
+    const otpLoading = document.getElementById('otpLoading');
     
     updateCountdown();
     
@@ -882,6 +883,7 @@ function initOTPHandling() {
         
         showToast('New OTP code sent to your email', 'success');
         
+        // Reset after 3 seconds
         setTimeout(() => {
             this.textContent = 'Resend Code';
             this.style.background = '';
@@ -891,10 +893,10 @@ function initOTPHandling() {
     });
     
     function sendOTP() {
-        const age = window.calculatedAge || 0;
-        if (age < 10) {
+
+        if (window.calculatedAge < 10) {
             showToast(
-                "Verification code has been sent to your parent/guardian's email.",
+                "Verification code has been sent to your parent/guardian’s email.",
                 "info"
             );
         } else {
@@ -904,7 +906,8 @@ function initOTPHandling() {
             );
         }
 
-        startOTPTimer();
+            startOTPTimer();
+        }, 1500);
     }
     
     function verifyOTP(otp) {
