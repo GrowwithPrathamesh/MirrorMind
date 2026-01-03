@@ -31,12 +31,11 @@ ALLOWED_HOSTS = []
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-AUTH_USER_MODEL = "students.Student"
-
 
 # Application definition
 
 INSTALLED_APPS = [
+    'teachers',
     'students',
     'django.contrib.admin',
     'django.contrib.auth',

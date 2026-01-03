@@ -1,24 +1,24 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
 
 # ============================
-# STUDENT USER MODEL
+# STUDENT USER MODEL (SIMPLE)
 # ============================
-class Student(AbstractUser):
+class Student(models.Model):
     """
-    Custom Student model using Django AbstractUser
+    Simple Student model (no AbstractUser)
     """
 
-    # ---- AUTH ----
+    # ---- AUTH-LIKE FIELDS (MANUAL) ----
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    password = models.CharField(max_length=128)  # store hashed password
 
     # ---- BASIC DETAILS (STEP 1) ----
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+
     enrollment_no = models.CharField(max_length=50, unique=True)
 
     department = models.CharField(
@@ -50,6 +50,7 @@ class Student(AbstractUser):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # ---- UTIL METHODS ----
     def age(self):
         if not self.dob:
             return None
@@ -65,9 +66,7 @@ class Student(AbstractUser):
         return f"{self.first_name} {self.last_name} | {self.enrollment_no}"
 
 
-# ============================
-# FACE DATA MODEL (STEP 2)
-# ============================
+
 class StudentFace(models.Model):
     """
     Stores captured face image & embedding
