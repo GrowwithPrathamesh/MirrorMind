@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 
 from datetime import datetime
 import base64
@@ -19,7 +20,8 @@ from email.mime.text import MIMEText
 # ===============================
 from students.models import Student, StudentFace
 from teachers.models import Teacher          # REQUIRED for teacher OTP
-from User.models import User                 # REQUIRED for forgot password
+
+          # REQUIRED for forgot password
 
 # ===============================
 # IN-MEMORY OTP STORAGE
