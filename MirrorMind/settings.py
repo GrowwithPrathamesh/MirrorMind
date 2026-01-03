@@ -31,18 +31,20 @@ ALLOWED_HOSTS = []
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+AUTH_USER_MODEL = "students.Student"
+
 
 # Application definition
 
 INSTALLED_APPS = [
+    'students',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Accounts',
-    'rest_framework',
+    
 ]
 
 MIDDLEWARE = [
@@ -55,7 +57,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTH_USER_MODEL = "Accounts.User"
 
 ROOT_URLCONF = 'MirrorMind.urls'
 
@@ -75,8 +76,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'MirrorMind.wsgi.application'
-
-AUTH_USER_MODEL = "Accounts.User"
 
 
 # Database

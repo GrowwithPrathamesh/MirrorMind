@@ -59,6 +59,7 @@
                 </div>
                 
                 <form id="studentSignupForm" action="/student/register/" method="POST">
+                    {% csrf_token %}
                     <div class="form-step active" id="step1">
                         <div class="form-group">
                             <div class="form-row">
@@ -248,7 +249,9 @@
                         <div class="form-step" id="step2">
                             <div class="face-capture-container">
                                 <div class="webcam-preview" id="webcamPreview">
-                                    <div class="webcam-placeholder">
+                                    <video id="webcamVideo" autoplay playsinline style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 24px;"></video>
+                                    <canvas id="webcamCanvas" style="display: none;"></canvas>
+                                    <div class="webcam-placeholder" id="webcamPlaceholder">
                                         <svg class="camera-icon" viewBox="0 0 24 24">
                                             <path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/>
                                         </svg>
@@ -268,10 +271,20 @@
                                     <p><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
                                 </div>
                                 
-                                <button type="button" class="btn-primary btn-capture" id="captureFaceBtn">
-                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                                    Capture Face
-                                </button>
+                                <div class="capture-controls" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px;">
+                                    <button type="button" class="btn-secondary" id="startWebcamBtn">
+                                        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M17 10.5V6H3v12h14v-4.5l4 4v-11l-4 4z"/></svg>
+                                        Start Camera
+                                    </button>
+                                    <button type="button" class="btn-primary btn-capture" id="captureFaceBtn" disabled>
+                                        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                                        Capture Face
+                                    </button>
+                                    <button type="button" class="btn-secondary" id="stopWebcamBtn" disabled>
+                                        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                        Stop Camera
+                                    </button>
+                                </div>
                                 
                                 <div class="capture-success" id="captureSuccess">
                                     <svg class="success-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
@@ -536,4 +549,4 @@
 
         <script src="/static/js/student_signup.js"></script>
     </body>
-    </html>
+</html>

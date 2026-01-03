@@ -1,238 +1,152 @@
-import json
-import random
-import smtplib
-from email.mime.text import MIMEText
-
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib import messages
-from django.contrib.auth import authenticate
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login
-from django.http import HttpResponseRedirect
-from django.contrib.auth import authenticate, login as auth_login
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-
-from MirrorMind.models import Accounts
-
-
-User = get_user_model()
-
-
-
-otp_storage = {}
-
-
-
-def home(request):
-    return render(request, "index.html")
-
-
-
+from django.shortcuts import render
+from django.core.files.base import ContentFile
+from django.db import transaction
+from datetime import datetime
+import base64
+from students.models import Student, StudentFace
 
 def student_signup(request):
-    return render(request, "student_signup.html")
-
-
-
-
-def teacher_signup(request):
-    if request.method == "GET":
-        return render(request, "teacher_signup.html")
-
     if request.method == "POST":
-        email = request.POST.get("email")
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm_password")
-        mobile = request.POST.get("mobile")
-
-        # ✅ Required field validation
-        if not all([email, first_name, last_name, password, confirm_password]):
-            return JsonResponse({"error": "All required fields must be filled"}, status=400)
-
-        if password != confirm_password:
-            return JsonResponse({"error": "Passwords do not match"}, status=400)
-
-        # 🔐 OTP verified?
-        if request.session.get("email_verified") != email:
-            return JsonResponse({"error": "Email OTP verification required"}, status=403)
-
-        if Accounts.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email already registered"}, status=400)
-
-        # ✅ Create user
-        user = Accounts.objects.create_user(
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            mobile=mobile,
-            is_email_verified=True
-        )
-
-        # ✅ Assign Teacher Group
-        teacher_group = Group.objects.get(name="Teacher")
-        user.groups.add(teacher_group)
-
-        request.session.pop("email_verified", None)
-
-        return JsonResponse({"success": "Teacher account created successfully"})
-    return render(request, "teacher_signup.html")
-
-
-
-
-
-def login_view(request):
-    if request.method == "GET":
-        return render(request, "login.html")
-
-    if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        if not email or not password:
-            messages.error(request, "Email and password required")
-            return redirect("login")
-
-        user = authenticate(request, username=email, password=password)
-
-        if user is None:
-            messages.error(request, "Invalid email or password")
-            return redirect("login")
-
-        if not user.is_email_verified:
-            messages.error(request, "Email not verified")
-            return redirect("login")
-
-        auth_login(request, user)
-
-        # 🔁 Group-based redirect
-        if user.groups.filter(name="Teacher").exists():
-            return redirect("teacher_dashboard")
-
-        elif user.groups.filter(name="Student").exists():
-            return redirect("student_dashboard")
-
-        else:
-            messages.error(request, "No group assigned")
-            return redirect("login")
-    return render(request, "login.html")
-
-
-
-def student_dashboard(request):
-    return render(request, "student_dashboard.html")
-
-
-
-def teacher_dashboard(request):
-    return render(request, "teacher_dashboard.html")
-
-
-
-def attendence(request):
-    return render(request, "attendence.html")
-
-
-
-
-
-def forgot_password(request):
-    if request.method == "GET":
-        return render(request, "forgot_password.html")
-
-    if request.method == "POST":
-        email = request.POST.get("email")
-        new_password = request.POST.get("password")
-        confirm_password = request.POST.get("confirmPassword")
-
-        if request.session.get("reset_email_verified") != email:
-            return JsonResponse({"error": "OTP verification required."}, status=403)
-
-        if not new_password or not confirm_password:
-            return JsonResponse({"error": "Password fields cannot be empty."}, status=400)
-
-        if new_password != confirm_password:
-            return JsonResponse({"error": "Passwords do not match."}, status=400)
-
         try:
-            user = Accounts.objects.get(email=email)
-            user.set_password(new_password)
-            user.save()
-        except Accounts.DoesNotExist:
-            return JsonResponse({"error": "User not found."}, status=404)
+            data = request.POST
 
-        request.session.pop("reset_email_verified", None)
-        return JsonResponse({"success": "Password reset successful."})
+            # ===============================
+            # 1️⃣ BASIC DETAILS (STEP 1)
+            # ===============================
+            first_name = data.get("first_name")
+            last_name = data.get("last_name")
+            email = data.get("email")
+            enrollment_no = data.get("enrollment_no")
+            department = data.get("department")
+            dob_raw = data.get("dob")
 
-    return JsonResponse({"error": "Invalid request method."}, status=405)
+            parent_name = data.get("parent_name")
+            parent_email = data.get("parent_email")
+            parent_mobile = data.get("parent_mobile")
 
+            # ===============================
+            # 2️⃣ SECURITY (STEP 4)
+            # ===============================
+            password = data.get("password")
+            confirm_password = data.get("confirm_password")
+            terms_accepted = data.get("terms")
 
+            # ===============================
+            # 3️⃣ FACE DATA (STEP 2)
+            # ===============================
+            face_image_base64 = data.get("face_image")
 
-def send_email_otp(receiver_email, otp, purpose="signup"):
-    sender_email = "rakshak.connect@gmail.com"
-    sender_password = "vpxiebniktusbtxk"
+            # ===============================
+            # VALIDATIONS
+            # ===============================
+            required_fields = [
+                first_name, last_name, email, enrollment_no,
+                department, dob_raw, password, confirm_password
+            ]
 
-    subject = "BrainWave | Email Verification OTP" if purpose == "signup" else "BrainWave | Password Reset OTP"
-    body = f"Your OTP is:\n\n{otp}\n\nDo not share this OTP."
+            if not all(required_fields):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = receiver_email
+            if password != confirm_password:
+                return JsonResponse({"error": "Passwords do not match"}, status=400)
 
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
-        return True
-    except Exception as e:
-        print("Email error:", e)
-        return False
+            if not terms_accepted:
+                return JsonResponse({"error": "Terms not accepted"}, status=400)
 
+            # ===============================
+            # 4️⃣ OTP VERIFICATION CHECK (STEP 3)
+            # ===============================
+            if request.session.get("email_verified") != email:
+                return JsonResponse(
+                    {"error": "Email not verified via OTP"}, status=403
+                )
 
+            # ===============================
+            # 5️⃣ DUPLICATE CHECK
+            # ===============================
+            if Student.objects.filter(email=email).exists():
+                return JsonResponse({"error": "Email already registered"}, status=400)
 
-@csrf_exempt
-def email_otp_handler(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=400)
+            if Student.objects.filter(enrollment_no=enrollment_no).exists():
+                return JsonResponse(
+                    {"error": "Enrollment number already exists"}, status=400
+                )
 
-    data = json.loads(request.body)
-    action = data.get("action")
-    email = data.get("email")
-    purpose = data.get("purpose")
+            # ===============================
+            # 6️⃣ FACE VALIDATION
+            # ===============================
+            if not face_image_base64:
+                return JsonResponse(
+                    {"error": "Face capture is required"}, status=400
+                )
 
-    if action == "send_otp":
-        if purpose == "signup" and Accounts.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email already registered"}, status=400)
+            try:
+                format, imgstr = face_image_base64.split(";base64,")
+                if not format.startswith("data:image/"):
+                    return JsonResponse({"error": "Invalid image format"}, status=400)
+            except ValueError:
+                return JsonResponse({"error": "Invalid face image"}, status=400)
 
-        if purpose == "forgot" and not Accounts.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email not registered"}, status=400)
+            # ===============================
+            # DOB FORMAT FIX (DD/MM/YYYY → YYYY-MM-DD)
+            # ===============================
+            try:
+                dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
+            except ValueError:
+                return JsonResponse({"error": "Invalid date format"}, status=400)
 
-        otp = str(random.randint(100000, 999999))
-        otp_storage[email] = otp
+            # ===============================
+            # 7️⃣ CREATE STUDENT + FACE (ATOMIC)
+            # ===============================
+            with transaction.atomic():
 
-        if send_email_otp(email, otp, purpose):
-            return JsonResponse({"success": "OTP sent successfully"})
+                student = Student.objects.create_user(
+                    username=enrollment_no,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    enrollment_no=enrollment_no,
+                    department=department,
+                    dob=dob,
+                    parent_name=parent_name,
+                    parent_email=parent_email,
+                    parent_mobile=parent_mobile,
+                    is_active=True,
+                    email_verified=True,
+                    terms_accepted=True
+                )
 
-        return JsonResponse({"error": "Failed to send OTP"}, status=500)
+                ext = format.split("/")[-1]
+                face_image = ContentFile(
+                    base64.b64decode(imgstr),
+                    name=f"{student.id}_face.{ext}"
+                )
 
-    if action == "verify_otp":
-        if otp_storage.get(email) == data.get("otp"):
-            del otp_storage[email]
+                StudentFace.objects.create(
+                    student=student,
+                    face_image=face_image
+                )
 
-            if purpose == "signup":
-                request.session["email_verified"] = email
-            else:
-                request.session["reset_email_verified"] = email
+                student.face_registered = True
+                student.save(update_fields=["face_registered"])
 
-            return JsonResponse({"verified": True})
+            # ===============================
+            # 8️⃣ CLEAR OTP SESSION
+            # ===============================
+            request.session.pop("email_verified", None)
 
-        return JsonResponse({"verified": False}, status=400)
+            return JsonResponse({
+                "success": True,
+                "message": "Student registered successfully",
+                "student_id": student.id
+            })
 
-    return JsonResponse({"error": "Invalid action"}, status=400)
+        except Exception as e:
+            print("STUDENT SIGNUP ERROR:", e)
+            return JsonResponse(
+                {"error": "Internal server error"}, status=500
+            )
+
+    return render(request, 'student_signup.html')
