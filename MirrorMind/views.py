@@ -1,19 +1,42 @@
+# ===============================
+# BASIC IMPORTS
+# ===============================
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
+
 from datetime import datetime
 import base64
-from students.models import Student, StudentFace
+import json
+import random
+import smtplib
+from email.mime.text import MIMEText
 
+# ===============================
+# MODELS
+# ===============================
+from students.models import Student, StudentFace
+from teachers.models import Teacher          # REQUIRED for teacher OTP
+from User.models import User                 # REQUIRED for forgot password
+
+# ===============================
+# IN-MEMORY OTP STORAGE
+# ===============================
+otp_storage = {}
+
+# ===============================
+# STUDENT SIGNUP
+# ===============================
 def student_signup(request):
     if request.method == "POST":
         try:
             data = request.POST
 
-            # ===============================
-            # 1️⃣ BASIC DETAILS (STEP 1)
-            # ===============================
+            # -------------------------------
+            # 1️⃣ BASIC DETAILS
+            # -------------------------------
             first_name = data.get("first_name")
             last_name = data.get("last_name")
             email = data.get("email")
@@ -25,24 +48,25 @@ def student_signup(request):
             parent_email = data.get("parent_email")
             parent_mobile = data.get("parent_mobile")
 
-            # ===============================
-            # 2️⃣ SECURITY (STEP 4)
-            # ===============================
+            # -------------------------------
+            # 2️⃣ SECURITY
+            # -------------------------------
             password = data.get("password")
             confirm_password = data.get("confirm_password")
             terms_accepted = data.get("terms")
 
-            # ===============================
-            # 3️⃣ FACE DATA (STEP 2)
-            # ===============================
+            # -------------------------------
+            # 3️⃣ FACE DATA
+            # -------------------------------
             face_image_base64 = data.get("face_image")
 
-            # ===============================
+            # -------------------------------
             # VALIDATIONS
-            # ===============================
+            # -------------------------------
             required_fields = [
-                first_name, last_name, email, enrollment_no,
-                department, dob_raw, password, confirm_password
+                first_name, last_name, email,
+                enrollment_no, department,
+                dob_raw, password, confirm_password
             ]
 
             if not all(required_fields):
@@ -54,32 +78,27 @@ def student_signup(request):
             if not terms_accepted:
                 return JsonResponse({"error": "Terms not accepted"}, status=400)
 
-            # ===============================
-            # 4️⃣ OTP VERIFICATION CHECK (STEP 3)
-            # ===============================
-            if request.session.get("email_verified") != email:
-                return JsonResponse(
-                    {"error": "Email not verified via OTP"}, status=403
-                )
+            # -------------------------------
+            # 4️⃣ OTP VERIFICATION CHECK
+            # -------------------------------
+            # 🔴 FIXED: session key aligned with OTP handler
+            if request.session.get("student_email_verified") != email:
+                return JsonResponse({"error": "Email not verified via OTP"}, status=403)
 
-            # ===============================
+            # -------------------------------
             # 5️⃣ DUPLICATE CHECK
-            # ===============================
+            # -------------------------------
             if Student.objects.filter(email=email).exists():
                 return JsonResponse({"error": "Email already registered"}, status=400)
 
             if Student.objects.filter(enrollment_no=enrollment_no).exists():
-                return JsonResponse(
-                    {"error": "Enrollment number already exists"}, status=400
-                )
+                return JsonResponse({"error": "Enrollment number already exists"}, status=400)
 
-            # ===============================
+            # -------------------------------
             # 6️⃣ FACE VALIDATION
-            # ===============================
+            # -------------------------------
             if not face_image_base64:
-                return JsonResponse(
-                    {"error": "Face capture is required"}, status=400
-                )
+                return JsonResponse({"error": "Face capture is required"}, status=400)
 
             try:
                 format, imgstr = face_image_base64.split(";base64,")
@@ -88,17 +107,17 @@ def student_signup(request):
             except ValueError:
                 return JsonResponse({"error": "Invalid face image"}, status=400)
 
-            # ===============================
-            # DOB FORMAT FIX (DD/MM/YYYY → YYYY-MM-DD)
-            # ===============================
+            # -------------------------------
+            # DOB FORMAT FIX
+            # -------------------------------
             try:
                 dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
             except ValueError:
                 return JsonResponse({"error": "Invalid date format"}, status=400)
 
-            # ===============================
+            # -------------------------------
             # 7️⃣ CREATE STUDENT + FACE (ATOMIC)
-            # ===============================
+            # -------------------------------
             with transaction.atomic():
 
                 student = Student.objects.create_user(
@@ -132,10 +151,10 @@ def student_signup(request):
                 student.face_registered = True
                 student.save(update_fields=["face_registered"])
 
-            # ===============================
+            # -------------------------------
             # 8️⃣ CLEAR OTP SESSION
-            # ===============================
-            request.session.pop("email_verified", None)
+            # -------------------------------
+            request.session.pop("student_email_verified", None)
 
             return JsonResponse({
                 "success": True,
@@ -145,8 +164,111 @@ def student_signup(request):
 
         except Exception as e:
             print("STUDENT SIGNUP ERROR:", e)
-            return JsonResponse(
-                {"error": "Internal server error"}, status=500
-            )
+            return JsonResponse({"error": "Internal server error"}, status=500)
 
-    return render(request, 'student_signup.html')
+    return render(request, "student_signup.html")
+
+
+# ===============================
+# TEACHER SIGNUP (UI ONLY HERE)
+# ===============================
+def teacher_signup(request):
+    return render(request, "teacher_signup.html")
+
+
+# ===============================
+# EMAIL OTP SENDER (COMMON)
+# ===============================
+def send_email_otp(receiver_email, otp, purpose):
+    sender_email = "rakshak.connect@gmail.com"
+    sender_password = "vpxiebniktusbtxk"
+
+    if purpose == "student_signup":
+        subject = "MirrorMind | Student Email Verification OTP"
+    elif purpose == "teacher_signup":
+        subject = "MirrorMind | Teacher Email Verification OTP"
+    else:
+        subject = "MirrorMind | Password Reset OTP"
+
+    body = f"""
+Your OTP is: {otp}
+
+Do not share this OTP with anyone.
+This OTP is valid for a short time only.
+"""
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        print("EMAIL OTP ERROR:", e)
+        return False
+
+
+# ===============================
+# OTP HANDLER (STUDENT / TEACHER / FORGOT)
+# ===============================
+@csrf_exempt
+def email_otp_handler(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+    data = json.loads(request.body)
+    action = data.get("action")
+    email = data.get("email")
+    purpose = data.get("purpose")
+    otp_input = data.get("otp")
+
+    # -------------------------------
+    # SEND OTP
+    # -------------------------------
+    if action == "send_otp":
+
+        if purpose == "student_signup" and Student.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Student email already registered"}, status=400)
+
+        if purpose == "teacher_signup" and Teacher.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Teacher email already registered"}, status=400)
+
+        if purpose == "forgot_password" and not User.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Email not registered"}, status=400)
+
+        otp = str(random.randint(100000, 999999))
+        otp_storage[email] = otp
+
+        if send_email_otp(email, otp, purpose):
+            if purpose == "student_signup":
+                return JsonResponse({"success": "OTP sent to student email"})
+            elif purpose == "teacher_signup":
+                return JsonResponse({"success": "OTP sent to teacher email"})
+            else:
+                return JsonResponse({"success": "OTP sent for password reset"})
+
+        return JsonResponse({"error": "Failed to send OTP"}, status=500)
+
+    # -------------------------------
+    # VERIFY OTP
+    # -------------------------------
+    if action == "verify_otp":
+        if otp_storage.get(email) == otp_input:
+            del otp_storage[email]
+
+            if purpose == "student_signup":
+                request.session["student_email_verified"] = email
+            elif purpose == "teacher_signup":
+                request.session["teacher_email_verified"] = email
+            else:
+                request.session["reset_email_verified"] = email
+
+            return JsonResponse({"verified": True})
+
+        return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
+
+    return JsonResponse({"error": "Invalid action"}, status=400)
