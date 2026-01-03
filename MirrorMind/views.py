@@ -21,6 +21,13 @@ User = get_user_model()
 
 otp_storage = {}
 
+def student_login(request):
+    return render(request, "student_login.html")
+
+
+def teacher_login(request):
+    return render(request, "teacher_login.html")
+
 
 def home(request):
     return render(request, "home.html")
