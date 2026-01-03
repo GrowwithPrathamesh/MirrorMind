@@ -96,6 +96,7 @@ function initFormNavigation() {
         document.getElementById(`step${step}`).classList.add('active');
         
         currentStep = step;
+<<<<<<< HEAD
         updateProgress(step);
         
         // FIX 2: Scroll to top when moving between steps
@@ -121,7 +122,10 @@ function initFormNavigation() {
                 }, 100);
             }
         }, 300);
+=======
+>>>>>>> 946148b65f5347df32f81e6c2ff13b616cb74382
         
+        // Special handling for specific steps
         if (step === 3) {
             setTimeout(() => {
                 document.querySelector('.otp-digit[data-index="0"]').focus();
@@ -1029,6 +1033,9 @@ function initOTPHandling() {
         
         sendOTP();
         
+        showToast('New OTP code sent to your email', 'success');
+        
+        // Reset after 3 seconds
         setTimeout(() => {
             this.textContent = 'Resend Code';
             this.style.background = '';
@@ -1038,25 +1045,18 @@ function initOTPHandling() {
     });
     
     function sendOTP() {
-        otpLoading.classList.add('visible');
-        resendOtpBtn.style.display = 'none';
-        
-        setTimeout(() => {
-            otpLoading.classList.remove('visible');
-            resendOtpBtn.style.display = 'block';
-            
-            const age = window.calculatedAge || 0;
-            if (age < 10) {
-                showToast(
-                    "Email OTP sent successfully to your parent/guardian's email.",
-                    "success"
-                );
-            } else {
-                showToast(
-                    "Email OTP sent successfully.",
-                    "success"
-                );
-            }
+
+        if (window.calculatedAge < 10) {
+            showToast(
+                "Verification code has been sent to your parent/guardian’s email.",
+                "info"
+            );
+        } else {
+            showToast(
+                "Verification code has been sent to your email.",
+                "info"
+            );
+        }
 
             startOTPTimer();
         }, 1500);

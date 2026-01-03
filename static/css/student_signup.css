@@ -222,8 +222,9 @@ body.no-scroll {
 }
 
 .form-container {
-    width: 1100px;
-    max-width: 1500px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .signup-card {
@@ -421,7 +422,7 @@ body.no-scroll {
     grid-template-rows: auto 1fr;
 }
 
-.form-label {
+.input-with-icon label {
     display: block;
     margin-bottom: 12px;
     font-size: 16px;
@@ -632,7 +633,7 @@ body.no-scroll {
 .toggle-password {
     position: absolute;
     right: 16px;
-    top: 50%;
+    top: calc(50% + 12px);
     transform: translateY(-50%);
     background: transparent;
     border: none;
@@ -799,16 +800,7 @@ body.no-scroll {
 
 .btn-capture {
     margin: 0 auto 30px;
-    min-width: 280px;
-    padding: 18px 32px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-capture:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 
-        0 12px 30px rgba(0, 198, 255, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
+    min-width: 200px;
 }
 
 .capture-success {
@@ -915,27 +907,7 @@ body.no-scroll {
     margin-top: 24px;
 }
 
-.otp-loading {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    color: #00C6FF;
-    font-weight: 500;
-}
-
-.otp-loading.visible {
-    display: flex;
-    animation: fadeIn 0.3s ease;
-}
-
-.spinner.small {
-    width: 20px;
-    height: 20px;
-    border-width: 2px;
-}
-
+/* Security Container */
 .security-container {
     text-align: center;
     margin-bottom: 40px;
@@ -1141,17 +1113,7 @@ body.no-scroll {
     display: flex;
 }
 
-.error-icon {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-}
-
-/* FIX 1: Increased top margin for Details page Continue button only */
-.action-buttons.details-page {
-    margin-top: 60px; /* Increased from 40px */
-}
-
+/* Action Buttons */
 .action-buttons {
     display: flex;
     justify-content: center;
@@ -1186,34 +1148,17 @@ body.no-scroll {
         0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
-.btn-wider {
-    min-width: 200px;
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 15px 35px rgba(0, 198, 255, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.15);
+    animation: gradientShift 2s ease infinite;
 }
 
-.btn-full-width {
-    width: 100%;
-    min-width: auto;
-    background: linear-gradient(135deg, #00C6FF, #00F5D4, #8B5CF6);
-    background-size: 200% auto;
-    animation: gradientShift 3s ease infinite;
-    padding: 20px;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    border: none;
-    border-radius: 14px;
-    color: #0F172A;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-        0 8px 25px rgba(0, 198, 255, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
 .btn-full-width:hover {
@@ -1813,50 +1758,16 @@ body.no-scroll {
     }
 }
 
-.logo-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-bottom: 20px;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.logo-img:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 10px 25px rgba(0, 198, 255, 0.3);
-}
-
-.input-with-icon {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
+/* Responsive Design */
 @media (max-width: 1200px) {
-    .container {
-        max-width: 100%;
-        padding: 30px 20px;
-    }
-    
-    .form-container {
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .signup-card {
-        padding: 40px 50px;
-        width: 100%;
-        margin: 0 auto;
-    }
-    
-    .logo-text {
-        font-size: 42px;
+    .form-scroll-container {
+        width: 85%;
     }
 }
 
 @media (max-width: 992px) {
-    .container {
-        padding: 25px 15px;
+    .form-scroll-container {
+        width: 95%;
     }
     
     .logo-text {
@@ -1869,39 +1780,13 @@ body.no-scroll {
     }
     
     .signup-card {
-        padding: 35px 40px;
-    }
-    
-    .card-header h2 {
-        font-size: 26px;
-    }
-    
-    .progress-track {
-        left: 70px;
-        right: 70px;
-    }
-    
-    .form-group {
-        margin-bottom: 28px;
-    }
-    
-    .btn-primary, .btn-secondary, .btn-capture {
-        font-size: 15px;
-        padding: 16px 30px;
-    }
-    
-    .btn-wider {
-        min-width: 180px;
+        padding: 30px;
     }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 20px 12px;
-    }
-    
-    .logo-header {
-        margin-bottom: 25px;
+        padding: 16px;
     }
     
     .logo-text {
@@ -1913,17 +1798,9 @@ body.no-scroll {
         letter-spacing: 0.8px;
     }
     
-    .signup-card {
-        padding: 30px;
-        margin-bottom: 30px;
-    }
-    
-    .card-header h2 {
-        font-size: 24px;
-    }
-    
-    .card-header p {
-        font-size: 15px;
+    .form-scroll-container {
+        width: 100%;
+        height: calc(100vh - 150px);
     }
     
     .progress-indicator {
@@ -1944,20 +1821,8 @@ body.no-scroll {
         gap: 0;
     }
     
-    .input-with-icon {
-        margin-bottom: 24px;
-    }
-    
-    .form-group {
-        margin-bottom: 24px;
-    }
-    
-    .btn-capture {
-        min-width: 240px;
-    }
-    
-    .btn-wider {
-        min-width: 160px;
+    .step-line {
+        width: 40px;
     }
     
     .webcam-preview {
@@ -1968,22 +1833,12 @@ body.no-scroll {
     .otp-digit {
         width: 50px;
         height: 70px;
-        font-size: 28px;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .step-nav {
-        flex-direction: row;
+        font-size: 1.8rem;
     }
     
     .calendar-modal,
     .terms-modal {
         max-width: 90%;
-        padding: 24px;
     }
 }
 
@@ -2011,37 +1866,11 @@ body.no-scroll {
     .progress-indicator {
         flex-wrap: wrap;
         gap: 10px;
+        padding: 0 10px;
     }
     
-    .step {
-        flex: 0 0 calc(50% - 20px);
-        margin-bottom: 10px;
-    }
-    
-    .step-circle {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-    
-    .step span {
-        font-size: 12px;
-    }
-    
-    .btn-capture {
-        min-width: 200px;
-        padding: 14px 25px;
-    }
-    
-    .btn-wider {
-        min-width: 140px;
-        padding: 14px 20px;
-        font-size: 14px;
-    }
-    
-    .btn-full-width {
-        padding: 18px;
-        font-size: 16px;
+    .step-line {
+        display: none;
     }
     
     .otp-inputs {
@@ -2049,52 +1878,68 @@ body.no-scroll {
     }
     
     .otp-digit {
-        width: 40px;
-        height: 55px;
-        font-size: 24px;
+        width: 50px;
+        height: 60px;
+        font-size: 1.5rem;
     }
     
     .action-buttons {
-        gap: 12px;
+        flex-direction: column;
+        gap: 15px;
     }
     
-    .webcam-preview {
-        width: 250px;
-        height: 250px;
+    .step-nav {
+        flex-direction: row;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .modal-content,
+    .calendar-modal,
+    .terms-modal {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .calendar-days div {
+        padding: 8px 0;
     }
 }
 
-@media (max-width: 400px) {
-    .logo-text {
-        font-size: 24px;
-    }
-    
-    .tagline {
-        font-size: 12px;
-    }
-    
-    .signup-card {
-        padding: 20px 15px;
-    }
-    
-    .btn-wider {
-        min-width: 120px;
-        padding: 12px 15px;
-        font-size: 13px;
-    }
-    
-    .btn-capture {
-        min-width: 180px;
-    }
-    
-    .webcam-preview {
-        width: 220px;
-        height: 220px;
-    }
-    
-    .otp-digit {
-        width: 35px;
-        height: 50px;
-        font-size: 20px;
-    }
+.toast {
+    min-width: 280px;
+    max-width: 360px;
+    background: rgba(30, 41, 59, 0.95);
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    animation: slideIn 0.4s ease, fadeOut 0.4s ease 4s forwards;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.toast.info {
+    border-left: 4px solid #38bdf8;
+}
+
+.toast i {
+    color: #38bdf8;
+    font-size: 18px;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(120%); }
 }
