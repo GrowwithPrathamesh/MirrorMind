@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+
 from django.contrib.auth.hashers import make_password
 
 from datetime import datetime
@@ -12,13 +13,15 @@ import json
 import random
 import smtplib
 from email.mime.text import MIMEText
+import json
 
 from students.models import Student, StudentFace
 from teachers.models import Teacher
 
 from django.contrib.auth.hashers import check_password
 
-User = get_user_model()
+
+
 
 otp_storage = {}
 
@@ -389,9 +392,87 @@ def email_otp_handler(request):
     return render(request, "email_otp.html")
 
 
+
 # ===============================
 # RESET PASSWORD
 # ===============================
+def forgot_password(request):
+
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            password = data.get("password")
+            confirm_password = data.get("confirmPassword")
+
+            # -------------------------------
+            # 1️⃣ OTP VERIFICATION CHECK
+            # -------------------------------
+            email = request.session.get("reset_email_verified")
+            if not email:
+                return JsonResponse(
+                    {"error": "OTP verification required"},
+                    status=403
+                )
+
+            # -------------------------------
+            # 2️⃣ VALIDATIONS
+            # -------------------------------
+            if not password or not confirm_password:
+                return JsonResponse(
+                    {"error": "Password fields are required"},
+                    status=400
+                )
+
+            if password != confirm_password:
+                return JsonResponse(
+                    {"error": "Passwords do not match"},
+                    status=400
+                )
+
+            if len(password) < 8:
+                return JsonResponse(
+                    {"error": "Password must be at least 8 characters long"},
+                    status=400
+                )
+
+            # -------------------------------
+            # 3️⃣ USER LOOKUP (STUDENT / TEACHER)
+            # -------------------------------
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return JsonResponse(
+                    {"error": "User not found"},
+                    status=404
+                )
+
+            # -------------------------------
+            # 4️⃣ RESET PASSWORD
+            # -------------------------------
+            user.password = make_password(password)
+            user.save(update_fields=["password"])
+
+            # -------------------------------
+            # 5️⃣ CLEAR OTP SESSION
+            # -------------------------------
+            request.session.pop("reset_email_verified", None)
+
+            return JsonResponse({
+                "success": True,
+                "message": "Password reset successful"
+            })
+
+        except Exception as e:
+            print("FORGOT PASSWORD ERROR:", e)
+            return JsonResponse(
+                {"error": "Internal server error"},
+                status=500
+            )
+
+
+
+
 @csrf_exempt
 def student_reset_password(request):
     if request.method == "POST":
@@ -446,5 +527,6 @@ def teacher_reset_password(request):
         request.session.pop("reset_email_verified", None)
 
         return JsonResponse({"success": True})
+
 
     return render(request, "teacher_reset_password.html")
