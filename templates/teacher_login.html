@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MirrorMind - AI Smart Classroom Platform</title>
-    <link rel="stylesheet" href="/static/css/student_login.css">
+    <title>MirrorMind - Teacher Login</title>
+    <link rel="stylesheet" href="/static/css/teacher_login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,6 @@
     <div class="animated-background">
         <div class="particle-layer"></div>
         <div class="grid-layer"></div>
-      
         <div class="orbs-layer">
             <div class="orb orb-1"></div>
             <div class="orb orb-2"></div>
@@ -31,7 +30,7 @@
             <div class="logo-gradient">
                 <h1 class="logo-text">MirrorMind</h1>
             </div>
-            <p class="tagline">AI-Powered Smart Classroom Platform</p>
+            <p class="tagline">AI-Powered Teacher Dashboard</p>
         </div>
 
         <!-- Form Container -->
@@ -41,17 +40,17 @@
                 <form id="loginForm" class="form-step active">
                     <div class="step-header">
                         <div class="step-logo-container">
-                            <img src="/static/images/123.png" alt="MirrorMind Logo" class="step-logo">
+                            <img src="/static/images/teacher-logo.png" alt="Teacher Portal Logo" class="step-logo">
                         </div>
-                        <h2>Welcome Back</h2>
-                        <p>Sign in to access your AI classroom dashboard</p>
+                        <h2>Teacher Portal</h2>
+                        <p>Access your AI-powered classroom analytics</p>
                     </div>
 
                     <div class="form-group">
-                        <label for="email">Email Address</label>
+                        <label for="email">Institutional Email</label>
                         <div class="input-with-icon">
-                            <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" id="email" name="email" required placeholder="Enter your email">
+                            <i class="fas fa-user-tie input-icon"></i>
+                            <input type="email" id="email" name="email" required placeholder="teacher@school.edu">
                             <div class="input-effects">
                                 <div class="focus-border"></div>
                             </div>
@@ -64,7 +63,19 @@
                             <i class="fas fa-lock input-icon"></i>
                             <input type="password" id="password" name="password" required placeholder="Enter your password">
                             <button type="button" class="toggle-password" data-target="password">
+                                <i class="fas fa-eye"></i>
                             </button>
+                            <div class="input-effects">
+                                <div class="focus-border"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="schoolCode">School Code</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-school input-icon"></i>
+                            <input type="text" id="schoolCode" name="schoolCode" required placeholder="Enter school code">
                             <div class="input-effects">
                                 <div class="focus-border"></div>
                             </div>
@@ -83,8 +94,8 @@
                     <div class="action-buttons">
                         <button type="submit" class="btn-primary" id="loginBtn">
                             <span class="btn-text">
-                                <i class="fas fa-sign-in-alt"></i>
-                                Sign In
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                Teacher Login
                             </span>
                             <span class="btn-loader">
                                 <i class="fas fa-spinner fa-spin"></i>
@@ -93,7 +104,7 @@
                     </div>
 
                     <div class="card-footer">
-                        <p class="footer-text">New to MirrorMind? <a href="#" class="admin-link"> Sign Up</a></p>
+                        <p class="footer-text">Need administrator access? <a href="#" class="admin-link">Contact Admin</a></p>
                         <a href="/" class="back-home">
                             <i class="fas fa-arrow-left"></i>
                             Back to Home
@@ -105,16 +116,16 @@
             <!-- Stats Panel -->
             <div class="stats-panel">
                 <div class="stat-item">
-                    <div class="stat-number" data-count="99.2">0.0</div>
-                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-number" data-count="98.5">0.0</div>
+                    <div class="stat-label">AI Accuracy</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" data-count="500">0</div>
-                    <div class="stat-label">Active Schools</div>
+                    <div class="stat-number" data-count="1200">0</div>
+                    <div class="stat-label">Active Teachers</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number" data-count="24">0</div>
-                    <div class="stat-label">/7 Monitoring</div>
+                    <div class="stat-number" data-count="85">0</div>
+                    <div class="stat-label">Avg. Engagement</div>
                 </div>
             </div>
         </div>
@@ -130,7 +141,7 @@
                 <div class="modal-icon">
                     <i class="fas fa-spinner fa-spin"></i>
                 </div>
-                <h3>Processing</h3>
+                <h3>Verifying Credentials</h3>
             </div>
             <div class="modal-body">
                 <div class="loading-animation">
@@ -139,7 +150,7 @@
                     <div class="pulse-ring delay-1"></div>
                     <div class="pulse-ring delay-2"></div>
                 </div>
-                <p class="loading-text">Authenticating...</p>
+                <p class="loading-text">Authenticating teacher credentials...</p>
                 <div class="progress-bar">
                     <div class="progress-fill"></div>
                 </div>
@@ -161,10 +172,10 @@
             </div>
             <div class="modal-body">
                 <div class="success-icon">
-                    <i class="fas fa-rocket"></i>
+                    <i class="fas fa-chalkboard-teacher"></i>
                 </div>
-                <h2>Welcome to MirrorMind</h2>
-                <p>Your AI classroom analytics are being prepared...</p>
+                <h2>Welcome to Teacher Dashboard</h2>
+                <p>Your classroom analytics and AI insights are ready...</p>
                 
                 <div class="confetti-container">
                     <div class="confetti"></div>
@@ -180,13 +191,13 @@
                 
                 <div class="auto-redirect">
                     <i class="fas fa-clock"></i>
-                    Redirecting to dashboard in <span id="redirectTimer">5</span> seconds
+                    Redirecting to teacher dashboard in <span id="redirectTimer">5</span> seconds
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn primary" id="continueBtn">
                     <i class="fas fa-rocket"></i>
-                    Continue to Dashboard
+                    Launch Dashboard
                 </button>
             </div>
         </div>
@@ -215,6 +226,6 @@
         </div>
     </div>
 
-    <script src="/static/js/student_login.js"></script>
+    <script src="/static/js/teacher_login.js"></script>
 </body>
 </html>

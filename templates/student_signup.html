@@ -189,113 +189,11 @@
                                         </div>
                                     </div>
                                 </div>
-<<<<<<< HEAD
-                            </div>
-                            
-                            <!-- FIX 1: Added specific class for Details page continue button spacing -->
-                            <div class="action-buttons details-page">
-                                <button type="button" class="btn-primary btn-next" data-next="2">
-                                    Continue
-                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-step" id="step2">
-                            <div class="face-capture-container">
-                                <div class="webcam-preview" id="webcamPreview">
-                                    <video id="webcamVideo" autoplay playsinline style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 24px;"></video>
-                                    <canvas id="webcamCanvas" style="display: none;"></canvas>
-                                    <div class="webcam-placeholder" id="webcamPlaceholder">
-                                        <svg class="camera-icon" viewBox="0 0 24 24">
-                                            <path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/>
-                                        </svg>
-                                        <p>Face capture preview</p>
-                                    </div>
-                                    <div class="face-frame">
-                                        <div class="frame-corner tl"></div>
-                                        <div class="frame-corner tr"></div>
-                                        <div class="frame-corner bl"></div>
-                                        <div class="frame-corner br"></div>
-                                    </div>
-                                    <div class="webcam-glow"></div>
-                                    <div class="pulse-scan"></div>
-                                </div>
-                                
-                                <div class="capture-instruction">
-                                    <p><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
-                                </div>
-                                
-                                <div class="capture-controls" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px;">
-                                    <button type="button" class="btn-secondary" id="startWebcamBtn">
-                                        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M17 10.5V6H3v12h14v-4.5l4 4v-11l-4 4z"/></svg>
-                                        Start Camera
-                                    </button>
-                                    <button type="button" class="btn-primary btn-capture" id="captureFaceBtn" disabled>
-                                        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                                        Capture Face
-                                    </button>
-                                    <button type="button" class="btn-secondary" id="stopWebcamBtn" disabled>
-                                        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                                        Stop Camera
-                                    </button>
-                                </div>
-                                
-                                <div class="capture-success" id="captureSuccess">
-                                    <svg class="success-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                                    <span>Face captured successfully!</span>
-                                </div>
-                            </div>
-                            
-                            <div class="action-buttons step-nav">
-                                <button type="button" class="btn-secondary btn-prev btn-wider" data-prev="1">
-                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                                    Back
-                                </button>
-                                <button type="button" class="btn-primary btn-next btn-wider" data-next="3" id="continueAfterCapture" disabled>
-                                    Continue
-                                    <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-step" id="step3">
-                            <div class="otp-container">
-                                <div class="otp-header">
-                                    <svg class="otp-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                                    <h3>Verify Your Email</h3>
-                                    <p>Enter the 6-digit code sent to your email</p>
-                                </div>
-                                
-                                <div class="otp-inputs">
-                                    <input type="text" class="otp-digit" maxlength="1" data-index="0">
-                                    <input type="text" class="otp-digit" maxlength="1" data-index="1">
-                                    <input type="text" class="otp-digit" maxlength="1" data-index="2">
-                                    <input type="text" class="otp-digit" maxlength="1" data-index="3">
-                                    <input type="text" class="otp-digit" maxlength="1" data-index="4">
-                                    <input type="text" class="otp-digit" maxlength="1" data-index="5">
-                                </div>
-                                <input type="hidden" id="otp" name="otp">
-                                <div class="validation-error" id="otp_error"></div>
-                                
-                                <div class="otp-timer">
-                                    <p>Code expires in: <span id="countdown">02:00</span></p>
-                                </div>
-                                
-                                <div class="otp-actions">
-                                    <div class="otp-loading" id="otpLoading">
-                                        <div class="spinner small"></div>
-                                        <span>Sending OTP...</span>
-                                    </div>
-                                    <button type="button" class="btn-secondary btn-resend btn-wider" id="resendOtpBtn" disabled>
-                                        Resend Code
-=======
                                 
                                 <div class="action-buttons">
                                     <button type="button" class="btn-primary btn-next" data-next="2">
                                         Continue
                                         <i class="fas fa-arrow-right"></i>
->>>>>>> 946148b65f5347df32f81e6c2ff13b616cb74382
                                     </button>
                                 </div>
                             </div>
