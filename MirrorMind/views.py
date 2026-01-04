@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 
 from datetime import datetime
 import base64
@@ -15,24 +16,127 @@ from email.mime.text import MIMEText
 from students.models import Student, StudentFace
 from teachers.models import Teacher
 
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 
 User = get_user_model()
 
 otp_storage = {}
 
-def student_login(request):
-    return render(request, "student_login.html")
 
-
-def teacher_login(request):
-    return render(request, "teacher_login.html")
-
-
+# ===============================
+# BASIC PAGES
+# ===============================
 def home(request):
     return render(request, "home.html")
 
 
+def student_login(request):
+    if request.method == "POST":
+        try:
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+
+            if not email or not password:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Email and password required"
+                }, status=400)
+
+            student = Student.objects.filter(email=email).first()
+
+            if not student:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Student not found"
+                }, status=404)
+
+            if not check_password(password, student.password):
+                return JsonResponse({
+                    "success": False,
+                    "error": "Invalid credentials"
+                }, status=401)
+
+            if not student.is_active:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Account is inactive"
+                }, status=403)
+
+            # ✅ SESSION LOGIN
+            request.session["student_id"] = student.id
+            request.session["user_type"] = "student"
+
+            return JsonResponse({
+                "success": True,
+                "message": "Student login successful"
+            })
+
+        except Exception as e:
+            print("STUDENT LOGIN ERROR:", e)
+            return JsonResponse({
+                "success": False,
+                "error": "Internal server error"
+            }, status=500)
+
+    return render(request, "student_login.html")
+
+
+
+def teacher_login(request):
+    if request.method == "POST":
+        try:
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+
+            if not email or not password:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Email and password required"
+                }, status=400)
+
+            teacher = Teacher.objects.filter(email=email).first()
+
+            if not teacher:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Teacher not found"
+                }, status=404)
+
+            if not check_password(password, teacher.password):
+                return JsonResponse({
+                    "success": False,
+                    "error": "Invalid credentials"
+                }, status=401)
+
+            if not teacher.is_active:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Account is inactive"
+                }, status=403)
+
+            # ✅ SESSION LOGIN
+            request.session["teacher_id"] = teacher.id
+            request.session["user_type"] = "teacher"
+
+            return JsonResponse({
+                "success": True,
+                "message": "Teacher login successful"
+            })
+
+        except Exception as e:
+            print("TEACHER LOGIN ERROR:", e)
+            return JsonResponse({
+                "success": False,
+                "error": "Internal server error"
+            }, status=500)
+
+    return render(request, "teacher_login.html")
+
+
+
+# ===============================
+# STUDENT SIGNUP
+# ===============================
 def student_signup(request):
     if request.method == "POST":
         try:
@@ -141,6 +245,9 @@ def student_signup(request):
     return render(request, "student_signup.html")
 
 
+# ===============================
+# TEACHER SIGNUP
+# ===============================
 def teacher_signup(request):
     if request.method == "POST":
         try:
@@ -212,16 +319,18 @@ def teacher_signup(request):
     return render(request, "teacher_signup.html")
 
 
+# ===============================
+# EMAIL OTP
+# ===============================
 def send_email_otp(receiver_email, otp, purpose):
     sender_email = "rakshak.connect@gmail.com"
     sender_password = "vpxiebniktusbtxk"
 
-    if purpose == "student_signup":
-        subject = "MirrorMind | Student Email Verification OTP"
-    elif purpose == "teacher_signup":
-        subject = "MirrorMind | Teacher Email Verification OTP"
-    else:
-        subject = "MirrorMind | Password Reset OTP"
+    subject_map = {
+        "student_signup": "MirrorMind | Student Email Verification OTP",
+        "teacher_signup": "MirrorMind | Teacher Email Verification OTP",
+        "forgot_password": "MirrorMind | Password Reset OTP"
+    }
 
     body = f"""
 Your OTP is: {otp}
@@ -231,7 +340,7 @@ This OTP is valid for a short time only.
 """
 
     msg = MIMEText(body)
-    msg["Subject"] = subject
+    msg["Subject"] = subject_map.get(purpose, "MirrorMind OTP")
     msg["From"] = sender_email
     msg["To"] = receiver_email
 
@@ -247,66 +356,50 @@ This OTP is valid for a short time only.
 
 @csrf_exempt
 def email_otp_handler(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=400)
+    if request.method == "POST":
+        data = json.loads(request.body)
+        action = data.get("action")
+        email = data.get("email")
+        purpose = data.get("purpose")
+        otp_input = data.get("otp")
 
-    data = json.loads(request.body)
-    action = data.get("action")
-    email = data.get("email")
-    purpose = data.get("purpose")
-    otp_input = data.get("otp")
+        if action == "send_otp":
+            otp = str(random.randint(100000, 999999))
+            otp_storage[email] = otp
 
-    if action == "send_otp":
+            if send_email_otp(email, otp, purpose):
+                return JsonResponse({"success": "OTP sent"})
+            return JsonResponse({"error": "Failed to send OTP"}, status=500)
 
-        if purpose == "student_signup" and Student.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Student email already registered"}, status=400)
+        if action == "verify_otp":
+            if otp_storage.get(email) == otp_input:
+                otp_storage.pop(email, None)
 
-        if purpose == "teacher_signup" and Teacher.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Teacher email already registered"}, status=400)
+                if purpose == "student_signup":
+                    request.session["student_email_verified"] = email
+                elif purpose == "teacher_signup":
+                    request.session["teacher_email_verified"] = email
+                else:
+                    request.session["reset_email_verified"] = email
 
-        if purpose == "forgot_password" and not User.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email not registered"}, status=400)
+                return JsonResponse({"verified": True})
 
-        otp = str(random.randint(100000, 999999))
-        otp_storage[email] = otp
+            return JsonResponse({"verified": False}, status=400)
 
-        if send_email_otp(email, otp, purpose):
-            return JsonResponse({"success": "OTP sent"})
-
-        return JsonResponse({"error": "Failed to send OTP"}, status=500)
-
-    if action == "verify_otp":
-        if otp_storage.get(email) == otp_input:
-            otp_storage.pop(email, None)
-
-            if purpose == "student_signup":
-                request.session["student_email_verified"] = email
-            elif purpose == "teacher_signup":
-                request.session["teacher_email_verified"] = email
-            else:
-                request.session["reset_email_verified"] = email
-
-            return JsonResponse({"verified": True})
-
-        return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
-
-    return JsonResponse({"error": "Invalid action"}, status=400)
+    return render(request, "email_otp.html")
 
 
+# ===============================
+# RESET PASSWORD
+# ===============================
 @csrf_exempt
 def student_reset_password(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=400)
-
-    try:
+    if request.method == "POST":
         data = json.loads(request.body)
 
         email = data.get("email")
         password = data.get("password")
         confirm_password = data.get("confirm_password")
-
-        if not email or not password or not confirm_password:
-            return JsonResponse({"error": "Missing required fields"}, status=400)
 
         if password != confirm_password:
             return JsonResponse({"error": "Passwords do not match"}, status=400)
@@ -323,30 +416,19 @@ def student_reset_password(request):
 
         request.session.pop("reset_email_verified", None)
 
-        return JsonResponse({
-            "success": True,
-            "message": "Student password reset successfully"
-        })
+        return JsonResponse({"success": True})
 
-    except Exception as e:
-        print("STUDENT RESET PASSWORD ERROR:", e)
-        return JsonResponse({"error": "Internal server error"}, status=500)
-    
+    return render(request, "student_reset_password.html")
+
 
 @csrf_exempt
 def teacher_reset_password(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=400)
-
-    try:
+    if request.method == "POST":
         data = json.loads(request.body)
 
         email = data.get("email")
         password = data.get("password")
         confirm_password = data.get("confirm_password")
-
-        if not email or not password or not confirm_password:
-            return JsonResponse({"error": "Missing required fields"}, status=400)
 
         if password != confirm_password:
             return JsonResponse({"error": "Passwords do not match"}, status=400)
@@ -363,11 +445,6 @@ def teacher_reset_password(request):
 
         request.session.pop("reset_email_verified", None)
 
-        return JsonResponse({
-            "success": True,
-            "message": "Teacher password reset successfully"
-        })
+        return JsonResponse({"success": True})
 
-    except Exception as e:
-        print("TEACHER RESET PASSWORD ERROR:", e)
-        return JsonResponse({"error": "Internal server error"}, status=500)
+    return render(request, "teacher_reset_password.html")
