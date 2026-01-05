@@ -58,7 +58,10 @@
                     </div>
                 </div>
                 
-                <form id="studentSignupForm" action="/student/register/" method="POST">
+                <form id="studentSignupForm" method="POST" action="{% url 'student_signup' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="face_image" name="face_image">
+                    
                     <div class="form-step active" id="step1">
                         <div class="form-group">
                             <div class="form-row">
@@ -261,14 +264,21 @@
                                 </div>
                                 <div class="webcam-glow"></div>
                                 <div class="pulse-scan"></div>
+                                <video id="webcamVideo" autoplay playsinline style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 24px;"></video>
+                                <canvas id="webcamCanvas" style="display: none;"></canvas>
                             </div>
                             
                             <div class="capture-instruction">
-                                <p><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
+                                <p><svg class="info-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg> Please blink or move your head slightly for liveness detection. Your face will be securely stored for AI-based attendance and liveness detection.</p>
                             </div>
                             
                             <button type="button" class="btn-primary btn-capture" id="captureFaceBtn">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/></svg>
+                                Start Camera
+                            </button>
+                            
+                            <button type="button" class="btn-primary btn-take-photo" id="takePhotoBtn" style="display: none; margin-top: 15px;">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-2c1.93 0 3.5 1.57 3.5 3.5S13.93 15 12 15s-3.5-1.57-3.5-3.5S10.07 8 12 8zm7-4H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V6h14v12z"/></svg>
                                 Capture Face
                             </button>
                             
@@ -324,6 +334,10 @@
                             <button type="button" class="btn-secondary btn-prev" data-prev="2">
                                 <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                                 Back
+                            </button>
+                            <button type="button" class="btn-primary" id="verifyOtpBtn">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                Verify OTP
                             </button>
                         </div>
                     </div>
@@ -414,120 +428,123 @@
                 </form>
                 
                 <div class="card-footer">
-                    <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
+                    <p>Already have an account? <a href="{% url 'login' %}" class="signin-link">Sign In</a></p>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="modal-overlay" id="calendarModal">
-        <div class="calendar-modal">
-            <div class="calendar-header">
-                <h3>Select Date of Birth</h3>
-                <button class="calendar-close" id="closeCalendar">
-                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </button>
-            </div>
-            <div class="calendar-body">
-                <div class="calendar-nav">
-                    <button class="nav-btn" id="prevYear">
-                        <svg viewBox="0 0 24 24"><path d="M18.41 7.41L17 6l-6 6 6 6 1.41-1.41L13.83 12l4.58-4.59zM6 6h2v12H6z"/></svg>
-                    </button>
-                    <button class="nav-btn" id="prevMonth">
-                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"/></svg>
-                    </button>
-                    <div class="month-year" id="currentMonthYear"></div>
-                    <button class="nav-btn" id="nextMonth">
-                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                    </button>
-                    <button class="nav-btn" id="nextYear">
-                        <svg viewBox="0 0 24 24"><path d="M5.59 7.41L7 6l6 6-6 6-1.41-1.41L10.17 12 5.59 7.41zM16 6h2v12h-2z"/></svg>
+        
+        <div class="modal-overlay" id="calendarModal">
+            <div class="calendar-modal">
+                <div class="calendar-header">
+                    <h3>Select Date of Birth</h3>
+                    <button class="calendar-close" id="closeCalendar">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                     </button>
                 </div>
-                <div class="year-selector">
-                    <select id="yearSelect"></select>
-                    <select id="monthSelect">
-                        <option value="0">January</option>
-                        <option value="1">February</option>
-                        <option value="2">March</option>
-                        <option value="3">April</option>
-                        <option value="4">May</option>
-                        <option value="5">June</option>
-                        <option value="6">July</option>
-                        <option value="7">August</option>
-                        <option value="8">September</option>
-                        <option value="9">October</option>
-                        <option value="10">November</option>
-                        <option value="11">December</option>
-                    </select>
+                <div class="calendar-body">
+                    <div class="calendar-nav">
+                        <button class="nav-btn" id="prevYear">
+                            <svg viewBox="0 0 24 24"><path d="M18.41 7.41L17 6l-6 6 6 6 1.41-1.41L13.83 12l4.58-4.59zM6 6h2v12H6z"/></svg>
+                        </button>
+                        <button class="nav-btn" id="prevMonth">
+                            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59z"/></svg>
+                        </button>
+                        <div class="month-year" id="currentMonthYear"></div>
+                        <button class="nav-btn" id="nextMonth">
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </button>
+                        <button class="nav-btn" id="nextYear">
+                            <svg viewBox="0 0 24 24"><path d="M5.59 7.41L7 6l6 6-6 6-1.41-1.41L10.17 12 5.59 7.41zM16 6h2v12h-2z"/></svg>
+                        </button>
+                    </div>
+                    <div class="year-selector">
+                        <select id="yearSelect"></select>
+                        <select id="monthSelect">
+                            <option value="0">January</option>
+                            <option value="1">February</option>
+                            <option value="2">March</option>
+                            <option value="3">April</option>
+                            <option value="4">May</option>
+                            <option value="5">June</option>
+                            <option value="6">July</option>
+                            <option value="7">August</option>
+                            <option value="8">September</option>
+                            <option value="9">October</option>
+                            <option value="10">November</option>
+                            <option value="11">December</option>
+                        </select>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Sun</div>
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
                 </div>
-                <div class="calendar-weekdays">
-                    <div>Sun</div>
-                    <div>Mon</div>
-                    <div>Tue</div>
-                    <div>Wed</div>
-                    <div>Thu</div>
-                    <div>Fri</div>
-                    <div>Sat</div>
+                <div class="calendar-footer">
+                    <button class="btn-secondary" id="clearDate">
+                        Clear
+                    </button>
+                    <button class="btn-primary" id="selectDate">
+                        Select Date
+                    </button>
                 </div>
-                <div class="calendar-days" id="calendarDays"></div>
-            </div>
-            <div class="calendar-footer">
-                <button class="btn-secondary" id="clearDate">
-                    Clear
-                </button>
-                <button class="btn-primary" id="selectDate">
-                    Select Date
-                </button>
             </div>
         </div>
-    </div>
-
-    <div class="modal-overlay" id="termsModal">
-        <div class="terms-modal">
-            <div class="terms-header">
-                <h3>Terms & Conditions</h3>
-                <button class="terms-close" id="closeTerms">
-                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </button>
-            </div>
-            <div class="terms-body">
-                <div class="terms-content">
-                    <h4>MirrorMind - Terms & Conditions</h4>
-                    <p>Welcome to MirrorMind, the AI-powered smart classroom monitoring system. Please read these terms carefully before using our services.</p>
-                    
-                    <h5>1. Acceptance of Terms</h5>
-                    <p>By registering for and using MirrorMind services, you agree to be bound by these Terms and Conditions.</p>
-                    
-                    <h5>2. Data Collection & Privacy</h5>
-                    <p>We collect facial recognition data for attendance tracking and liveness detection. All data is encrypted and stored securely.</p>
-                    
-                    <h5>3. Student Responsibilities</h5>
-                    <p>Students must maintain accurate information and notify administrators of any changes to their registration details.</p>
-                    
-                    <h5>4. System Usage</h5>
-                    <p>The system is for educational purposes only. Any misuse may result in account termination.</p>
-                    
-                    <h5>5. Parental Consent</h5>
-                    <p>For students under 10 years, parental consent is mandatory. Parents/guardians will receive email notifications about system usage.</p>
-                    
-                    <h5>6. Limitation of Liability</h5>
-                    <p>MirrorMind is not liable for any technical issues, data loss, or system downtime beyond our control.</p>
-                    
-                    <h5>7. Changes to Terms</h5>
-                    <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance of changes.</p>
+        
+        <div class="modal-overlay" id="termsModal">
+            <div class="terms-modal">
+                <div class="terms-header">
+                    <h3>Terms & Conditions</h3>
+                    <button class="terms-close" id="closeTerms">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="terms-body">
+                    <div class="terms-content">
+                        <h4>MirrorMind - Terms & Conditions</h4>
+                        <p>Welcome to MirrorMind, the AI-powered smart classroom monitoring system. Please read these terms carefully before using our services.</p>
+                        
+                        <h5>1. Acceptance of Terms</h5>
+                        <p>By registering for and using MirrorMind services, you agree to be bound by these Terms and Conditions.</p>
+                        
+                        <h5>2. Data Collection & Privacy</h5>
+                        <p>We collect facial recognition data for attendance tracking and liveness detection. All data is encrypted and stored securely.</p>
+                        
+                        <h5>3. Student Responsibilities</h5>
+                        <p>Students must maintain accurate information and notify administrators of any changes to their registration details.</p>
+                        
+                        <h5>4. System Usage</h5>
+                        <p>The system is for educational purposes only. Any misuse may result in account termination.</p>
+                        
+                        <h5>5. Parental Consent</h5>
+                        <p>For students under 10 years, parental consent is mandatory. Parents/guardians will receive email notifications about system usage.</p>
+                        
+                        <h5>6. Limitation of Liability</h5>
+                        <p>MirrorMind is not liable for any technical issues, data loss, or system downtime beyond our control.</p>
+                        
+                        <h5>7. Changes to Terms</h5>
+                        <p>We reserve the right to modify these terms at any time. Continued use constitutes acceptance of changes.</p>
+                    </div>
+                </div>
+                <div class="terms-footer">
+                    <button class="btn-primary" id="acceptTerms">
+                        I Accept Terms
+                    </button>
                 </div>
             </div>
-            <div class="terms-footer">
-                <button class="btn-primary" id="acceptTerms">
-                    I Accept Terms
-                </button>
-            </div>
         </div>
-    </div>
-
-    <div id="toastContainer"></div>
-
-    <script src="/static/js/student_signup.js"></script>
-</body>
+        
+        <div id="toastContainer"></div>
+        
+        <script>
+            // CSRF Token for AJAX requests
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        </script>
+        <script src="/static/js/student_signup.js"></script>
+    </body>
 </html>

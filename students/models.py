@@ -1,21 +1,11 @@
 from django.db import models
 from django.utils import timezone
 
-
-# ============================
-# STUDENT USER MODEL (SIMPLE)
-# ============================
 class Student(models.Model):
-    """
-    Simple Student model (no AbstractUser)
-    """
-
-    # ---- AUTH-LIKE FIELDS (MANUAL) ----
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)  # store hashed password
 
-    # ---- BASIC DETAILS (STEP 1) ----
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
 
@@ -36,21 +26,17 @@ class Student(models.Model):
 
     dob = models.DateField(null=True, blank=True)
 
-    # ---- PARENT DETAILS (UNDER 10) ----
     parent_name = models.CharField(max_length=100, null=True, blank=True)
     parent_email = models.EmailField(null=True, blank=True)
     parent_mobile = models.CharField(max_length=15, null=True, blank=True)
 
-    # ---- VERIFICATION FLAGS ----
     email_verified = models.BooleanField(default=False)
     face_registered = models.BooleanField(default=False)
     terms_accepted = models.BooleanField(default=False)
 
-    # ---- META ----
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # ---- UTIL METHODS ----
     def age(self):
         if not self.dob:
             return None
@@ -68,10 +54,6 @@ class Student(models.Model):
 
 
 class StudentFace(models.Model):
-    """
-    Stores captured face image & embedding
-    """
-
     student = models.OneToOneField(
         Student,
         on_delete=models.CASCADE,

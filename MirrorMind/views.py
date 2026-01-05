@@ -3,9 +3,13 @@ from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.models import User
 
 from django.contrib.auth.hashers import make_password
+
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 from datetime import datetime
 import base64
@@ -137,38 +141,33 @@ def teacher_login(request):
 
 
 
-# ===============================
-# STUDENT SIGNUP
-# ===============================
 def student_signup(request):
     if request.method == "POST":
         try:
             data = request.POST
 
-            first_name = data.get("first_name")
-            last_name = data.get("last_name")
-            email = data.get("email")
-            enrollment_no = data.get("enrollment_no")
-            department = data.get("department")
-            dob_raw = data.get("dob")
+            first_name = data.get("first_name", "").strip()
+            last_name = data.get("last_name", "").strip()
+            email = data.get("email", "").strip()
+            enrollment_no = data.get("enrollment_no", "").strip()
+            department = data.get("department", "").strip()
+            dob_raw = data.get("dob", "").strip()
 
-            parent_name = data.get("parent_name")
-            parent_email = data.get("parent_email")
-            parent_mobile = data.get("parent_mobile")
-
-            password = data.get("password")
-            confirm_password = data.get("confirm_password")
+            password = data.get("password", "")
+            confirm_password = data.get("confirm_password", "")
             terms_accepted = data.get("terms")
+
+            parent_name = data.get("parent_name", "").strip()
+            parent_email = data.get("parent_email", "").strip()
+            parent_mobile = data.get("parent_mobile", "").strip()
 
             face_image_base64 = data.get("face_image")
 
-            required_fields = [
+            if not all([
                 first_name, last_name, email,
                 enrollment_no, department,
                 dob_raw, password, confirm_password
-            ]
-
-            if not all(required_fields):
+            ]):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             if password != confirm_password:
@@ -177,32 +176,48 @@ def student_signup(request):
             if not terms_accepted:
                 return JsonResponse({"error": "Terms not accepted"}, status=400)
 
-            if request.session.get("student_email_verified") != email:
-                return JsonResponse({"error": "Email not verified via OTP"}, status=403)
+            verified_email = request.session.get("student_email_verified")
+            otp_time = request.session.get("student_otp_time")
+
+            if not verified_email or verified_email != email:
+                return JsonResponse({"error": "Email not verified"}, status=403)
+
+            if not otp_time:
+                return JsonResponse({"error": "OTP expired"}, status=403)
+
+            otp_time = datetime.fromisoformat(otp_time)
+            if timezone.now() > otp_time + timedelta(minutes=5):
+                request.session.pop("student_email_verified", None)
+                request.session.pop("student_otp_time", None)
+                return JsonResponse({"error": "OTP expired"}, status=403)
 
             if Student.objects.filter(email=email).exists():
                 return JsonResponse({"error": "Email already registered"}, status=400)
 
             if Student.objects.filter(enrollment_no=enrollment_no).exists():
-                return JsonResponse({"error": "Enrollment number already exists"}, status=400)
+                return JsonResponse({"error": "Enrollment already exists"}, status=400)
 
             if not face_image_base64:
-                return JsonResponse({"error": "Face capture is required"}, status=400)
+                return JsonResponse({"error": "Face capture required"}, status=400)
 
             try:
-                format, imgstr = face_image_base64.split(";base64,")
-                if not format.startswith("data:image/"):
-                    return JsonResponse({"error": "Invalid image format"}, status=400)
+                format_part, imgstr = face_image_base64.split(";base64,")
+                if not format_part.startswith("data:image/"):
+                    raise ValueError
+                ext = format_part.split("/")[-1]
             except Exception:
                 return JsonResponse({"error": "Invalid face image"}, status=400)
 
             try:
-                dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
+                dob = datetime.strptime(dob_raw, "%Y-%m-%d").date()
             except ValueError:
-                return JsonResponse({"error": "Invalid date format"}, status=400)
+                try:
+                    dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
+                except ValueError:
+                    return JsonResponse({"error": "Invalid DOB"}, status=400)
 
             with transaction.atomic():
-                student = Student.objects.create_user(
+                student = Student.objects.create(
                     username=enrollment_no,
                     email=email,
                     password=password,
@@ -211,33 +226,29 @@ def student_signup(request):
                     enrollment_no=enrollment_no,
                     department=department,
                     dob=dob,
-                    parent_name=parent_name,
-                    parent_email=parent_email,
-                    parent_mobile=parent_mobile,
-                    is_active=True,
+                    parent_name=parent_name or None,
+                    parent_email=parent_email or None,
+                    parent_mobile=parent_mobile or None,
                     email_verified=True,
+                    face_registered=True,
                     terms_accepted=True
                 )
 
-                ext = format.split("/")[-1]
-                face_image = ContentFile(
+                image_file = ContentFile(
                     base64.b64decode(imgstr),
-                    name=f"{student.id}_face.{ext}"
+                    name=f"student_{student.id}.{ext}"
                 )
 
                 StudentFace.objects.create(
                     student=student,
-                    face_image=face_image
+                    face_image=image_file
                 )
 
-                student.face_registered = True
-                student.save(update_fields=["face_registered"])
-
             request.session.pop("student_email_verified", None)
+            request.session.pop("student_otp_time", None)
 
             return JsonResponse({
                 "success": True,
-                "message": "Student registered successfully",
                 "student_id": student.id
             })
 
