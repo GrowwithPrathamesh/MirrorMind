@@ -2,21 +2,13 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
-<<<<<<< HEAD
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.contrib.auth.models import User
-
-from django.contrib.auth.hashers import make_password
-=======
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.cache import cache
->>>>>>> 769101ef960f93f135c344091ba0fe937c991030
-
 from django.utils import timezone
-from datetime import datetime, timedelta
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import base64
 import json
 import random
@@ -109,13 +101,9 @@ def teacher_login(request):
     return render(request, "teacher_login.html")
 
 
-<<<<<<< HEAD
-
-=======
 # ===============================
 # STUDENT SIGNUP
 # ===============================
->>>>>>> 769101ef960f93f135c344091ba0fe937c991030
 def student_signup(request):
     if request.method == "POST":
         try:
@@ -131,7 +119,6 @@ def student_signup(request):
             password = data.get("password", "")
             confirm_password = data.get("confirm_password", "")
             terms_accepted = data.get("terms")
-<<<<<<< HEAD
 
             parent_name = data.get("parent_name", "").strip()
             parent_email = data.get("parent_email", "").strip()
@@ -144,11 +131,6 @@ def student_signup(request):
                 enrollment_no, department,
                 dob_raw, password, confirm_password
             ]):
-=======
-            face_image_base64 = data.get("face_image")
-
-            if not all([first_name, last_name, email, enrollment_no, department, dob_raw, password, confirm_password]):
->>>>>>> 769101ef960f93f135c344091ba0fe937c991030
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
             if password != confirm_password:
@@ -182,7 +164,6 @@ def student_signup(request):
                 return JsonResponse({"error": "Face capture required"}, status=400)
 
             try:
-<<<<<<< HEAD
                 format_part, imgstr = face_image_base64.split(";base64,")
                 if not format_part.startswith("data:image/"):
                     raise ValueError
@@ -197,13 +178,6 @@ def student_signup(request):
                     dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
                 except ValueError:
                     return JsonResponse({"error": "Invalid DOB"}, status=400)
-=======
-                format, imgstr = face_image_base64.split(";base64,")
-                ext = format.split("/")[-1]
-                dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
-            except Exception:
-                return JsonResponse({"error": "Invalid image or DOB format"}, status=400)
->>>>>>> 769101ef960f93f135c344091ba0fe937c991030
 
             with transaction.atomic():
                 student = Student.objects.create(
@@ -223,16 +197,11 @@ def student_signup(request):
                     terms_accepted=True
                 )
 
-<<<<<<< HEAD
                 image_file = ContentFile(
-=======
-                face_image = ContentFile(
->>>>>>> 769101ef960f93f135c344091ba0fe937c991030
                     base64.b64decode(imgstr),
                     name=f"student_{student.id}.{ext}"
                 )
 
-<<<<<<< HEAD
                 StudentFace.objects.create(
                     student=student,
                     face_image=image_file
@@ -245,14 +214,6 @@ def student_signup(request):
                 "success": True,
                 "student_id": student.id
             })
-=======
-                StudentFace.objects.create(student=student, face_image=face_image)
-                student.face_registered = True
-                student.save(update_fields=["face_registered"])
-
-            request.session.pop("student_email_verified", None)
-            return JsonResponse({"success": True, "message": "Student registered successfully"})
->>>>>>> 769101ef960f93f135c344091ba0fe937c991030
 
         except Exception as e:
             print("STUDENT SIGNUP ERROR:", e)
