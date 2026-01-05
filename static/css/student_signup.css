@@ -205,12 +205,10 @@ body.no-scroll {
 }
 
 .logo-text {
-    font-size: 60px;
+    font-size: 48px;
     font-weight: 700;
     letter-spacing: 1px;
     text-shadow: 0 2px 10px rgba(0, 198, 255, 0.3);
-    filter: none;
-    -webkit-filter: none;
 }
 
 .tagline {
@@ -223,21 +221,20 @@ body.no-scroll {
 
 .form-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
 .signup-card {
     background: rgba(245, 247, 250, 0.95);
     backdrop-filter: blur(20px);
-    border: 5px solid rgba(6, 137, 174, 0.9);
+    border: 1px solid rgba(6, 137, 174, 0.15);
     border-radius: 24px;
-    padding: 50px 70px 70px;
-    box-shadow:
-        10px 20px 40px rgba(0, 0, 0, 0.5),
-        10px -20px 40px rgba(126, 162, 212, 0.4),
-        20px 0 40px rgba(0, 0, 0, 0.6),
-        -20px 0 40px rgba(0, 0, 0, 0.6);
+    padding: 40px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(0, 198, 255, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: visible;
     margin-bottom: 40px;
@@ -259,6 +256,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     height: 3px;
+    background: linear-gradient(90deg, #00C6FF, #00F5D4, #8B5CF6, #22D3EE);
     border-radius: 24px 24px 0 0;
 }
 
@@ -422,7 +420,8 @@ body.no-scroll {
     grid-template-rows: auto 1fr;
 }
 
-.input-with-icon label {
+
+.form-label {
     display: block;
     margin-bottom: 12px;
     font-size: 16px;
@@ -440,6 +439,8 @@ body.no-scroll {
 
 .input-field {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
 .input-icon-container {
@@ -486,6 +487,7 @@ body.no-scroll {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     line-height: 1.5;
+    flex: 1;
 }
 
 .input-field select {
@@ -534,6 +536,39 @@ body.no-scroll {
     width: 100%;
     left: 0;
     transform: translateX(0);
+}
+
+/* Fixed toggle password button position */
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #6B7280;
+    cursor: pointer;
+    padding: 4px;
+    transition: all 0.3s ease;
+    z-index: 2;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.toggle-password:hover {
+    background: rgba(0, 198, 255, 0.1);
+    color: #00C6FF;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
 }
 
 .dob-container {
@@ -628,38 +663,6 @@ body.no-scroll {
     font-size: 15px;
     font-style: italic;
     font-weight: 300;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 16px;
-    top: calc(50% + 12px);
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    color: #6B7280;
-    cursor: pointer;
-    padding: 4px;
-    transition: all 0.3s ease;
-    z-index: 2;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.toggle-password:hover {
-    background: rgba(0, 198, 255, 0.1);
-    color: #00C6FF;
-    transform: translateY(-50%) scale(1.1);
-}
-
-.eye-icon {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
 }
 
 .face-capture-container {
@@ -800,7 +803,16 @@ body.no-scroll {
 
 .btn-capture {
     margin: 0 auto 30px;
-    min-width: 200px;
+    min-width: 240px;
+    padding: 18px 32px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-capture:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+        0 12px 30px rgba(0, 198, 255, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .capture-success {
@@ -907,7 +919,6 @@ body.no-scroll {
     margin-top: 24px;
 }
 
-/* Security Container */
 .security-container {
     text-align: center;
     margin-bottom: 40px;
@@ -1113,7 +1124,12 @@ body.no-scroll {
     display: flex;
 }
 
-/* Action Buttons */
+.error-icon {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
 .action-buttons {
     display: flex;
     justify-content: center;
@@ -1146,27 +1162,6 @@ body.no-scroll {
     box-shadow: 
         0 8px 20px rgba(0, 198, 255, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 
-        0 15px 35px rgba(0, 198, 255, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.15);
-    animation: gradientShift 2s ease infinite;
-}
-
-@keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-.btn-full-width:hover {
-    transform: translateY(-3px);
-    box-shadow: 
-        0 15px 35px rgba(0, 198, 255, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.15);
-    animation: gradientShift 1.5s ease infinite;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -1758,35 +1753,29 @@ body.no-scroll {
     }
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
-    .form-scroll-container {
-        width: 85%;
+    .container {
+        max-width: 900px;
     }
 }
 
 @media (max-width: 992px) {
-    .form-scroll-container {
-        width: 95%;
+    .container {
+        max-width: 700px;
     }
     
     .logo-text {
-        font-size: 38px;
-    }
-    
-    .tagline {
-        font-size: 16px;
-        letter-spacing: 1px;
+        font-size: 36px;
     }
     
     .signup-card {
-        padding: 30px;
+        padding: 32px;
     }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 16px;
+        padding: 20px 15px;
     }
     
     .logo-text {
@@ -1794,35 +1783,16 @@ body.no-scroll {
     }
     
     .tagline {
-        font-size: 14px;
-        letter-spacing: 0.8px;
+        font-size: 16px;
     }
     
-    .form-scroll-container {
-        width: 100%;
-        height: calc(100vh - 150px);
-    }
-    
-    .progress-indicator {
-        padding: 0 10px;
-        margin-bottom: 30px;
-    }
-    
-    .progress-track {
-        display: none;
-    }
-    
-    .step span {
-        font-size: 13px;
+    .signup-card {
+        padding: 24px;
     }
     
     .form-row {
         flex-direction: column;
         gap: 0;
-    }
-    
-    .step-line {
-        width: 40px;
     }
     
     .webcam-preview {
@@ -1833,34 +1803,32 @@ body.no-scroll {
     .otp-digit {
         width: 50px;
         height: 70px;
-        font-size: 1.8rem;
+        font-size: 28px;
     }
     
     .calendar-modal,
     .terms-modal {
         max-width: 90%;
+        padding: 24px;
+    }
+    
+    .progress-track {
+        left: 60px;
+        right: 60px;
     }
 }
 
 @media (max-width: 576px) {
-    .container {
-        padding: 15px 10px;
-    }
-    
     .logo-text {
         font-size: 28px;
     }
     
     .tagline {
-        font-size: 13px;
-    }
-    
-    .signup-card {
-        padding: 25px;
+        font-size: 14px;
     }
     
     .card-header h2 {
-        font-size: 22px;
+        font-size: 24px;
     }
     
     .progress-indicator {
@@ -1869,23 +1837,23 @@ body.no-scroll {
         padding: 0 10px;
     }
     
-    .step-line {
+    .progress-track {
         display: none;
     }
     
     .otp-inputs {
-        gap: 8px;
+        gap: 10px;
     }
     
     .otp-digit {
-        width: 50px;
+        width: 45px;
         height: 60px;
-        font-size: 1.5rem;
+        font-size: 24px;
     }
     
     .action-buttons {
         flex-direction: column;
-        gap: 15px;
+        gap: 16px;
     }
     
     .step-nav {
@@ -1897,49 +1865,17 @@ body.no-scroll {
         width: 100%;
         min-width: auto;
     }
-    
-    .modal-content,
-    .calendar-modal,
-    .terms-modal {
-        padding: 20px;
-        margin: 10px;
-    }
-    
-    .calendar-days div {
-        padding: 8px 0;
-    }
 }
 
-.toast {
-    min-width: 280px;
-    max-width: 360px;
-    background: rgba(30, 41, 59, 0.95);
-    color: #fff;
-    padding: 14px 18px;
-    border-radius: 12px;
+.logo-img{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.input-with-icon {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-    animation: slideIn 0.4s ease, fadeOut 0.4s ease 4s forwards;
-    margin-top: 12px;
-    font-size: 14px;
-}
-
-.toast.info {
-    border-left: 4px solid #38bdf8;
-}
-
-.toast i {
-    color: #38bdf8;
-    font-size: 18px;
-}
-
-@keyframes slideIn {
-    from { transform: translateX(120%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; transform: translateX(120%); }
+    flex-direction: column;
+    gap: 6px;
 }

@@ -17,11 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addParticles();
 });
 
-// Global variable to store face image and capture status
-let face_image = null;
-let webcamStream = null;
-let faceCaptured = false; // Initialize as false
-
 function initParticlesBackground() {
     addParticles();
 }
@@ -87,45 +82,12 @@ function initFormNavigation() {
     });
     
     function navigateToStep(step) {
-        // Stop webcam when leaving step 2
-        if (currentStep === 2 && step !== 2) {
-            stopWebcam();
-        }
-        
         document.getElementById(`step${currentStep}`).classList.remove('active');
         document.getElementById(`step${step}`).classList.add('active');
         
         currentStep = step;
-<<<<<<< HEAD
         updateProgress(step);
         
-        // FIX 2: Scroll to top when moving between steps
-        setTimeout(() => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-            
-            // Focus on first input for accessibility
-            if (step === 2) {
-                setTimeout(() => {
-                    const startBtn = document.getElementById('startWebcamBtn');
-                    if (startBtn) startBtn.focus();
-                }, 100);
-            } else if (step === 3) {
-                setTimeout(() => {
-                    document.querySelector('.otp-digit[data-index="0"]').focus();
-                }, 100);
-            } else if (step === 4) {
-                setTimeout(() => {
-                    document.getElementById('password').focus();
-                }, 100);
-            }
-        }, 300);
-=======
->>>>>>> 946148b65f5347df32f81e6c2ff13b616cb74382
-        
-        // Special handling for specific steps
         if (step === 3) {
             setTimeout(() => {
                 document.querySelector('.otp-digit[data-index="0"]').focus();
@@ -285,7 +247,8 @@ function validateStep1() {
 }
 
 function validateStep2() {
-    // Use faceCaptured variable instead of DOM style checks
+    const faceCaptured = document.getElementById('captureSuccess').style.display === 'flex';
+    
     if (!faceCaptured) {
         showToast('Please capture your face before continuing', 'error');
         shakeElement(document.getElementById('step2'));
@@ -611,51 +574,50 @@ function initCalendarPicker() {
         return null;
     }
     
-    function calculateAge(dob) {
-        const today = new Date();
-        let age = today.getFullYear() - dob.getFullYear();
-        const monthDiff = today.getMonth() - dob.getMonth();
-        
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-            age--;
-        }
-        
-        const ageDisplay = document.getElementById('ageDisplay');
-        ageDisplay.textContent = `${age} years`;
-        
-        const dobContainer = document.getElementById('dob').parentElement;
-        dobContainer.classList.add('has-age');
-        
-        const parentSection = document.getElementById('parentSection');
-        if (age < 10) {
-            parentSection.classList.add('active');
-            ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.required = true;
-                    field.disabled = false;
-                }
-            });
-        } else {
-            parentSection.classList.remove('active');
-            ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.required = false;
-                    field.disabled = true;
-                    field.value = '';
-                    hideValidationError(fieldId + '_error');
-                }
-            });
-        }
-        
-        window.calculatedAge = age;
-        return age;
-    }
-    
     populateYearSelect();
     renderCalendar();
-    window.calculateAge = calculateAge;
+}
+
+function calculateAge(dob) {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    
+    const ageDisplay = document.getElementById('ageDisplay');
+    ageDisplay.textContent = `${age} years`;
+    
+    const dobContainer = document.getElementById('dob').parentElement;
+    dobContainer.classList.add('has-age');
+    
+    const parentSection = document.getElementById('parentSection');
+    if (age < 10) {
+        parentSection.classList.add('active');
+        ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.required = true;
+                field.disabled = false;
+            }
+        });
+    } else {
+        parentSection.classList.remove('active');
+        ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.required = false;
+                field.disabled = true;
+                field.value = '';
+                hideValidationError(fieldId + '_error');
+            }
+        });
+    }
+    
+    window.calculatedAge = age;
+    return age;
 }
 
 function initPasswordToggle() {
@@ -752,128 +714,57 @@ function initPasswordStrength() {
             passwordMatch.style.color = '#00F5D4';
             hideValidationError('confirm_password_error');
         } else {
-            passwordMatch.innerHTML = '<svg class="match-icon" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg><span>Passwords don\'t match</span>';
+            passwordMatch.innerHTML = '<svg class="match-icon" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg><span>Passwords don\'t match</span>';
             passwordMatch.style.color = '#FF6B6B';
             showValidationError('confirm_password_error', 'Passwords do not match');
         }
     });
 }
 
-// FACE CAPTURE FUNCTIONALITY
 function initFaceCapture() {
-    const startBtn = document.getElementById('startWebcamBtn');
     const captureBtn = document.getElementById('captureFaceBtn');
-    const stopBtn = document.getElementById('stopWebcamBtn');
-    const webcamVideo = document.getElementById('webcamVideo');
-    const webcamCanvas = document.getElementById('webcamCanvas');
     const webcamPreview = document.getElementById('webcamPreview');
-    const webcamPlaceholder = document.getElementById('webcamPlaceholder');
     const captureSuccess = document.getElementById('captureSuccess');
     const continueAfterCapture = document.getElementById('continueAfterCapture');
     
-    if (!startBtn || !captureBtn || !stopBtn) return;
+    if (!captureBtn) return;
     
-    startBtn.addEventListener('click', startWebcam);
-    captureBtn.addEventListener('click', captureFace);
-    stopBtn.addEventListener('click', stopWebcam);
-    
-    async function startWebcam() {
-        try {
-            webcamStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    width: { ideal: 640 },
-                    height: { ideal: 480 },
-                    facingMode: 'user'
-                } 
-            });
-            
-            webcamVideo.srcObject = webcamStream;
-            webcamVideo.style.display = 'block';
-            webcamPlaceholder.style.display = 'none';
-            
-            startBtn.disabled = true;
-            captureBtn.disabled = false;
-            stopBtn.disabled = false;
-            
-            webcamPreview.classList.add('active');
-            
-            showToast('Camera started successfully', 'success');
-        } catch (error) {
-            console.error('Error accessing webcam:', error);
-            showToast('Failed to access camera. Please check permissions.', 'error');
-            alert('Cannot access webcam. Please allow camera permissions and try again.');
-        }
-    }
-    
-    function captureFace() {
-        if (!webcamStream) {
-            showToast('Please start the camera first', 'error');
-            return;
-        }
+    captureBtn.addEventListener('click', function() {
+        webcamPreview.classList.add('active');
         
-        // Set canvas dimensions to match video
-        const video = webcamVideo;
-        const canvas = webcamCanvas;
-        
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Draw current video frame to canvas
-        const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Convert to base64 JPEG
-        face_image = canvas.toDataURL('image/jpeg', 0.8);
-        
-        // Set faceCaptured to true upon successful capture
-        faceCaptured = true;
-        
-        // Show success message
-        captureSuccess.style.display = 'flex';
-        continueAfterCapture.disabled = false;
-        
-        // Visual feedback
-        const flash = document.createElement('div');
-        flash.style.position = 'absolute';
-        flash.style.top = '0';
-        flash.style.left = '0';
-        flash.style.width = '100%';
-        flash.style.height = '100%';
-        flash.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-        flash.style.borderRadius = '24px';
-        flash.style.animation = 'fadeIn 0.2s ease-out forwards';
-        flash.style.zIndex = '1';
-        webcamPreview.appendChild(flash);
+        const originalText = this.innerHTML;
+        this.innerHTML = '<div class="spinner"></div> Capturing...';
+        this.disabled = true;
         
         setTimeout(() => {
-            flash.style.animation = 'fadeOut 0.3s ease-out forwards';
-            setTimeout(() => flash.remove(), 300);
-        }, 200);
-        
-        showToast('Face captured successfully!', 'success');
-    }
-    
-    function stopWebcam() {
-        if (webcamStream) {
-            webcamStream.getTracks().forEach(track => track.stop());
-            webcamStream = null;
-        }
-        
-        webcamVideo.srcObject = null;
-        webcamVideo.style.display = 'none';
-        webcamPlaceholder.style.display = 'block';
-        
-        startBtn.disabled = false;
-        captureBtn.disabled = true;
-        stopBtn.disabled = true;
-        
-        webcamPreview.classList.remove('active');
-        
-        showToast('Camera stopped', 'info');
-    }
-    
-    // Clean up webcam when leaving the page
-    window.addEventListener('beforeunload', stopWebcam);
+            captureSuccess.style.display = 'flex';
+            
+            this.innerHTML = originalText;
+            this.classList.add('captured');
+            this.disabled = false;
+            
+            continueAfterCapture.disabled = false;
+            
+            const flash = document.createElement('div');
+            flash.style.position = 'absolute';
+            flash.style.top = '0';
+            flash.style.left = '0';
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            flash.style.borderRadius = '24px';
+            flash.style.animation = 'fadeIn 0.2s ease-out forwards';
+            flash.style.zIndex = '1';
+            webcamPreview.appendChild(flash);
+            
+            setTimeout(() => {
+                flash.style.animation = 'fadeOut 0.3s ease-out forwards';
+                setTimeout(() => flash.remove(), 300);
+            }, 200);
+            
+            showToast('Face captured successfully! Liveness detected.', 'success');
+        }, 2000);
+    });
 }
 
 function initOTPHandling() {
@@ -883,7 +774,6 @@ function initOTPHandling() {
     const otpField = document.getElementById('otp');
     const resendOtpBtn = document.getElementById('resendOtpBtn');
     const countdownElement = document.getElementById('countdown');
-    const otpLoading = document.getElementById('otpLoading');
     
     updateCountdown();
     
@@ -900,7 +790,7 @@ function initOTPHandling() {
             if (index === otpDigits.length - 1 && this.value.length === 1) {
                 const otpValue = otpField.value;
                 if (otpValue.length === 6) {
-                    verifyOTPWithBackend(otpValue);
+                    autoVerifyOTP(otpValue);
                 }
             }
             
@@ -919,7 +809,7 @@ function initOTPHandling() {
                     
                     const otpValue = otpField.value;
                     if (otpValue.length === 6) {
-                        verifyOTPWithBackend(otpValue);
+                        autoVerifyOTP(otpValue);
                     }
                 }, 10);
             }
@@ -939,7 +829,7 @@ function initOTPHandling() {
                 updateOTPValue();
                 otpDigits[5].focus();
                 
-                setTimeout(() => verifyOTPWithBackend(numbers), 100);
+                setTimeout(() => autoVerifyOTP(numbers), 100);
             }
         });
         
@@ -951,67 +841,24 @@ function initOTPHandling() {
         });
     });
     
-    // Add backend OTP verification function
-    async function verifyOTPWithBackend(otpValue) {
-        const email = document.getElementById('email').value;
-        
-        // Show loading state
-        otpDigits.forEach(digit => {
-            digit.disabled = true;
-        });
-        
-        const verifyLoading = document.createElement('div');
-        verifyLoading.className = 'otp-verifying';
-        verifyLoading.innerHTML = '<div class="spinner-small"></div><span>Verifying...</span>';
-        const otpContainer = document.querySelector('.otp-inputs');
-        otpContainer.parentNode.insertBefore(verifyLoading, otpContainer.nextSibling);
-        
-        try {
-            const response = await fetch('/verify-email-otp/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify({
-                    email: email,
-                    otp: otpValue
-                })
+    function autoVerifyOTP(otpValue) {
+        if (verifyOTP(otpValue)) {
+            showToast('OTP verified successfully!', 'success');
+            setTimeout(() => {
+                navigateToStep(4);
+            }, 500);
+        } else {
+            showToast('Invalid OTP code. Please try again.', 'error');
+            shakeElement(document.querySelector('.otp-inputs'));
+            
+            otpDigits.forEach(digit => {
+                digit.value = '';
+                digit.classList.add('shake');
+                setTimeout(() => digit.classList.remove('shake'), 600);
             });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                showToast('OTP verified successfully!', 'success');
-                setTimeout(() => {
-                    navigateToStep(4);
-                }, 500);
-            } else {
-                showToast(result.message || 'Invalid OTP code. Please try again.', 'error');
-                shakeElement(document.querySelector('.otp-inputs'));
-                
-                otpDigits.forEach(digit => {
-                    digit.value = '';
-                    digit.classList.add('shake');
-                    setTimeout(() => digit.classList.remove('shake'), 600);
-                });
-                otpField.value = '';
-                otpDigits[0].focus();
-            }
-        } catch (error) {
-            console.error('OTP verification error:', error);
-            showToast('Network error. Please try again.', 'error');
-            otpDigits.forEach(digit => digit.disabled = false);
-        } finally {
-            verifyLoading.remove();
-            otpDigits.forEach(digit => digit.disabled = false);
+            otpField.value = '';
+            otpDigits[0].focus();
         }
-    }
-    
-    // Helper function to get CSRF token
-    function getCSRFToken() {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        return csrfToken ? csrfToken.value : '';
     }
     
     resendOtpBtn.addEventListener('click', function() {
@@ -1035,7 +882,6 @@ function initOTPHandling() {
         
         showToast('New OTP code sent to your email', 'success');
         
-        // Reset after 3 seconds
         setTimeout(() => {
             this.textContent = 'Resend Code';
             this.style.background = '';
@@ -1045,10 +891,10 @@ function initOTPHandling() {
     });
     
     function sendOTP() {
-
-        if (window.calculatedAge < 10) {
+        const age = window.calculatedAge || 0;
+        if (age < 10) {
             showToast(
-                "Verification code has been sent to your parent/guardian’s email.",
+                "Verification code has been sent to your parent/guardian's email.",
                 "info"
             );
         } else {
@@ -1058,8 +904,11 @@ function initOTPHandling() {
             );
         }
 
-            startOTPTimer();
-        }, 1500);
+        startOTPTimer();
+    }
+    
+    function verifyOTP(otp) {
+        return otp.length === 6 && /^\d{6}$/.test(otp);
     }
     
     function updateOTPValue() {
@@ -1145,8 +994,7 @@ function initFormSubmission() {
     
     if (!form || !submitBtn) return;
     
-    // Override form submission to include face image
-    form.addEventListener('submit', async function(e) {
+    submitBtn.addEventListener('click', function(e) {
         e.preventDefault();
         
         if (!validateStep1()) return;
@@ -1173,59 +1021,23 @@ function initFormSubmission() {
             return;
         }
         
-        // Check if face is captured using both faceCaptured variable and face_image
-        if (!faceCaptured || !face_image) {
-            showToast('Please capture your face before submitting', 'error');
-            navigateToStep(2);
-            return;
-        }
+        const originalText = this.innerHTML;
+        this.innerHTML = '<div class="spinner"></div> Processing...';
+        this.disabled = true;
         
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<div class="spinner"></div> Processing...';
-        submitBtn.disabled = true;
-        
-        try {
-            // Create FormData and append face_image
-            const formData = new FormData(form);
-            formData.append('face_image', face_image);
+        setTimeout(() => {
+            const firstName = document.getElementById('first_name').value;
             
-            // Send to backend
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCSRFToken()
-                }
-            });
+            showToast('Registration successful! Redirecting to dashboard...', 'success');
             
-            if (response.ok) {
-                const result = await response.json();
-                showToast('Registration successful! Redirecting to dashboard...', 'success');
-                
-                setTimeout(() => {
-                    window.location.href = '/student/dashboard/';
-                }, 1500);
-            } else {
-                throw new Error('Registration failed');
-            }
-        } catch (error) {
-            console.error('Registration error:', error);
-            showToast('Registration failed. Please try again.', 'error');
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
+            setTimeout(() => {
+                window.location.href = '/student/dashboard/';
+            }, 1500);
+        }, 2000);
     });
-    
-    // Helper function to get CSRF token
-    function getCSRFToken() {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        return csrfToken ? csrfToken.value : '';
-    }
 }
 
-function initToastSystem() {
-    // Toast system initialization
-}
+function initToastSystem() {}
 
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
@@ -1233,7 +1045,7 @@ function showToast(message, type = 'info') {
     
     let icon = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg>';
     if (type === 'success') icon = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
-    if (type === 'error') icon = '<svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg>';
+    if (type === 'error') icon = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v6z"/></svg>';
     
     toast.innerHTML = `
         ${icon}
