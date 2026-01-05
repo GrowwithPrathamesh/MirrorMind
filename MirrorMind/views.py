@@ -62,7 +62,7 @@ def student_login(request):
 
 # ===============================
 # TEACHER LOGIN
-@csrf_exempt  # remove this if you are handling CSRF properly via AJAX
+@csrf_exempt  # remove this if CSRF is handled via AJAX
 def teacher_login(request):
     print("➡️ teacher_login view called")
 
@@ -94,7 +94,6 @@ def teacher_login(request):
 
             print("✅ Teacher found:", teacher.full_name())
 
-
             if not teacher.is_active:
                 print("❌ Teacher account inactive:", email)
                 return JsonResponse(
@@ -102,10 +101,8 @@ def teacher_login(request):
                     status=403
                 )
 
-            password_match = check_password(password, teacher.password)
-            print("🔐 Password match:", password_match)
-
-            if not password_match:
+            # ❗ PLAIN TEXT PASSWORD CHECK (NO HASHING)
+            if password != teacher.password:
                 print("❌ Invalid password for:", email)
                 return JsonResponse(
                     {"success": False, "error": "Invalid credentials"},

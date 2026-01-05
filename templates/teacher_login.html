@@ -37,14 +37,9 @@
         <!-- Form Container -->
         <div class="form-wrapper">
             <div class="form-container">
-<<<<<<< HEAD
-                <!-- Login Form -->
-                <form id="loginForm" class="form-step active">
-                    {% csrf_token %}
-=======
                 <!-- Teacher Login Form -->
-                <form id="teacherLoginForm" class="form-step active">
->>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
+                <form method="POST" id="teacherLoginForm" class="form-step active">
+                    {% csrf_token %}
                     <div class="step-header">
                         <div class="step-logo-container">
                             <img src="/static/images/123.png" alt="MirrorMind Logo" class="step-logo">
@@ -67,8 +62,6 @@
                     </div>
 
                     <!-- Password -->
-
-                    <!-- Password Field - UPDATED -->
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-with-icon">
@@ -92,14 +85,10 @@
                             <span class="checkmark"></span>
                             <span class="checkbox-label">Remember this device</span>
                         </label>
-<<<<<<< HEAD
-                        <a href="/teacher-reset-password/" class="forgot-password" id="forgotPassword">Forgot password?</a>
-=======
                         <a href="#" class="forgot-password" id="forgotPassword">
                             <i class="fas fa-key"></i>
                             Forgot password?
                         </a>
->>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                     </div>
 
                     <!-- Action Buttons -->
@@ -117,13 +106,6 @@
 
                     <!-- Footer Links -->
                     <div class="card-footer">
-<<<<<<< HEAD
-                        <p class="footer-text">New to MirrorMind? <a href="/teacher-signup/" class="signup-link">Sign Up</a></p>
-                        <a href="/" class="back-home">
-                            <i class="fas fa-home"></i>
-                            Back to Home
-                        </a>
-=======
                         <div class="footer-links">
                             <a href="/teacher/signup/" class="signup-link">
                                 <i class="fas fa-user-plus"></i>
@@ -134,7 +116,6 @@
                                 Back to Home
                             </a>
                         </div>
->>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                     </div>
                 </form>
             </div>
