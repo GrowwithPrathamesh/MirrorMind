@@ -12,4 +12,5 @@ urlpatterns = [
     path("teacher-reset-password/", views.teacher_reset_password),
     path("student-login/", views.student_login),
     path("teacher-login/", views.teacher_login),
+
 ]
