@@ -97,8 +97,10 @@ def teacher_login(request):
 # ===============================
 # STUDENT SIGNUP
 # ===============================
+@csrf_protect
 def student_signup(request):
     if request.method == "POST":
+        print("STUDENT SIGNUP POST HIT")
         try:
             data = request.POST
 
@@ -142,7 +144,7 @@ def student_signup(request):
                 return JsonResponse({"error": "OTP expired"}, status=403)
 
             otp_time = datetime.fromisoformat(otp_time)
-            if timezone.now() > otp_time + timedelta(minutes=5):
+            if timezone.now() > otp_time + timedelta(minutes=10):
                 request.session.pop("student_email_verified", None)
                 request.session.pop("student_otp_time", None)
                 return JsonResponse({"error": "OTP expired"}, status=403)
@@ -258,17 +260,17 @@ def send_email_otp(receiver_email, otp, purpose="signup"):
     sender_password = "vpxiebniktusbtxk" 
 
     subject = (
-        "BrainWave | Email Verification OTP"
+        "MirrorMind | Email Verification OTP"
         if purpose == "signup"
-        else "BrainWave | Password Reset OTP"
+        else "MirrorMind | Password Reset OTP"
     )
 
     body = f"""Your OTP is:
 
-{otp}
+        {otp}
 
-Do not share this OTP with anyone.
-"""
+        Do not share this OTP with anyone.
+        """
 
     msg = MIMEText(body)
     msg["Subject"] = subject
@@ -381,3 +383,51 @@ def teacher_reset_password(request):
         return JsonResponse({"success": True})
 
     return render(request, "teacher_reset_password.html")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def check_student_exists(request):
+    """Check if email or enrollment already exists"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip()
+            enrollment = data.get('enrollment', '').strip()
+            
+            email_exists = False
+            enrollment_exists = False
+            
+            if email:
+                email_exists = Student.objects.filter(email=email).exists()
+            
+            if enrollment:
+                enrollment_exists = Student.objects.filter(enrollment_no=enrollment).exists()
+            
+            return JsonResponse({
+                'email_exists': email_exists,
+                'enrollment_exists': enrollment_exists
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
