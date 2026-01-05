@@ -1314,7 +1314,7 @@ function initFormSubmission() {
             const formData = new FormData(form);
             const csrfToken = getCSRFToken();
             
-            const response = await fetch('/student_signup/', {
+            const response = await fetch('/student-signup/', {
                 method: 'POST',
                 body: formData,
                 headers: {

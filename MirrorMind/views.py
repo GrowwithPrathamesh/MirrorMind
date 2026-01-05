@@ -99,84 +99,159 @@ def teacher_login(request):
 # ===============================
 @csrf_protect
 def student_signup(request):
+    print("➡️ student_signup view called")
+
     if request.method == "POST":
-        print("STUDENT SIGNUP POST HIT")
+        print("✅ REQUEST METHOD = POST")
+
         try:
+            print("🔹 Entered TRY block")
+
             data = request.POST
+            print("📦 request.POST data:", data)
 
             first_name = data.get("first_name", "").strip()
+            print("first_name:", first_name)
+
             last_name = data.get("last_name", "").strip()
+            print("last_name:", last_name)
+
             email = data.get("email", "").strip()
+            print("email:", email)
+
             enrollment_no = data.get("enrollment_no", "").strip()
+            print("enrollment_no:", enrollment_no)
+
             department = data.get("department", "").strip()
+            print("department:", department)
+
             dob_raw = data.get("dob", "").strip()
+            print("dob_raw:", dob_raw)
 
             password = data.get("password", "")
+            print("password present:", bool(password))
+
             confirm_password = data.get("confirm_password", "")
+            print("confirm_password present:", bool(confirm_password))
+
             terms_accepted = data.get("terms")
+            print("terms_accepted:", terms_accepted)
 
             parent_name = data.get("parent_name", "").strip()
+            print("parent_name:", parent_name)
+
             parent_email = data.get("parent_email", "").strip()
+            print("parent_email:", parent_email)
+
             parent_mobile = data.get("parent_mobile", "").strip()
+            print("parent_mobile:", parent_mobile)
 
             face_image_base64 = data.get("face_image")
+            print("face_image_base64 present:", bool(face_image_base64))
 
+            print("🔍 Checking required fields")
             if not all([
                 first_name, last_name, email,
                 enrollment_no, department,
                 dob_raw, password, confirm_password
             ]):
+                print("❌ Missing required fields")
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
+            print("🔍 Checking password match")
             if password != confirm_password:
+                print("❌ Passwords do not match")
                 return JsonResponse({"error": "Passwords do not match"}, status=400)
 
+            print("🔍 Checking terms acceptance")
             if not terms_accepted:
+                print("❌ Terms not accepted")
                 return JsonResponse({"error": "Terms not accepted"}, status=400)
 
             verified_email = request.session.get("student_email_verified")
             otp_verified_at = request.session.get("student_otp_verified_at")
 
+            print("📧 verified_email from session:", verified_email)
+            print("⏱️ otp_verified_at from session:", otp_verified_at)
+
             if not verified_email or verified_email != email:
-                return JsonResponse({"error": "Email not verified. Please complete OTP verification."}, status=403)
+                print("❌ Email not verified or mismatch")
+                return JsonResponse(
+                    {"error": "Email not verified. Please complete OTP verification."},
+                    status=403
+                )
 
             if not otp_verified_at:
+                print("❌ OTP verification timestamp missing")
                 return JsonResponse({"error": "OTP verification required"}, status=403)
 
+            print("⏳ Parsing OTP verified time")
             verified_time = datetime.fromisoformat(otp_verified_at)
             expiry_time = verified_time + timedelta(minutes=2)
 
+            print("verified_time:", verified_time)
+            print("expiry_time:", expiry_time)
+            print("current_time:", timezone.now())
+
             if timezone.now() > expiry_time:
+                print("❌ OTP expired")
                 request.session.pop("student_email_verified", None)
                 request.session.pop("student_otp_verified_at", None)
-                return JsonResponse({"error": "OTP verification expired. Please verify again."}, status=403)
+                return JsonResponse(
+                    {"error": "OTP verification expired. Please verify again."},
+                    status=403
+                )
 
+            print("🔍 Checking duplicate email")
             if Student.objects.filter(email=email).exists():
+                print("❌ Email already registered")
                 return JsonResponse({"error": "Email already registered"}, status=400)
 
+            print("🔍 Checking duplicate enrollment")
             if Student.objects.filter(enrollment_no=enrollment_no).exists():
+                print("❌ Enrollment already exists")
                 return JsonResponse({"error": "Enrollment already exists"}, status=400)
 
+            print("📸 Checking face image")
             if not face_image_base64:
+                print("❌ Face image missing")
                 return JsonResponse({"error": "Face capture required"}, status=400)
 
+            print("📸 Parsing face image")
             try:
                 format_part, imgstr = face_image_base64.split(";base64,")
+                print("format_part:", format_part)
+
                 if not format_part.startswith("data:image/"):
+                    print("❌ Invalid image format")
                     raise ValueError
+
                 ext = format_part.split("/")[-1]
-            except Exception:
+                print("image extension:", ext)
+
+            except Exception as img_err:
+                print("❌ Face image parse error:", img_err)
                 return JsonResponse({"error": "Invalid face image"}, status=400)
 
+            print("📅 Parsing DOB")
             try:
                 dob = datetime.strptime(dob_raw, "%Y-%m-%d").date()
+                print("DOB parsed (YYYY-MM-DD):", dob)
+
             except ValueError:
+                print("⚠️ Failed YYYY-MM-DD, trying DD/MM/YYYY")
                 try:
                     dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
-                except ValueError:
+                    print("DOB parsed (DD/MM/YYYY):", dob)
+
+                except ValueError as dob_err:
+                    print("❌ DOB parse error:", dob_err)
                     return JsonResponse({"error": "Invalid DOB"}, status=400)
 
+            print("🔐 Starting transaction.atomic()")
             with transaction.atomic():
+                print("👤 Creating Student object")
+
                 student = Student.objects.create(
                     username=enrollment_no,
                     email=email,
@@ -194,6 +269,9 @@ def student_signup(request):
                     terms_accepted=True
                 )
 
+                print("✅ Student created with ID:", student.id)
+
+                print("📸 Saving face image to StudentFace")
                 image_file = ContentFile(
                     base64.b64decode(imgstr),
                     name=f"student_{student.id}.{ext}"
@@ -204,18 +282,25 @@ def student_signup(request):
                     face_image=image_file
                 )
 
+                print("✅ Face image saved")
+
+            print("🧹 Clearing session OTP data")
             request.session.pop("student_email_verified", None)
             request.session.pop("student_otp_verified_at", None)
 
+            print("🎉 STUDENT REGISTRATION SUCCESS")
             return JsonResponse({
                 "success": True,
                 "student_id": student.id
             })
 
         except Exception as e:
-            print("STUDENT SIGNUP ERROR:", e)
+            print("🔥 STUDENT SIGNUP EXCEPTION 🔥")
+            print("Exception type:", type(e))
+            print("Exception message:", e)
             return JsonResponse({"error": "Internal server error"}, status=500)
 
+    print("⚠️ Non-POST request, rendering signup page")
     return render(request, "student_signup.html")
 
 
@@ -287,8 +372,6 @@ def send_email_otp(receiver_email, otp, purpose="signup"):
     except Exception as e:
         print("EMAIL OTP ERROR:", e)
         return False
-
-
 
 
 
