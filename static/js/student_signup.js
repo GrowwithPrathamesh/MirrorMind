@@ -948,8 +948,11 @@ function initFaceCapture() {
             webcamVideo.style.display = 'block';
             webcamPlaceholder.style.display = 'none';
             
-            webcamCanvas.width = webcamVideo.videoWidth;
-            webcamCanvas.height = webcamVideo.videoHeight;
+            webcamVideo.onloadedmetadata = () => {
+                webcamCanvas.width = webcamVideo.videoWidth || 640;
+                webcamCanvas.height = webcamVideo.videoHeight || 480;
+            };
+
             
             captureBtn.innerHTML = originalText;
             captureBtn.disabled = false;
@@ -969,12 +972,23 @@ function initFaceCapture() {
     }
     
     function captureFace() {
+        if (webcamVideo.videoWidth === 0 || webcamVideo.videoHeight === 0) {
+            showToast("Camera not ready. Please wait a second.", "error");
+            return;
+        }
+
         if (!stream || !isCameraActive) return;
         
         const context = webcamCanvas.getContext('2d');
         context.drawImage(webcamVideo, 0, 0, webcamCanvas.width, webcamCanvas.height);
         
         const imageData = webcamCanvas.toDataURL('image/jpeg', 0.8);
+
+        if (imageData === "data:," || imageData.length < 100) {
+            showToast("Face capture failed. Please try again.", "error");
+            return;
+        }
+
         
         document.getElementById('face_image').value = imageData;
         
@@ -1011,6 +1025,27 @@ function initFaceCapture() {
         }, 200);
         
         showToast('Face captured successfully!', 'success');
+
+        setTimeout(() => {
+            const context = webcamCanvas.getContext('2d');
+            context.drawImage(
+                webcamVideo,
+                0,
+                0,
+                webcamCanvas.width,
+                webcamCanvas.height
+            );
+
+            const imageData = webcamCanvas.toDataURL('image/jpeg', 0.9);
+
+            if (imageData === "data:," || imageData.length < 100) {
+                showToast("Face capture failed. Try again.", "error");
+                return;
+            }
+
+            document.getElementById('face_image').value = imageData;
+        }, 500);
+
     }
 }
 
@@ -1328,7 +1363,7 @@ function initFormSubmission() {
                 showToast('Registration successful! Redirecting to dashboard...', 'success');
                 
                 setTimeout(() => {
-                    window.location.href = '/student_login/';
+                    window.location.href = '/student-login/';
                 }, 1500);
             } else {
                 showToast(data.error || 'Registration failed', 'error');
