@@ -949,8 +949,13 @@ function initFaceCapture() {
             webcamPlaceholder.style.display = 'none';
             
             webcamVideo.onloadedmetadata = () => {
-                webcamCanvas.width = webcamVideo.videoWidth || 640;
-                webcamCanvas.height = webcamVideo.videoHeight || 480;
+                webcamCanvas.width = webcamVideo.videoWidth;
+                webcamCanvas.height = webcamVideo.videoHeight;
+            };
+            
+            webcamVideo.onplaying = () => {
+                webcamCanvas.width = webcamVideo.videoWidth;
+                webcamCanvas.height = webcamVideo.videoHeight;
             };
 
             
@@ -980,9 +985,11 @@ function initFaceCapture() {
         if (!stream || !isCameraActive) return;
         
         const context = webcamCanvas.getContext('2d');
+        webcamCanvas.width = webcamVideo.videoWidth;
+        webcamCanvas.height = webcamVideo.videoHeight;
         context.drawImage(webcamVideo, 0, 0, webcamCanvas.width, webcamCanvas.height);
         
-        const imageData = webcamCanvas.toDataURL('image/jpeg', 0.8);
+        const imageData = webcamCanvas.toDataURL('image/jpeg', 0.9);
 
         if (imageData === "data:," || imageData.length < 100) {
             showToast("Face capture failed. Please try again.", "error");
@@ -1025,27 +1032,6 @@ function initFaceCapture() {
         }, 200);
         
         showToast('Face captured successfully!', 'success');
-
-        setTimeout(() => {
-            const context = webcamCanvas.getContext('2d');
-            context.drawImage(
-                webcamVideo,
-                0,
-                0,
-                webcamCanvas.width,
-                webcamCanvas.height
-            );
-
-            const imageData = webcamCanvas.toDataURL('image/jpeg', 0.9);
-
-            if (imageData === "data:," || imageData.length < 100) {
-                showToast("Face capture failed. Try again.", "error");
-                return;
-            }
-
-            document.getElementById('face_image').value = imageData;
-        }, 500);
-
     }
 }
 
