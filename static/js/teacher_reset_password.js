@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let otpCountdown = 60;
     let autoRedirectTimer = null;
     let autoRedirectCountdown = 5;
+    let currentEmail = '';
     
     // Initialize particles background
     initParticles();
@@ -128,40 +129,68 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        currentEmail = email;
         otpEmailDisplay.textContent = maskEmail(email);
         
         await sendOtp(email);
     });
     
     async function sendOtp(email) {
-        showLoading();
+        showLoading('Sending OTP...');
         
-        // Simulate API call
-        setTimeout(() => {
-            hideLoading();
-            showStep(2);
-            showSuccessModal('OTP sent successfully! Check your email.');
+        const csrfToken = getCSRFToken();
+        
+        try {
+            const response = await fetch('/teacher-reset-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'send_otp',
+                    email: email
+                })
+            });
             
-            // Auto-focus first OTP input
-            setTimeout(() => {
-                otpDigits[0].focus();
-            }, 500);
-        }, 1500);
+            const data = await response.json();
+            
+            hideLoading();
+            
+            if (data.success) {
+                showStep(2);
+                showToast('OTP sent successfully! Check your email.', 'success');
+                
+                setTimeout(() => {
+                    otpDigits[0].focus();
+                }, 500);
+            } else {
+                showToast(data.error || 'Failed to send OTP', 'error');
+            }
+            
+        } catch (error) {
+            hideLoading();
+            showToast('Network error. Please try again.', 'error');
+            console.error('Send OTP error:', error);
+        }
     }
     
     // ------------------ Resend OTP ------------------
     resendOtpBtn.addEventListener('click', async function() {
         if (resendOtpBtn.disabled) return;
         
-        const email = emailStep.querySelector('input[name="email"]').value.trim();
-        if (!email) return;
+        if (!currentEmail) {
+            showToast('Email not found', 'error');
+            return;
+        }
         
         resendOtpBtn.disabled = true;
         resendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
-        await sendOtp(email);
+        await sendOtp(currentEmail);
         
         startOtpTimer();
+        resendOtpBtn.innerHTML = 'Resend OTP';
     });
     
     // ------------------ OTP Auto Verification ------------------
@@ -171,7 +200,6 @@ document.addEventListener('DOMContentLoaded', function() {
         digit.addEventListener('input', async function(e) {
             const value = e.target.value;
             
-            // Only allow numbers
             if (!/^\d*$/.test(value)) {
                 e.target.value = '';
                 return;
@@ -180,18 +208,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value) {
                 e.target.classList.add('filled');
                 
-                // Move to next input
                 if (index < otpDigits.length - 1) {
                     otpDigits[index + 1].focus();
                 }
                 
-                // Update hidden OTP input
                 updateOtpInput();
                 
-                // Check if all digits are filled
                 const otp = Array.from(otpDigits).map(d => d.value).join('');
                 if (otp.length === 6) {
-                    // Auto-verify after a short delay
                     clearTimeout(otpVerificationTimeout);
                     otpVerificationTimeout = setTimeout(() => {
                         autoVerifyOtp(otp);
@@ -227,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 updateOtpInput();
                 
-                // Auto-verify
                 setTimeout(() => {
                     autoVerifyOtp(pasteData);
                 }, 500);
@@ -239,25 +262,68 @@ document.addEventListener('DOMContentLoaded', function() {
         const otp = Array.from(otpDigits).map(d => d.value).join('');
         otpInput.value = otp;
         
-        // Enable/disable verify button
         verifyOtpBtn.disabled = otp.length !== 6;
     }
     
     async function autoVerifyOtp(otp) {
         showLoading('Verifying OTP...');
         
-        // Simulate API verification
-        setTimeout(() => {
-            hideLoading();
-            showStep(3);
-            showToast('OTP verified successfully!', 'success');
+        const csrfToken = getCSRFToken();
+        
+        try {
+            const response = await fetch('/teacher-reset-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'verify_otp',
+                    email: currentEmail,
+                    otp: otp
+                })
+            });
             
-            // Auto-focus password input
-            setTimeout(() => {
-                newPasswordInput.focus();
-            }, 500);
-        }, 1500);
+            const data = await response.json();
+            
+            hideLoading();
+            
+            if (data.success) {
+                showStep(3);
+                showToast('OTP verified successfully!', 'success');
+                
+                setTimeout(() => {
+                    newPasswordInput.focus();
+                }, 500);
+            } else {
+                showToast(data.error || 'Invalid OTP', 'error');
+                otpDigits.forEach(digit => {
+                    digit.value = '';
+                    digit.classList.remove('filled');
+                });
+                updateOtpInput();
+                otpDigits[0].focus();
+            }
+            
+        } catch (error) {
+            hideLoading();
+            showToast('Network error. Please try again.', 'error');
+            console.error('Verify OTP error:', error);
+        }
     }
+    
+    // ------------------ Manual OTP Verification ------------------
+    verifyOtpBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const otp = Array.from(otpDigits).map(d => d.value).join('');
+        if (otp.length !== 6) {
+            showToast('Please enter 6-digit OTP', 'error');
+            return;
+        }
+        
+        await autoVerifyOtp(otp);
+    });
     
     // ------------------ Password Strength Check ------------------
     newPasswordInput.addEventListener('input', function() {
@@ -278,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
             special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
         
-        // Update rules UI
         strengthRules.forEach(rule => {
             const ruleType = rule.dataset.rule;
             if (rules[ruleType]) {
@@ -291,7 +356,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Update strength bar and text
         const percentage = (score / 5) * 100;
         strengthFill.style.width = `${percentage}%`;
         
@@ -369,12 +433,38 @@ document.addEventListener('DOMContentLoaded', function() {
         
         showLoading('Resetting password...');
         
-        // Simulate API call
-        setTimeout(() => {
+        const csrfToken = getCSRFToken();
+        
+        try {
+            const response = await fetch('/teacher-reset-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    action: 'reset_password',
+                    email: currentEmail,
+                    password: password
+                })
+            });
+            
+            const data = await response.json();
+            
             hideLoading();
-            showStep(4);
-            showToast('Password reset successfully!', 'success');
-        }, 1500);
+            
+            if (data.success) {
+                showStep(4);
+                showToast('Password reset successfully!', 'success');
+            } else {
+                showToast(data.error || 'Failed to reset password', 'error');
+            }
+            
+        } catch (error) {
+            hideLoading();
+            showToast('Network error. Please try again.', 'error');
+            console.error('Reset password error:', error);
+        }
     });
     
     // ------------------ Utility Functions ------------------
@@ -389,6 +479,20 @@ document.addEventListener('DOMContentLoaded', function() {
             name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1) : 
             '*'.repeat(name.length);
         return maskedName + '@' + domain;
+    }
+    
+    function getCSRFToken() {
+        const csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfTokenElement) {
+            return csrfTokenElement.value;
+        }
+        
+        const csrfCookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        if (csrfCookie) {
+            return csrfCookie.split('=')[1];
+        }
+        
+        return '';
     }
     
     // ------------------ Modal Functions ------------------
@@ -408,7 +512,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('successModal').classList.add('active');
         document.body.classList.add('no-scroll');
         
-        // Auto-hide after 3 seconds
         setTimeout(() => {
             hideModal('successModal');
         }, 3000);
@@ -443,13 +546,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('toastContainer').appendChild(toast);
         
-        // Close button
         toast.querySelector('.toast-close').addEventListener('click', () => {
             toast.style.animation = 'toastSlideOut 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         });
         
-        // Auto-remove after 5 seconds
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.style.animation = 'toastSlideOut 0.3s ease';

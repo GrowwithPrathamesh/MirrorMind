@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentEmail = email;
         otpEmailDisplay.textContent = maskEmail(email);
         
-        await callOtpHandler('send_otp', email, null);
+        await handleSendOtp(email);
     });
     
     resendOtpBtn.addEventListener('click', async function() {
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         resendOtpBtn.disabled = true;
         resendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
-        await callOtpHandler('send_otp', currentEmail, null);
+        await handleSendOtp(currentEmail);
         
         startOtpTimer();
     });
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (otp.length === 6) {
                     clearTimeout(otpVerificationTimeout);
                     otpVerificationTimeout = setTimeout(() => {
-                        callOtpHandler('verify_otp', currentEmail, otp);
+                        handleVerifyOtp(currentEmail, otp);
                     }, 500);
                 }
             }
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateOtpInput();
                 
                 setTimeout(() => {
-                    callOtpHandler('verify_otp', currentEmail, pasteData);
+                    handleVerifyOtp(currentEmail, pasteData);
                 }, 500);
             }
         });
@@ -207,66 +207,88 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const otp = otpInput.value;
         if (otp.length !== 6) return;
-        await callOtpHandler('verify_otp', currentEmail, otp);
+        await handleVerifyOtp(currentEmail, otp);
     });
     
-    async function callOtpHandler(action, email, otp) {
+    async function handleSendOtp(email) {
         showLoading();
-        toggleButtonLoading(action === 'send_otp' ? sendOtpBtn : verifyOtpBtn, true);
+        toggleButtonLoading(sendOtpBtn, true);
         
         try {
-            const payload = {
-                action: action,
-                email: email,
-                purpose: 'reset'
-            };
-            
-            if (otp) {
-                payload.otp = otp;
-            }
-            
-            const response = await fetch('/email_otp_handler/', {
+            const response = await fetch('/student-reset-password/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCSRFToken()
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    action: 'send_otp',
+                    email: email
+                })
             });
             
             const data = await response.json();
             
             if (response.ok && data.success) {
-                if (action === 'send_otp') {
-                    showStep(2);
-                    showSuccessModal('OTP sent successfully! Check your email.');
-                    setTimeout(() => otpDigits[0].focus(), 500);
-                } else if (action === 'verify_otp') {
-                    hideLoading();
-                    showStep(3);
-                    showToast('OTP verified successfully!', 'success');
-                    setTimeout(() => newPasswordInput.focus(), 500);
-                }
+                showStep(2);
+                showSuccessModal('OTP sent successfully! Check your email.');
+                setTimeout(() => otpDigits[0].focus(), 500);
             } else {
-                showErrorModal(data.message || `Failed to ${action.replace('_', ' ')}`);
-                if (action === 'verify_otp') {
+                showErrorModal(data.error || 'Failed to send OTP');
+            }
+        } catch (error) {
+            showErrorModal('Network error. Please try again.');
+        } finally {
+            hideLoading();
+            toggleButtonLoading(sendOtpBtn, false);
+            if (resendOtpBtn) {
+                resendOtpBtn.disabled = false;
+                resendOtpBtn.textContent = 'Resend OTP';
+            }
+        }
+    }
+    
+    async function handleVerifyOtp(email, otp) {
+        showLoading();
+        toggleButtonLoading(verifyOtpBtn, true);
+        
+        try {
+            const response = await fetch('/student-reset-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    action: 'verify_otp',
+                    email: email,
+                    otp: otp
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                hideLoading();
+                showStep(3);
+                showToast('OTP verified successfully!', 'success');
+                setTimeout(() => newPasswordInput.focus(), 500);
+            } else {
+                showErrorModal(data.error || 'Invalid OTP');
+                if (otpDigits) {
                     otpDigits.forEach(digit => {
                         digit.value = '';
                         digit.classList.remove('filled');
                     });
                     updateOtpInput();
-                    otpDigits[0].focus();
+                    if (otpDigits[0]) otpDigits[0].focus();
                 }
             }
         } catch (error) {
             showErrorModal('Network error. Please try again.');
         } finally {
             hideLoading();
-            toggleButtonLoading(action === 'send_otp' ? sendOtpBtn : verifyOtpBtn, false);
-            if (action === 'send_otp') {
-                resendOtpBtn.disabled = false;
-                resendOtpBtn.textContent = 'Resend OTP';
-            }
+            toggleButtonLoading(verifyOtpBtn, false);
         }
     }
     
@@ -377,13 +399,14 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleButtonLoading(resetPasswordBtn, true);
         
         try {
-            const response = await fetch('/student_reset_password/', {
+            const response = await fetch('/student-reset-password/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCSRFToken()
                 },
                 body: JSON.stringify({ 
+                    action: 'reset_password',
                     email: currentEmail,
                     password: password 
                 })
@@ -396,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showStep(4);
                 showToast('Password reset successfully!', 'success');
             } else {
-                showErrorModal(data.message || 'Failed to reset password');
+                showErrorModal(data.error || 'Failed to reset password');
             }
         } catch (error) {
             showErrorModal('Network error. Please try again.');
