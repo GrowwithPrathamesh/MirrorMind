@@ -434,3 +434,47 @@ window.addEventListener('load', function() {
         if (rememberCheckbox) rememberCheckbox.checked = true;
     }
 });
+function initPasswordToggle() {
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const passwordInput = document.getElementById('password');
+    
+    if (!toggleBtn || !passwordInput) return;
+    
+    toggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const icon = this.querySelector('i');
+        const isPassword = passwordInput.type === 'password';
+        
+        // Toggle password visibility
+        passwordInput.type = isPassword ? 'text' : 'password';
+        
+        // Update icon
+        if (isPassword) {
+            icon.className = 'fas fa-eye-slash';
+            icon.style.color = '#00C6FF';
+        } else {
+            icon.className = 'fas fa-eye';
+            icon.style.color = '#6B7280';
+        }
+        
+        // Animate button
+        this.style.transform = 'translateY(-50%) scale(1.2)';
+        setTimeout(() => {
+            this.style.transform = 'translateY(-50%) scale(1)';
+        }, 200);
+        
+        // Focus back on input
+        passwordInput.focus();
+    });
+    
+    // Also handle click on the icon itself
+    const eyeIcon = toggleBtn.querySelector('i');
+    if (eyeIcon) {
+        eyeIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleBtn.click();
+        });
+    }
+}

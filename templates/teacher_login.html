@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MirrorMind - Teacher Login</title>
     <link rel="stylesheet" href="/static/css/teacher_login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- Animated Background -->
     <div class="animated-background">
@@ -58,12 +61,15 @@
                     </div>
 
                     <!-- Password -->
+
+                    <!-- Password Field - UPDATED -->
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-with-icon">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password" id="password" name="password" required placeholder="Enter your password">
-                            <button type="button" class="toggle-password" id="togglePassword">
+                            <input type="password" id="password" name="password" required
+                                placeholder="Enter your password">
+                            <button type="button" class="toggle-password" id="togglePasswordBtn">
                                 <i class="fas fa-eye"></i>
                             </button>
                             <div class="input-effects">
@@ -161,7 +167,7 @@
                 </div>
                 <h2>Welcome Teacher!</h2>
                 <p>Your classroom dashboard is ready</p>
-                
+
                 <div class="auto-redirect">
                     <i class="fas fa-clock"></i>
                     Redirecting to dashboard in <span id="redirectTimer">5</span> seconds
@@ -205,4 +211,5 @@
 
     <script src="/static/js/teacher_login.js"></script>
 </body>
+
 </html>

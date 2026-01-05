@@ -1019,3 +1019,54 @@ body.no-scroll {
         border-radius: 8px;
     }
 }
+
+/* Toggle Password Button - UPDATED */
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #6B7280;
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.3s ease;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    outline: none;
+}
+
+.toggle-password:hover {
+    background: rgba(0, 198, 255, 0.1);
+    color: #00C6FF;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.toggle-password:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.toggle-password i {
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+/* Fix for input field padding */
+.input-with-icon input {
+    width: 100%;
+    padding: 16px 60px 16px 52px; /* Increased right padding for button */
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 15px;
+    color: #1F2937;
+    outline: none;
+    line-height: 1.5;
+}
