@@ -38,6 +38,7 @@
             <div class="form-container">
                 <!-- Login Form -->
                 <form id="loginForm" class="form-step active">
+                    {% csrf_token %}
                     <div class="step-header">
                         <div class="step-logo-container">
                             <img src="/static/images/123.png" alt="MirrorMind Logo" class="step-logo">
@@ -77,7 +78,7 @@
                             <span class="checkmark"></span>
                             <span class="checkbox-label">Remember me</span>
                         </label>
-                        <a href="#" class="forgot-password" id="forgotPassword">Forgot password?</a>
+                        <a href="/teacher-reset-password/" class="forgot-password" id="forgotPassword">Forgot password?</a>
                     </div>
 
                     <div class="action-buttons">
@@ -93,7 +94,7 @@
                     </div>
 
                     <div class="card-footer">
-                        <p class="footer-text">New to MirrorMind? <a href="#" class="signup-link">Sign Up</a></p>
+                        <p class="footer-text">New to MirrorMind? <a href="/teacher-signup/" class="signup-link">Sign Up</a></p>
                         <a href="/" class="back-home">
                             <i class="fas fa-home"></i>
                             Back to Home

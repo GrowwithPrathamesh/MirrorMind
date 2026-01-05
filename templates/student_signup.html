@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 
-                <form id="studentSignupForm" method="POST"">
+                <form id="studentSignupForm" method="POST" action="{% url 'student_signup' %}">
                     {% csrf_token %}
                     <input type="hidden" id="face_image" name="face_image">
                     
@@ -428,7 +428,7 @@
                 </form>
                 
                 <div class="card-footer">
-                    <p>Already have an account? <a href="/student-login/" class="signin-link">Sign In</a></p>
+                    <p>Already have an account? <a href="{% url 'login' %}" class="signin-link">Sign In</a></p>
                 </div>
             </div>
         </div>

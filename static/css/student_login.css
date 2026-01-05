@@ -570,102 +570,6 @@ body.no-scroll {
     color: #00C6FF;
 }
 
-/* Form Options */
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-}
-
-.checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.3s ease;
-}
-
-.checkbox-container:hover {
-    transform: translateX(5px);
-}
-
-.checkbox-container input {
-    display: none;
-}
-
-.checkmark {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(7, 8, 8, 0.3);
-    border-radius: 6px;
-    position: relative;
-    transition: all 0.3s ease;
-    background: rgba(15, 23, 42, 0.3);
-}
-
-.checkbox-container input:checked + .checkmark {
-    background: linear-gradient(135deg, #00C6FF, #00F5D4);
-    border-color: transparent;
-    transform: rotate(360deg) scale(1.1);
-}
-
-.checkmark::after {
-    content: '';
-    position: absolute;
-    top: 1px;
-    left: 6px;
-    width: 5px;
-    height: 10px;
-    border: solid var(--white);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg) scale(0);
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.checkbox-container input:checked + .checkmark::after {
-    transform: rotate(45deg) scale(1);
-    opacity: 1;
-    border-color: #0F172A;
-}
-
-.checkbox-label {
-    font-size: 14px;
-    color: #0b0c0d;
-    font-weight: 400;
-}
-
-.forgot-password {
-    font-size: 14px;
-    color: #00C6FF;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    position: relative;
-    padding-bottom: 2px;
-}
-
-.forgot-password::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: #0b0c0d;
-    transition: width 0.3s ease;
-}
-
-.forgot-password:hover {
-    color: #0b0c0d;
-}
-
-.forgot-password:hover::after {
-    width: 100%;
-}
-
 /* Action Buttons */
 .action-buttons {
     display: flex;
@@ -1304,12 +1208,6 @@ body.no-scroll {
     .stat-item {
         width: 100%;
         max-width: 200px;
-    }
-    
-    .form-options {
-        flex-direction: column;
-        gap: 12px;
-        align-items: flex-start;
     }
     
     .modal-content {

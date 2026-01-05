@@ -11,7 +11,7 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
-    background: #f0f8ff; /* Light blue background */
+    background: #f0f8ff;
     position: relative;
 }
 
@@ -42,7 +42,7 @@ body.no-scroll {
     backdrop-filter: blur(10px);
     animation: toastSlideIn 0.3s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    border-left: 4px solid #4a90e2; /* Light blue */
+    border-left: 4px solid #4a90e2;
 }
 
 .toast-notification.success {
@@ -59,7 +59,7 @@ body.no-scroll {
 
 .toast-icon {
     font-size: 20px;
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
 }
 
 .toast-notification.success .toast-icon {
@@ -96,7 +96,7 @@ body.no-scroll {
 }
 
 .toast-close:hover {
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
 }
 
 @keyframes toastSlideIn {
@@ -121,7 +121,7 @@ body.no-scroll {
     }
 }
 
-/* Advanced Animated Background - UPDATED TO LIGHT BLUE THEME */
+/* Advanced Animated Background */
 .animated-background {
     position: fixed;
     top: 0;
@@ -131,11 +131,11 @@ body.no-scroll {
     z-index: -1;
     overflow: hidden;
     background: linear-gradient(135deg, 
-        #e6f2ff 0%,    /* Light blue 1 */
-        #d9ebff 25%,   /* Light blue 2 */
-        #cce5ff 50%,   /* Light blue 3 */
-        #b3d9ff 75%,   /* Light blue 4 */
-        #99ccff 100%   /* Light blue 5 */
+        #e6f2ff 0%,
+        #d9ebff 25%,
+        #cce5ff 50%,
+        #b3d9ff 75%,
+        #99ccff 100%
     );
 }
 
@@ -150,7 +150,7 @@ body.no-scroll {
     position: absolute;
     width: 3px;
     height: 3px;
-    background: linear-gradient(45deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(45deg, #4a90e2, #6bb1f7);
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
     animation: floatParticle calc(20s * var(--i)) linear infinite;
@@ -196,7 +196,7 @@ body.no-scroll {
     }
 }
 
-/* Orbs Layer - UPDATED COLORS */
+/* Orbs Layer */
 .orbs-layer {
     position: absolute;
     width: 100%;
@@ -272,7 +272,7 @@ body.no-scroll {
 }
 
 .logo-gradient {
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8, #2196F3); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8, #2196F3);
     background-size: 300% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -296,7 +296,7 @@ body.no-scroll {
 
 .tagline {
     font-size: 18px;
-    color: #4a6572; /* Dark blue-gray */
+    color: #4a6572;
     font-weight: 300;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -325,7 +325,7 @@ body.no-scroll {
     font-family: 'Montserrat', sans-serif;
     font-size: 32px;
     font-weight: 700;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8, #2196F3); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8, #2196F3);
     background-size: 300% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -348,7 +348,7 @@ body.no-scroll {
     border-radius: 25px;
     padding: 50px 40px;
     box-shadow: 
-        0 25px 50px rgba(74, 144, 226, 0.1), /* Light blue shadow */
+        0 25px 50px rgba(74, 144, 226, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.5),
         0 0 0 1px rgba(255, 255, 255, 0.8);
     position: relative;
@@ -363,7 +363,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8, #2196F3); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8, #2196F3);
     border-radius: 25px 25px 0 0;
 }
 
@@ -395,7 +395,7 @@ body.no-scroll {
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    background: linear-gradient(135deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(135deg, #4a90e2, #6bb1f7);
     padding: 6px;
     border: 4px solid rgba(255, 255, 255, 0.8);
     box-shadow: 
@@ -416,7 +416,7 @@ body.no-scroll {
     font-weight: 700;
     color: #333;
     margin-bottom: 12px;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -433,7 +433,7 @@ body.no-scroll {
     transform: translateX(-50%);
     width: 60px;
     height: 3px;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7);
     border-radius: 2px;
 }
 
@@ -467,7 +467,7 @@ body.no-scroll {
     margin-bottom: 10px;
     font-size: 14px;
     font-weight: 600;
-    color: #4a6572; /* Dark blue-gray */
+    color: #4a6572;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -481,7 +481,7 @@ body.no-scroll {
     left: 18px;
     top: 50%;
     transform: translateY(-50%);
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     font-size: 20px;
     z-index: 2;
     transition: all 0.3s ease;
@@ -491,7 +491,7 @@ body.no-scroll {
     width: 100%;
     padding: 18px 20px 18px 60px;
     background: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(74, 144, 226, 0.2); /* Light blue border */
+    border: 2px solid rgba(74, 144, 226, 0.2);
     border-radius: 15px;
     font-family: inherit;
     font-size: 16px;
@@ -502,13 +502,13 @@ body.no-scroll {
 }
 
 .input-with-icon input:hover {
-    border-color: rgba(107, 177, 247, 0.4); /* Lighter blue */
+    border-color: rgba(107, 177, 247, 0.4);
     box-shadow: 0 8px 25px rgba(107, 177, 247, 0.1);
 }
 
 .input-with-icon input:focus {
     outline: none;
-    border-color: #6bb1f7; /* Light blue */
+    border-color: #6bb1f7;
     box-shadow: 
         0 0 0 4px rgba(107, 177, 247, 0.15),
         0 10px 30px rgba(107, 177, 247, 0.2);
@@ -517,7 +517,7 @@ body.no-scroll {
 }
 
 .input-with-icon input:focus + .input-icon {
-    color: #6bb1f7; /* Light blue */
+    color: #6bb1f7;
     transform: translateY(-50%) scale(1.1);
 }
 
@@ -537,7 +537,7 @@ body.no-scroll {
     left: 50%;
     width: 0;
     height: 100%;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7);
     transition: all 0.3s ease;
     transform: translateX(-50%);
 }
@@ -571,7 +571,7 @@ body.no-scroll {
 }
 
 .toggle-password:hover {
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     background: rgba(74, 144, 226, 0.1);
 }
 
@@ -605,7 +605,7 @@ body.no-scroll {
 .checkmark {
     width: 22px;
     height: 22px;
-    border: 2px solid rgba(74, 144, 226, 0.3); /* Light blue border */
+    border: 2px solid rgba(74, 144, 226, 0.3);
     border-radius: 6px;
     position: relative;
     transition: all 0.3s ease;
@@ -613,7 +613,7 @@ body.no-scroll {
 }
 
 .checkbox-container input:checked + .checkmark {
-    background: linear-gradient(135deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(135deg, #4a90e2, #6bb1f7);
     border-color: transparent;
     transform: rotate(360deg) scale(1.1);
     box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2);
@@ -640,19 +640,19 @@ body.no-scroll {
 
 .checkbox-label {
     font-size: 14px;
-    color: #4a6572; /* Dark blue-gray */
+    color: #4a6572;
     font-weight: 500;
 }
 
 .forgot-password {
     font-size: 14px;
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     position: relative;
     padding-bottom: 2px;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -665,7 +665,7 @@ body.no-scroll {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7);
     transition: width 0.3s ease;
 }
 
@@ -687,7 +687,7 @@ body.no-scroll {
 
 .btn-primary {
     padding: 20px 40px;
-    background: linear-gradient(135deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(135deg, #4a90e2, #6bb1f7);
     border: none;
     border-radius: 15px;
     color: white;
@@ -702,7 +702,7 @@ body.no-scroll {
     position: relative;
     overflow: hidden;
     min-width: 220px;
-    box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3); /* Light blue shadow */
+    box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
     letter-spacing: 0.5px;
 }
 
@@ -763,24 +763,24 @@ body.no-scroll {
     text-align: center;
     margin-top: 40px;
     padding-top: 35px;
-    border-top: 1px solid rgba(74, 144, 226, 0.1); /* Light blue border */
+    border-top: 1px solid rgba(74, 144, 226, 0.1);
     animation: fadeIn 0.8s ease 1.2s both;
 }
 
 .footer-text {
-    color: #4a6572; /* Dark blue-gray */
+    color: #4a6572;
     font-size: 14px;
     margin-bottom: 20px;
 }
 
 .signup-link {
-    color: #6bb1f7; /* Light blue */
+    color: #6bb1f7;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
     position: relative;
     padding: 2px 4px;
-    background: linear-gradient(90deg, #6bb1f7, #4a90e2); /* Light blue gradient */
+    background: linear-gradient(90deg, #6bb1f7, #4a90e2);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -793,7 +793,7 @@ body.no-scroll {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #6bb1f7, #4a90e2); /* Light blue gradient */
+    background: linear-gradient(90deg, #6bb1f7, #4a90e2);
     transition: width 0.3s ease;
 }
 
@@ -809,19 +809,19 @@ body.no-scroll {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: #4a6572; /* Dark blue-gray */
+    color: #4a6572;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
     padding: 10px 20px;
     border-radius: 8px;
-    background: rgba(74, 144, 226, 0.1); /* Light blue background */
-    border: 1px solid rgba(74, 144, 226, 0.2); /* Light blue border */
+    background: rgba(74, 144, 226, 0.1);
+    border: 1px solid rgba(74, 144, 226, 0.2);
     transition: all 0.3s ease;
 }
 
 .back-home:hover {
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     border-color: #4a90e2;
     transform: translateX(-5px);
     background: rgba(74, 144, 226, 0.15);
@@ -835,7 +835,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(240, 248, 255, 0.95); /* Light blue overlay */
+    background: rgba(240, 248, 255, 0.95);
     backdrop-filter: blur(10px);
     z-index: 2000;
     align-items: center;
@@ -868,7 +868,7 @@ body.no-scroll {
     width: 100%;
     position: relative;
     box-shadow: 
-        0 30px 60px rgba(74, 144, 226, 0.15), /* Light blue shadow */
+        0 30px 60px rgba(74, 144, 226, 0.15),
         0 0 0 1px rgba(255, 255, 255, 0.8);
     animation: modalSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     max-height: 90vh;
@@ -902,7 +902,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7, transparent); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7, transparent);
 }
 
 .modal-header.success::after {
@@ -922,7 +922,7 @@ body.no-scroll {
     align-items: center;
     justify-content: center;
     font-size: 32px;
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     margin-right: 20px;
     box-shadow: 0 10px 30px rgba(74, 144, 226, 0.15);
 }
@@ -944,7 +944,7 @@ body.no-scroll {
     color: #333;
     font-weight: 700;
     flex: 1;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -968,7 +968,7 @@ body.no-scroll {
 }
 
 .modal-close:hover {
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     background: rgba(74, 144, 226, 0.1);
 }
 
@@ -1021,7 +1021,7 @@ body.no-scroll {
     color: #333;
     margin-bottom: 20px;
     font-weight: 700;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #4CAF50); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #4CAF50);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1037,7 +1037,7 @@ body.no-scroll {
     margin-right: auto;
 }
 
-/* Confetti Animation - UPDATED COLORS */
+/* Confetti Animation */
 .confetti-container {
     position: relative;
     height: 100px;
@@ -1048,7 +1048,7 @@ body.no-scroll {
     position: absolute;
     width: 12px;
     height: 24px;
-    background: linear-gradient(45deg, #4a90e2, #6bb1f7, #4CAF50, #5ac8c8); /* Light blue colors */
+    background: linear-gradient(45deg, #4a90e2, #6bb1f7, #4CAF50, #5ac8c8);
     opacity: 0.9;
     border-radius: 3px;
     animation: confettiFall 4s ease-in-out infinite;
@@ -1114,7 +1114,7 @@ body.no-scroll {
     background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(107, 177, 247, 0.1));
     border-radius: 12px;
     border: 2px solid rgba(74, 144, 226, 0.2);
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     font-size: 15px;
     font-weight: 600;
     backdrop-filter: blur(5px);
@@ -1158,14 +1158,14 @@ body.no-scroll {
 }
 
 .modal-btn.primary {
-    background: linear-gradient(135deg, #4CAF50, #4a90e2); /* Light blue gradient */
+    background: linear-gradient(135deg, #4CAF50, #4a90e2);
     color: white;
     box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
 }
 
 .modal-btn.secondary {
     background: linear-gradient(135deg, rgba(74, 144, 226, 0.1), rgba(107, 177, 247, 0.1));
-    color: #4a90e2; /* Light blue */
+    color: #4a90e2;
     border: 2px solid rgba(74, 144, 226, 0.3);
 }
 
@@ -1181,7 +1181,7 @@ body.no-scroll {
 
 .modal-btn.secondary:hover {
     background: linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(107, 177, 247, 0.2));
-    border-color: #4a90e2; /* Light blue */
+    border-color: #4a90e2;
 }
 
 /* Loading Animation */
@@ -1203,9 +1203,9 @@ body.no-scroll {
 .spinner {
     width: 70px;
     height: 70px;
-    border: 5px solid rgba(74, 144, 226, 0.1); /* Light blue */
-    border-top: 5px solid #4a90e2; /* Light blue */
-    border-right: 5px solid #6bb1f7; /* Light blue */
+    border: 5px solid rgba(74, 144, 226, 0.1);
+    border-top: 5px solid #4a90e2;
+    border-right: 5px solid #6bb1f7;
     border-bottom: 5px solid #4CAF50;
     border-radius: 50%;
     position: absolute;
@@ -1227,7 +1227,7 @@ body.no-scroll {
     transform: translate(-50%, -50%);
     width: 100px;
     height: 100px;
-    border: 3px solid #4a90e2; /* Light blue */
+    border: 3px solid #4a90e2;
     border-radius: 50%;
     animation: pulseRing 2.5s ease-out infinite;
     opacity: 0;
@@ -1235,12 +1235,12 @@ body.no-scroll {
 
 .pulse-ring.delay-1 {
     animation-delay: 0.5s;
-    border-color: #6bb1f7; /* Light blue */
+    border-color: #6bb1f7;
 }
 
 .pulse-ring.delay-2 {
     animation-delay: 1s;
-    border-color: #5ac8c8; /* Teal */
+    border-color: #5ac8c8;
 }
 
 @keyframes pulseRing {
@@ -1259,7 +1259,7 @@ body.no-scroll {
 .progress-bar {
     width: 100%;
     height: 8px;
-    background: rgba(74, 144, 226, 0.1); /* Light blue */
+    background: rgba(74, 144, 226, 0.1);
     border-radius: 4px;
     overflow: hidden;
     margin-top: 25px;
@@ -1268,7 +1268,7 @@ body.no-scroll {
 .progress-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8); /* Light blue gradient */
+    background: linear-gradient(90deg, #4a90e2, #6bb1f7, #5ac8c8);
     border-radius: 4px;
     animation: progressFill 2s ease-in-out infinite;
 }

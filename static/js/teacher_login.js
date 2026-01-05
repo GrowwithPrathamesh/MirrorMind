@@ -1,6 +1,6 @@
-// Initialize when DOM is fully loaded
+// Teacher Login JavaScript - Complete and Working
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('MirrorMind Teacher Login Initialized');
+    console.log('Teacher Login Initialized');
     
     // Initialize all components
     initParticlesBackground();
@@ -28,7 +28,7 @@ function addParticles() {
     particleLayer.innerHTML = '';
     
     const particleCount = 15;
-    const colors = ['#4a90e2', '#6bb1f7', '#5ac8c8', '#2196F3']; // Light blue colors
+    const colors = ['#4a90e2', '#6bb1f7', '#5ac8c8', '#2196F3'];
     
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
@@ -43,7 +43,7 @@ function addParticles() {
     }
 }
 
-// Form submission handling
+// Form submission handling - CORRECT BACKEND INTEGRATION
 function initFormHandling() {
     const loginForm = document.getElementById('loginForm');
     const loginBtn = document.getElementById('loginBtn');
@@ -56,18 +56,15 @@ function initFormHandling() {
         // Get form data
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
-        const rememberMe = document.getElementById('rememberMe').checked;
         
-        // Validate inputs
-        if (!validateEmail(email)) {
-            showToast('Please enter a valid email address', 'error');
-            shakeElement(loginForm);
+        // Basic validation
+        if (!email || !password) {
+            showToast('Please fill in all fields', 'error');
             return;
         }
         
-        if (password.length < 6) {
-            showToast('Password must be at least 6 characters', 'error');
-            shakeElement(loginForm);
+        if (!validateEmail(email)) {
+            showToast('Please enter a valid email address', 'error');
             return;
         }
         
@@ -76,54 +73,58 @@ function initFormHandling() {
         loginBtn.classList.add('loading');
         loginBtn.disabled = true;
         
-        // Simulate API call with random success/failure
-        setTimeout(() => {
+        try {
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Create FormData for POST request (matches Django form submission)
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            
+            // Send POST request to backend EXACT URL
+            const response = await fetch('/teacher-login/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+            
+            // Parse JSON response
+            const data = await response.json();
+            
+            // Hide loading
             hideLoading();
             loginBtn.classList.remove('loading');
             loginBtn.disabled = false;
             
-            // Simulate 90% success rate
-            if (Math.random() > 0.1) {
+            // Handle response based on backend contract
+            if (response.ok && data.success === true) {
+                // SUCCESS: Backend returned success:true
+                showToast(data.message || 'Login successful!', 'success');
                 handleLoginSuccess();
+                
+                // Redirect to dashboard after delay
+                setTimeout(() => {
+                    window.location.href = '/teacher-dashboard/';
+                }, 2000);
+                
             } else {
-                handleLoginError('Invalid credentials. Please try again.');
+                // FAILURE: Backend returned success:false or error
+                const errorMessage = data.error || 'Invalid email or password';
+                handleLoginError(errorMessage);
             }
-        }, 1500);
+            
+        } catch (error) {
+            console.error('Login request failed:', error);
+            hideLoading();
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
+            handleLoginError('Network error. Please check your connection.');
+        }
     });
-    
-    // Real-time validation
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    
-    if (emailInput) {
-        emailInput.addEventListener('blur', function() {
-            if (this.value && !validateEmail(this.value)) {
-                highlightInputError(this);
-                showToast('Please enter a valid email address', 'error');
-            } else {
-                clearInputError(this);
-            }
-        });
-        
-        emailInput.addEventListener('input', function() {
-            clearInputError(this);
-        });
-    }
-    
-    if (passwordInput) {
-        passwordInput.addEventListener('blur', function() {
-            if (this.value && this.value.length < 6) {
-                highlightInputError(this);
-                showToast('Password must be at least 6 characters', 'error');
-            } else {
-                clearInputError(this);
-            }
-        });
-        
-        passwordInput.addEventListener('input', function() {
-            clearInputError(this);
-        });
-    }
 }
 
 // Email validation helper
@@ -132,41 +133,15 @@ function validateEmail(email) {
     return re.test(email);
 }
 
-// Highlight input error
-function highlightInputError(input) {
-    input.style.borderColor = '#f44336';
-    input.style.boxShadow = '0 0 0 4px rgba(244, 67, 54, 0.1)';
-    
-    // Add shake animation
-    input.style.animation = 'shake 0.5s ease';
-    setTimeout(() => {
-        input.style.animation = '';
-    }, 500);
-}
-
-// Clear input error
-function clearInputError(input) {
-    input.style.borderColor = '';
-    input.style.boxShadow = '';
-}
-
 // Handle successful login
 function handleLoginSuccess() {
-    // Show success modal
     const modal = document.getElementById('successModal');
     if (modal) {
         modal.classList.add('active');
         document.body.classList.add('no-scroll');
-        
-        // Start auto redirect timer
         startAutoRedirect();
-        
-        // Trigger confetti animation
         triggerConfetti();
     }
-    
-    // Show success toast
-    showToast('Login successful! Welcome to MirrorMind Teacher Portal.', 'success');
 }
 
 // Start auto redirect timer
@@ -183,7 +158,6 @@ function startAutoRedirect() {
         autoRedirectCountdown--;
         if (timerElement) {
             timerElement.textContent = autoRedirectCountdown;
-            // Add pulse animation
             timerElement.style.transform = 'scale(1.2)';
             setTimeout(() => {
                 timerElement.style.transform = 'scale(1)';
@@ -199,13 +173,8 @@ function startAutoRedirect() {
 
 // Redirect to dashboard
 function redirectToDashboard() {
-    console.log('Redirecting to teacher dashboard...');
     showToast('Dashboard loading...', 'success');
-    
-    // Simulate redirect
-    setTimeout(() => {
-        hideModal('successModal');
-    }, 500);
+    window.location.href = '/teacher-dashboard/';
 }
 
 // Handle login error
@@ -245,13 +214,11 @@ function initPasswordToggle() {
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
         
-        // Update icon
         const icon = this.querySelector('i');
         if (icon) {
             icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
         }
         
-        // Animate toggle
         this.style.transform = 'translateY(-50%) scale(1.3)';
         setTimeout(() => {
             this.style.transform = 'translateY(-50%) scale(1)';
@@ -311,7 +278,8 @@ function initLinkHandlers() {
     if (forgotPassword) {
         forgotPassword.addEventListener('click', function(e) {
             e.preventDefault();
-            showToast('Password reset link will be sent to your email.', 'info');
+            showToast('Redirecting to password reset...', 'info');
+            window.location.href = '/teacher-reset-password/';
         });
     }
     
@@ -321,7 +289,7 @@ function initLinkHandlers() {
         signupLink.addEventListener('click', function(e) {
             e.preventDefault();
             showToast('Redirecting to sign up page...', 'info');
-            // In production: window.location.href = '/signup';
+            window.location.href = '/teacher-signup/';
         });
     }
     
@@ -331,7 +299,7 @@ function initLinkHandlers() {
         backHome.addEventListener('click', function(e) {
             e.preventDefault();
             showToast('Returning to homepage...', 'info');
-            // In production: window.location.href = '/';
+            window.location.href = '/';
         });
     }
 }
@@ -344,18 +312,12 @@ function initInteractiveEffects() {
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
             this.parentElement.classList.add('focused');
-            // Add subtle animation
             this.style.transform = 'translateY(-2px)';
         });
         
         input.addEventListener('blur', function() {
             this.parentElement.classList.remove('focused');
             this.style.transform = 'translateY(0)';
-        });
-        
-        // Add ripple effect on focus
-        input.addEventListener('focus', function(e) {
-            createRippleEffect(e, this.parentElement);
         });
     });
     
@@ -372,45 +334,6 @@ function initInteractiveEffects() {
     });
 }
 
-// Create ripple effect
-function createRippleEffect(event, element) {
-    const ripple = document.createElement('span');
-    const rect = element.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
-    
-    ripple.style.cssText = `
-        position: absolute;
-        border-radius: 50%;
-        background: radial-gradient(circle, #4a90e2 0%, transparent 70%);
-        transform: scale(0);
-        animation: ripple 0.6s linear;
-        width: ${size}px;
-        height: ${size}px;
-        top: ${y}px;
-        left: ${x}px;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0.1;
-    `;
-    
-    element.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-}
-
-// Add ripple animation to CSS
-const rippleStyle = document.createElement('style');
-rippleStyle.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(rippleStyle);
-
 // Shake element animation
 function shakeElement(element) {
     element.style.animation = 'shake 0.5s ease';
@@ -418,17 +341,6 @@ function shakeElement(element) {
         element.style.animation = '';
     }, 500);
 }
-
-// Add shake animation to CSS
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-`;
-document.head.appendChild(shakeStyle);
 
 // Toast notification system
 function showToast(message, type = 'info') {
@@ -453,13 +365,11 @@ function showToast(message, type = 'info') {
     if (container) {
         container.appendChild(toast);
         
-        // Close button
         toast.querySelector('.toast-close').addEventListener('click', () => {
             toast.style.animation = 'toastSlideOut 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         });
         
-        // Auto-remove after 5 seconds
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.style.animation = 'toastSlideOut 0.3s ease';
@@ -509,7 +419,6 @@ function hideModal(modalId) {
         document.body.classList.remove('no-scroll');
     }
     
-    // Clear auto redirect timer
     if (modalId === 'successModal') {
         if (autoRedirectTimer) {
             clearInterval(autoRedirectTimer);
@@ -517,19 +426,28 @@ function hideModal(modalId) {
     }
 }
 
-// Performance optimization
-window.addEventListener('load', function() {
-    // Remove loading delays for animations
-    setTimeout(() => {
-        document.body.classList.add('loaded');
-    }, 100);
-});
+// Add animations CSS dynamically
+const animationsCSS = `
+@keyframes toastSlideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+`;
+
+// Inject animations CSS
+const style = document.createElement('style');
+style.textContent = animationsCSS;
+document.head.appendChild(style);
 
 // Error handling
 window.addEventListener('error', function(e) {
     console.error('Teacher login page error:', e.error);
-    // Fallback for any animation errors
-    document.body.classList.add('animations-disabled');
 });
 
 // Touch device support

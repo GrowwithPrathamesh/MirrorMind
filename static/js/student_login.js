@@ -55,7 +55,6 @@ function initFormHandling() {
         // Get form data
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
-        const rememberMe = document.getElementById('rememberMe').checked;
         
         // Validate inputs
         if (!validateEmail(email)) {
@@ -75,19 +74,38 @@ function initFormHandling() {
         loginBtn.classList.add('loading');
         loginBtn.disabled = true;
         
-        // Simulate API call with random success/failure
-        setTimeout(() => {
+        try {
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', getCSRFToken());
+            formData.append('email', email);
+            formData.append('password', password);
+            
+            const response = await fetch('/student-login/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+            
+            const data = await response.json();
+            
             hideLoading();
             loginBtn.classList.remove('loading');
             loginBtn.disabled = false;
             
-            // Simulate 90% success rate
-            if (Math.random() > 0.1) {
+            if (data.success) {
                 handleLoginSuccess();
             } else {
-                handleLoginError('Invalid credentials. Please try again.');
+                handleLoginError(data.error || 'Invalid credentials. Please try again.');
             }
-        }, 2000);
+        } catch (error) {
+            console.error('Login error:', error);
+            hideLoading();
+            loginBtn.classList.remove('loading');
+            loginBtn.disabled = false;
+            handleLoginError('Network error. Please try again.');
+        }
     });
     
     // Real-time validation
@@ -123,6 +141,12 @@ function initFormHandling() {
             clearInputError(this);
         });
     }
+}
+
+// Get CSRF token from form
+function getCSRFToken() {
+    const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    return csrfTokenInput ? csrfTokenInput.value : '';
 }
 
 // Email validation helper
@@ -187,14 +211,7 @@ function startAutoRedirect() {
 
 // Redirect to dashboard
 function redirectToDashboard() {
-    // In production: window.location.href = '/dashboard';
-    console.log('Redirecting to dashboard...');
-    showToast('Dashboard loading...', 'success');
-    
-    // Simulate redirect
-    setTimeout(() => {
-        hideModal('successModal');
-    }, 500);
+    window.location.href = '/student/dashboard/';
 }
 
 // Handle login error
@@ -338,21 +355,12 @@ function initModalHandling() {
 
 // Link handlers
 function initLinkHandlers() {
-    // Forgot password
-    const forgotPassword = document.getElementById('forgotPassword');
-    if (forgotPassword) {
-        forgotPassword.addEventListener('click', function(e) {
-            e.preventDefault();
-            showToast('Password reset instructions will be sent to your email.', 'info');
-        });
-    }
-    
     // Admin link
     const adminLink = document.querySelector('.admin-link');
     if (adminLink) {
         adminLink.addEventListener('click', function(e) {
             e.preventDefault();
-            showToast('Please contact your institution administrator for account access.', 'info');
+            window.location.href = '/student-signup/';
         });
     }
     
@@ -361,8 +369,7 @@ function initLinkHandlers() {
     if (backHome) {
         backHome.addEventListener('click', function(e) {
             e.preventDefault();
-            showToast('Returning to homepage...', 'info');
-            // In production: window.location.href = '/';
+            window.location.href = '/';
         });
     }
 }
