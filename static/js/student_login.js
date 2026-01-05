@@ -15,34 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addParticles();
 });
 
-// Initialize particles background
-function initParticlesBackground() {
-    addParticles();
-}
-
-// Add particles to the background
-function addParticles() {
-    const particleLayer = document.querySelector('.particle-layer');
-    if (!particleLayer) return;
-    
-    // Clear existing particles
-    particleLayer.innerHTML = '';
-    
-    const particleCount = 30;
-    const particles = [];
-    
-    for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.setProperty('--i', Math.random());
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        particle.style.animationDelay = `${Math.random() * 15}s`;
-        particleLayer.appendChild(particle);
-    }
-}
-
-// Form submission handling
+// Form submission handling - UPDATED
 function initFormHandling() {
     const loginForm = document.getElementById('loginForm');
     const loginBtn = document.getElementById('loginBtn');
@@ -75,6 +48,7 @@ function initFormHandling() {
         loginBtn.disabled = true;
         
         try {
+<<<<<<< HEAD
             const formData = new FormData();
             formData.append('csrfmiddlewaretoken', getCSRFToken());
             formData.append('email', email);
@@ -86,6 +60,19 @@ function initFormHandling() {
                 headers: {
                     'X-CSRFToken': getCSRFToken()
                 }
+=======
+            // Call real API
+            const response = await fetch('/student_login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken') // CSRF token function needed
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
             });
             
             const data = await response.json();
@@ -95,16 +82,30 @@ function initFormHandling() {
             loginBtn.disabled = false;
             
             if (data.success) {
+<<<<<<< HEAD
                 handleLoginSuccess();
             } else {
                 handleLoginError(data.error || 'Invalid credentials. Please try again.');
             }
+=======
+                // Login successful
+                handleLoginSuccess(data.redirect_url);
+            } else {
+                // Login failed
+                handleLoginError(data.error || 'Login failed');
+            }
+            
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
         } catch (error) {
             console.error('Login error:', error);
             hideLoading();
             loginBtn.classList.remove('loading');
             loginBtn.disabled = false;
+<<<<<<< HEAD
             handleLoginError('Network error. Please try again.');
+=======
+            handleLoginError('Network error. Please check your connection.');
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
         }
     });
     
@@ -116,7 +117,6 @@ function initFormHandling() {
         emailInput.addEventListener('blur', function() {
             if (this.value && !validateEmail(this.value)) {
                 highlightInputError(this);
-                showToast('Please enter a valid email address', 'error');
             } else {
                 clearInputError(this);
             }
@@ -131,7 +131,6 @@ function initFormHandling() {
         passwordInput.addEventListener('blur', function() {
             if (this.value && this.value.length < 6) {
                 highlightInputError(this);
-                showToast('Password must be at least 6 characters', 'error');
             } else {
                 clearInputError(this);
             }
@@ -143,6 +142,7 @@ function initFormHandling() {
     }
 }
 
+<<<<<<< HEAD
 // Get CSRF token from form
 function getCSRFToken() {
     const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
@@ -153,22 +153,26 @@ function getCSRFToken() {
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
+=======
+// CSRF token function - ADD THIS
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
 }
 
-// Highlight input error
-function highlightInputError(input) {
-    input.style.borderColor = '#FF6B6B';
-    input.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.1)';
-}
-
-// Clear input error
-function clearInputError(input) {
-    input.style.borderColor = '';
-    input.style.boxShadow = '';
-}
-
-// Handle successful login
-function handleLoginSuccess() {
+// Handle successful login - UPDATED
+function handleLoginSuccess(redirectUrl = '/student/dashboard/') {
     // Show success modal
     const modal = document.getElementById('successModal');
     if (modal) {
@@ -176,7 +180,7 @@ function handleLoginSuccess() {
         document.body.classList.add('no-scroll');
         
         // Start auto redirect timer
-        startAutoRedirect();
+        startAutoRedirect(redirectUrl);
         
         // Trigger confetti animation
         triggerConfetti();
@@ -186,11 +190,11 @@ function handleLoginSuccess() {
     showToast('Login successful! Redirecting to dashboard...', 'success');
 }
 
-// Start auto redirect timer
+// Start auto redirect timer - UPDATED
 let autoRedirectTimer = null;
 let autoRedirectCountdown = 5;
 
-function startAutoRedirect() {
+function startAutoRedirect(redirectUrl) {
     autoRedirectCountdown = 5;
     const timerElement = document.getElementById('redirectTimer');
     
@@ -204,111 +208,31 @@ function startAutoRedirect() {
         
         if (autoRedirectCountdown <= 0) {
             clearInterval(autoRedirectTimer);
-            redirectToDashboard();
+            redirectToDashboard(redirectUrl);
         }
     }, 1000);
 }
 
+<<<<<<< HEAD
 // Redirect to dashboard
 function redirectToDashboard() {
     window.location.href = '/student/dashboard/';
+=======
+// Redirect to dashboard - UPDATED
+function redirectToDashboard(redirectUrl = '/student/dashboard/') {
+    // Actual redirect
+    window.location.href = redirectUrl;
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
 }
 
-// Handle login error
+// Handle login error - UPDATED
 function handleLoginError(message) {
     showToast(message || 'Login failed. Please try again.', 'error');
     shakeElement(document.getElementById('loginForm'));
     showErrorModal(message);
 }
 
-// Trigger confetti animation
-function triggerConfetti() {
-    const confettiContainer = document.querySelector('.confetti-container');
-    if (!confettiContainer) return;
-    
-    // Clear existing confetti
-    confettiContainer.innerHTML = '';
-    
-    // Create new confetti
-    const confettiCount = 5;
-    for (let i = 0; i < confettiCount; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = `${20 + i * 15}%`;
-        confetti.style.animationDelay = `${i * 0.2}s`;
-        confettiContainer.appendChild(confetti);
-    }
-}
-
-// Password toggle functionality
-function initPasswordToggle() {
-    const toggleBtn = document.querySelector('.toggle-password');
-    const passwordInput = document.getElementById('password');
-    
-    if (!toggleBtn || !passwordInput) return;
-    
-    toggleBtn.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        
-        // Update icon
-        const icon = this.querySelector('i');
-        if (icon) {
-            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-        }
-        
-        // Animate toggle
-        this.style.transform = 'translateY(-50%) scale(1.3)';
-        setTimeout(() => {
-            this.style.transform = 'translateY(-50%) scale(1)';
-        }, 200);
-    });
-}
-
-// Animate statistics counter
-function initStatsAnimation() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    
-    statNumbers.forEach((stat, index) => {
-        const target = parseFloat(stat.getAttribute('data-count'));
-        const isDecimal = stat.getAttribute('data-count').includes('.');
-        
-        // Start animation with delay
-        setTimeout(() => {
-            animateCounter(stat, target, isDecimal);
-        }, 1000 + (index * 500));
-    });
-}
-
-// Counter animation with easing
-function animateCounter(element, target, isDecimal) {
-    const duration = 2000;
-    const startTime = performance.now();
-    const startValue = 0;
-    
-    function updateCounter(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Ease out cubic
-        const easeProgress = 1 - Math.pow(1 - progress, 3);
-        const currentValue = startValue + (target - startValue) * easeProgress;
-        
-        if (isDecimal) {
-            element.textContent = currentValue.toFixed(1);
-        } else {
-            element.textContent = Math.floor(currentValue);
-        }
-        
-        if (progress < 1) {
-            requestAnimationFrame(updateCounter);
-        }
-    }
-    
-    requestAnimationFrame(updateCounter);
-}
-
-// Modal handling
+// Rest of the code remains same, just update the continue button event listener:
 function initModalHandling() {
     // Close modal functions
     document.querySelectorAll('.modal-close').forEach(closeBtn => {
@@ -320,27 +244,10 @@ function initModalHandling() {
         });
     });
     
-    // Close on outside click
-    document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideModal(this.id);
-            }
-        });
-    });
-    
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-overlay.active').forEach(modal => {
-                hideModal(modal.id);
-            });
-        }
-    });
-    
-    // Continue button
+    // Continue button - UPDATED
     const continueBtn = document.getElementById('continueBtn');
     if (continueBtn) {
+<<<<<<< HEAD
         continueBtn.addEventListener('click', redirectToDashboard);
     }
     
@@ -551,4 +458,12 @@ window.addEventListener('error', function(e) {
 let isTouchDevice = 'ontouchstart' in window;
 if (isTouchDevice) {
     document.body.classList.add('touch-device');
+=======
+        continueBtn.addEventListener('click', function() {
+            redirectToDashboard('/student/dashboard/');
+        });
+    }
+    
+    // ... rest of the code
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
 }

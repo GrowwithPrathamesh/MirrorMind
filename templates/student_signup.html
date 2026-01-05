@@ -23,6 +23,36 @@
     <div class="container">
         <div class="logo-header">
             <div class="logo-gradient">
+                <div class="logo-animation">
+                    <svg class="logo-svg" width="120" height="120" viewBox="0 0 120 120">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00C6FF">
+                                    <animate attributeName="stop-color" values="#00C6FF;#00F5D4;#8B5CF6;#22D3EE;#00C6FF" dur="4s" repeatCount="indefinite"/>
+                                </stop>
+                                <stop offset="100%" stop-color="#8B5CF6">
+                                    <animate attributeName="stop-color" values="#8B5CF6;#22D3EE;#00C6FF;#00F5D4;#8B5CF6" dur="4s" repeatCount="indefinite"/>
+                                </stop>
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#logoGradient)" stroke-width="3" stroke-dasharray="314" stroke-dashoffset="314">
+                            <animate attributeName="stroke-dashoffset" values="314;0;314" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <path d="M40,40 L80,40 L80,80 L40,80 Z" fill="none" stroke="url(#logoGradient)" stroke-width="3" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate" from="0 60 60" to="360 60 60" dur="8s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M50,50 L70,50 L70,70 L50,70 Z" fill="none" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate" from="360 60 60" to="0 60 60" dur="6s" repeatCount="indefinite"/>
+                        </path>
+                    </svg>
+                </div>
                 <h1 class="logo-text">MirrorMind</h1>
             </div>
             <p class="tagline">AI-Powered Smart Classroom Registration</p>
@@ -46,11 +76,11 @@
                     </div>
                     <div class="step" data-step="2">
                         <div class="step-circle">2</div>
-                        <span>Face Capture</span>
+                        <span>Verify</span>
                     </div>
                     <div class="step" data-step="3">
                         <div class="step-circle">3</div>
-                        <span>Verify</span>
+                        <span>Face Capture</span>
                     </div>
                     <div class="step" data-step="4">
                         <div class="step-circle">4</div>
@@ -58,7 +88,11 @@
                     </div>
                 </div>
                 
+<<<<<<< HEAD
                 <form id="studentSignupForm" method="POST" action="{% url 'student_signup' %}">
+=======
+                <form id="studentSignupForm" method="POST">
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                     {% csrf_token %}
                     <input type="hidden" id="face_image" name="face_image">
                     
@@ -113,6 +147,7 @@
                                     <div class="focus-border"></div>
                                 </div>
                                 <div class="validation-error" id="email_error"></div>
+                                <div class="validation-feedback" id="email_feedback"></div>
                             </div>
                         </div>
                         
@@ -131,6 +166,7 @@
                                     <div class="focus-border"></div>
                                 </div>
                                 <div class="validation-error" id="enrollment_no_error"></div>
+                                <div class="validation-feedback" id="enrollment_feedback"></div>
                             </div>
                         </div>
                         
@@ -240,7 +276,7 @@
                         </div>
                         
                         <div class="action-buttons">
-                            <button type="button" class="btn-primary btn-next" data-next="2">
+                            <button type="button" class="btn-primary btn-next" data-next="2" id="step1Continue">
                                 Continue
                                 <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
                             </button>
@@ -248,6 +284,44 @@
                     </div>
                     
                     <div class="form-step" id="step2">
+                        <div class="otp-container">
+                            <div class="otp-header">
+                                <svg class="otp-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                                <h3>Verify Your Email</h3>
+                                <p>Enter the 6-digit code sent to <span id="otpEmailDisplay" class="otp-email"></span></p>
+                            </div>
+                            
+                            <div class="otp-inputs">
+                                <input type="text" class="otp-digit" maxlength="1" data-index="0">
+                                <input type="text" class="otp-digit" maxlength="1" data-index="1">
+                                <input type="text" class="otp-digit" maxlength="1" data-index="2">
+                                <input type="text" class="otp-digit" maxlength="1" data-index="3">
+                                <input type="text" class="otp-digit" maxlength="1" data-index="4">
+                                <input type="text" class="otp-digit" maxlength="1" data-index="5">
+                            </div>
+                            <input type="hidden" id="otp" name="otp">
+                            <div class="validation-error" id="otp_error"></div>
+                            
+                            <div class="otp-timer">
+                                <p>Code expires in: <span id="countdown">02:00</span></p>
+                            </div>
+                            
+                            <div class="otp-actions">
+                                <button type="button" class="btn-secondary btn-resend" id="resendOtpBtn" disabled>
+                                    Resend Code
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons step-nav">
+                            <button type="button" class="btn-secondary btn-prev" data-prev="1">
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                                Back
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-step" id="step3">
                         <div class="face-capture-container">
                             <div class="webcam-preview" id="webcamPreview">
                                 <div class="webcam-placeholder">
@@ -289,55 +363,13 @@
                         </div>
                         
                         <div class="action-buttons step-nav">
-                            <button type="button" class="btn-secondary btn-prev" data-prev="1">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                                Back
-                            </button>
-                            <button type="button" class="btn-primary btn-next" data-next="3" id="continueAfterCapture" disabled>
-                                Continue
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-step" id="step3">
-                        <div class="otp-container">
-                            <div class="otp-header">
-                                <svg class="otp-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                                <h3>Verify Your Email</h3>
-                                <p>Enter the 6-digit code sent to your email</p>
-                            </div>
-                            
-                            <div class="otp-inputs">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="0">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="1">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="2">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="3">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="4">
-                                <input type="text" class="otp-digit" maxlength="1" data-index="5">
-                            </div>
-                            <input type="hidden" id="otp" name="otp">
-                            <div class="validation-error" id="otp_error"></div>
-                            
-                            <div class="otp-timer">
-                                <p>Code expires in: <span id="countdown">02:00</span></p>
-                            </div>
-                            
-                            <div class="otp-actions">
-                                <button type="button" class="btn-secondary btn-resend" id="resendOtpBtn" disabled>
-                                    Resend Code
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="action-buttons step-nav">
                             <button type="button" class="btn-secondary btn-prev" data-prev="2">
                                 <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                                 Back
                             </button>
-                            <button type="button" class="btn-primary" id="verifyOtpBtn">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                                Verify OTP
+                            <button type="button" class="btn-primary btn-next" data-next="4" id="continueAfterCapture" disabled>
+                                Continue
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
                             </button>
                         </div>
                     </div>
@@ -428,7 +460,11 @@
                 </form>
                 
                 <div class="card-footer">
+<<<<<<< HEAD
                     <p>Already have an account? <a href="{% url 'login' %}" class="signin-link">Sign In</a></p>
+=======
+                    <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                 </div>
             </div>
         </div>
@@ -541,10 +577,6 @@
         
         <div id="toastContainer"></div>
         
-        <script>
-            // CSRF Token for AJAX requests
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        </script>
         <script src="/static/js/student_signup.js"></script>
     </body>
-</html>
+    </html>

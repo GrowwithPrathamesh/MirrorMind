@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MirrorMind - Teacher Login</title>
     <link rel="stylesheet" href="/static/css/teacher_login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- Animated Background -->
     <div class="animated-background">
@@ -18,6 +21,7 @@
             <div class="orb orb-2"></div>
             <div class="orb orb-3"></div>
         </div>
+        <div class="wave-layer"></div>
     </div>
 
     <!-- Main Container -->
@@ -27,65 +31,83 @@
             <div class="logo-gradient">
                 <h1 class="logo-text">MirrorMind</h1>
             </div>
-            <p class="tagline">AI-Powered Smart Classroom Platform</p>
-            <div class="teacher-login-text">
-                <span class="gradient-text">TEACHER LOGIN</span>
-            </div>
+            <p class="tagline">AI-Powered Teacher Dashboard</p>
         </div>
 
         <!-- Form Container -->
         <div class="form-wrapper">
             <div class="form-container">
+<<<<<<< HEAD
                 <!-- Login Form -->
                 <form id="loginForm" class="form-step active">
                     {% csrf_token %}
+=======
+                <!-- Teacher Login Form -->
+                <form id="teacherLoginForm" class="form-step active">
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                     <div class="step-header">
                         <div class="step-logo-container">
                             <img src="/static/images/123.png" alt="MirrorMind Logo" class="step-logo">
                         </div>
-                        <h2>Welcome Back</h2>
-                        <p>Sign in to access your AI classroom dashboard</p>
+                        <h2>Teacher Portal</h2>
+                        <p>Access your AI-powered classroom dashboard</p>
                     </div>
 
+                    <!-- Email Address -->
                     <div class="form-group">
-                        <label for="email">Email Address</label>
+                        <label for="email">Teacher Email</label>
                         <div class="input-with-icon">
                             <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" id="email" name="email" required placeholder="Enter your email">
+                            <input type="email" id="email" name="email" required placeholder="teacher@institute.edu">
                             <div class="input-effects">
                                 <div class="focus-border"></div>
                             </div>
                         </div>
+                        <div class="validation-error" id="email_error"></div>
                     </div>
 
+                    <!-- Password -->
+
+                    <!-- Password Field - UPDATED -->
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-with-icon">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password" id="password" name="password" required placeholder="Enter your password">
-                            <button type="button" class="toggle-password" data-target="password">
+                            <input type="password" id="password" name="password" required
+                                placeholder="Enter your password">
+                            <button type="button" class="toggle-password" id="togglePasswordBtn">
                                 <i class="fas fa-eye"></i>
                             </button>
                             <div class="input-effects">
                                 <div class="focus-border"></div>
                             </div>
                         </div>
+                        <div class="validation-error" id="password_error"></div>
                     </div>
 
+                    <!-- Form Options -->
                     <div class="form-options">
                         <label class="checkbox-container">
                             <input type="checkbox" id="rememberMe" name="remember">
                             <span class="checkmark"></span>
-                            <span class="checkbox-label">Remember me</span>
+                            <span class="checkbox-label">Remember this device</span>
                         </label>
+<<<<<<< HEAD
                         <a href="/teacher-reset-password/" class="forgot-password" id="forgotPassword">Forgot password?</a>
+=======
+                        <a href="#" class="forgot-password" id="forgotPassword">
+                            <i class="fas fa-key"></i>
+                            Forgot password?
+                        </a>
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                     </div>
 
+                    <!-- Action Buttons -->
                     <div class="action-buttons">
                         <button type="submit" class="btn-primary" id="loginBtn">
                             <span class="btn-text">
                                 <i class="fas fa-sign-in-alt"></i>
-                                Sign In
+                                Sign In as Teacher
                             </span>
                             <span class="btn-loader">
                                 <i class="fas fa-spinner fa-spin"></i>
@@ -93,41 +115,54 @@
                         </button>
                     </div>
 
+                    <!-- Footer Links -->
                     <div class="card-footer">
+<<<<<<< HEAD
                         <p class="footer-text">New to MirrorMind? <a href="/teacher-signup/" class="signup-link">Sign Up</a></p>
                         <a href="/" class="back-home">
                             <i class="fas fa-home"></i>
                             Back to Home
                         </a>
+=======
+                        <div class="footer-links">
+                            <a href="/teacher/signup/" class="signup-link">
+                                <i class="fas fa-user-plus"></i>
+                                Create Teacher Account
+                            </a>
+                            <a href="/" class="back-home">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Home
+                            </a>
+                        </div>
+>>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toastContainer"></div>
-
-    <!-- Loading Modal -->
-    <div class="modal-overlay" id="loadingModal">
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-icon">
-                    <i class="fas fa-spinner fa-spin"></i>
+                    <i class="fas fa-key"></i>
                 </div>
-                <h3>Processing</h3>
+                <h3>Reset Password</h3>
+                <button class="modal-close" id="closeForgotModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
-                <div class="loading-animation">
-                    <div class="spinner"></div>
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring delay-1"></div>
-                    <div class="pulse-ring delay-2"></div>
+                <p>Enter your email address and we'll send you instructions to reset your password.</p>
+                <div class="form-group">
+                    <input type="email" id="resetEmail" placeholder="Enter your email address">
+                    <div class="validation-error" id="reset_email_error"></div>
                 </div>
-                <p class="loading-text">Authenticating...</p>
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelReset">Cancel</button>
+                <button class="btn-primary" id="sendResetLink">Send Reset Link</button>
             </div>
         </div>
     </div>
@@ -140,7 +175,7 @@
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <h3>Access Granted</h3>
-                <button class="modal-close">
+                <button class="modal-close" id="closeSuccess">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -148,21 +183,9 @@
                 <div class="success-icon">
                     <i class="fas fa-chalkboard-teacher"></i>
                 </div>
-                <h2>Welcome to MirrorMind</h2>
-                <p>Your AI classroom analytics are being prepared...</p>
-                
-                <div class="confetti-container">
-                    <div class="confetti"></div>
-                    <div class="confetti"></div>
-                    <div class="confetti"></div>
-                    <div class="confetti"></div>
-                    <div class="confetti"></div>
-                </div>
-                
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
-                
+                <h2>Welcome Teacher!</h2>
+                <p>Your classroom dashboard is ready</p>
+
                 <div class="auto-redirect">
                     <i class="fas fa-clock"></i>
                     Redirecting to dashboard in <span id="redirectTimer">5</span> seconds
@@ -170,8 +193,8 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-btn primary" id="continueBtn">
-                    <i class="fas fa-rocket"></i>
-                    Continue to Dashboard
+                    <i class="fas fa-tachometer-alt"></i>
+                    Go to Dashboard
                 </button>
             </div>
         </div>
@@ -185,21 +208,26 @@
                     <i class="fas fa-exclamation-circle"></i>
                 </div>
                 <h3>Access Denied</h3>
-                <button class="modal-close">
+                <button class="modal-close" id="closeError">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p id="errorMessage">Invalid credentials. Please try again.</p>
+                <p id="errorMessage">Invalid teacher credentials. Please try again.</p>
             </div>
             <div class="modal-footer">
-                <button class="modal-btn secondary" id="closeError">
+                <button class="modal-btn secondary" id="tryAgainBtn">
+                    <i class="fas fa-redo"></i>
                     Try Again
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
     <script src="/static/js/teacher_login.js"></script>
 </body>
+
 </html>

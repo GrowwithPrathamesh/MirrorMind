@@ -1,3 +1,4 @@
+/* student_signup.css */
 * {
     margin: 0;
     padding: 0;
@@ -190,6 +191,10 @@ body.no-scroll {
 }
 
 .logo-gradient {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     background: linear-gradient(90deg, #00C6FF, #00F5D4, #8B5CF6, #22D3EE);
     background-size: 300% auto;
     -webkit-background-clip: text;
@@ -204,11 +209,47 @@ body.no-scroll {
     100% { background-position: 300% center; }
 }
 
+.logo-animation {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    filter: drop-shadow(0 0 15px rgba(0, 198, 255, 0.3));
+}
+
+.logo-svg {
+    width: 100%;
+    height: 100%;
+    animation: floatLogo 4s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.05);
+    }
+}
+
 .logo-text {
     font-size: 48px;
     font-weight: 700;
     letter-spacing: 1px;
     text-shadow: 0 2px 10px rgba(0, 198, 255, 0.3);
+    animation: glowText 3s ease-in-out infinite alternate;
+}
+
+@keyframes glowText {
+    from {
+        text-shadow: 0 0 10px rgba(0, 198, 255, 0.3),
+                     0 0 20px rgba(0, 198, 255, 0.2),
+                     0 0 30px rgba(0, 198, 255, 0.1);
+    }
+    to {
+        text-shadow: 0 0 15px rgba(0, 198, 255, 0.4),
+                     0 0 25px rgba(0, 198, 255, 0.3),
+                     0 0 35px rgba(0, 198, 255, 0.2);
+    }
 }
 
 .tagline {
@@ -217,6 +258,19 @@ body.no-scroll {
     font-weight: 300;
     letter-spacing: 2px;
     text-transform: uppercase;
+    opacity: 0.9;
+    animation: fadeInUp 1s ease 0.5s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 0.9;
+        transform: translateY(0);
+    }
 }
 
 .form-container {
@@ -420,7 +474,6 @@ body.no-scroll {
     grid-template-rows: auto 1fr;
 }
 
-
 .form-label {
     display: block;
     margin-bottom: 12px;
@@ -477,7 +530,7 @@ body.no-scroll {
 .input-field input,
 .input-field select {
     width: 100%;
-    padding: 18px 52px 18px 52px;
+    padding: 18px 20px 18px 52px;
     background: #F2F5F9;
     border: 2px solid rgba(15, 23, 42, 0.3);
     border-radius: 14px;
@@ -538,7 +591,6 @@ body.no-scroll {
     transform: translateX(0);
 }
 
-/* Fixed toggle password button position */
 .toggle-password {
     position: absolute;
     right: 16px;
@@ -868,6 +920,11 @@ body.no-scroll {
     font-weight: 300;
 }
 
+.otp-email {
+    color: #00C6FF;
+    font-weight: 600;
+}
+
 .otp-inputs {
     display: flex;
     justify-content: center;
@@ -917,6 +974,13 @@ body.no-scroll {
 
 .otp-actions {
     margin-top: 24px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.otp-actions button {
+    min-width: 140px;
 }
 
 .security-container {
@@ -1733,6 +1797,25 @@ body.no-scroll {
 }
 
 .validation-error.active {
+    display: block;
+}
+
+.validation-feedback {
+    font-size: 13px;
+    margin-top: 6px;
+    text-align: left;
+    font-weight: 500;
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.validation-feedback.valid {
+    color: #00F5D4;
+    display: block;
+}
+
+.validation-feedback.invalid {
+    color: #FF6B6B;
     display: block;
 }
 
