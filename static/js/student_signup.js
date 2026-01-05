@@ -1027,15 +1027,20 @@ function initOTPHandling() {
     otpDigits.forEach((digit, index) => {
         digit.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
-            
+
             if (this.value.length === 1 && index < otpDigits.length - 1) {
                 otpDigits[index + 1].focus();
             }
-            
+
             updateOTPValue();
-            
             hideValidationError('otp_error');
+
+            // ✅ AUTO VERIFY WHEN OTP COMPLETE
+            if (isOTPComplete()) {
+                verifyOTP();
+            }
         });
+
         
         digit.addEventListener('keydown', function(e) {
             if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
