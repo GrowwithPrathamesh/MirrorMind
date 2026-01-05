@@ -58,7 +58,7 @@
                     </div>
                 </div>
                 
-                <form id="studentSignupForm" method="POST"">
+                <form id="studentSignupForm" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="face_image" name="face_image">
                     
@@ -108,6 +108,9 @@
                                         </svg>
                                     </div>
                                     <input type="email" id="email" name="email" required placeholder="Enter your email">
+                                    <button type="button" class="btn-send-otp" id="sendEmailOtpBtn">
+                                        Send OTP
+                                    </button>
                                 </div>
                                 <div class="input-effects">
                                     <div class="focus-border"></div>
@@ -273,7 +276,7 @@
                             </div>
                             
                             <button type="button" class="btn-primary btn-capture" id="captureFaceBtn">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/></svg>
+                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                                 Start Camera
                             </button>
                             
@@ -327,6 +330,9 @@
                                 <button type="button" class="btn-secondary btn-resend" id="resendOtpBtn" disabled>
                                     Resend Code
                                 </button>
+                                <button type="button" class="btn-primary btn-verify" id="verifyOtpBtn">
+                                    Verify OTP
+                                </button>
                             </div>
                         </div>
                         
@@ -334,10 +340,6 @@
                             <button type="button" class="btn-secondary btn-prev" data-prev="2">
                                 <svg class="btn-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                                 Back
-                            </button>
-                            <button type="button" class="btn-primary" id="verifyOtpBtn">
-                                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                                Verify OTP
                             </button>
                         </div>
                     </div>
@@ -428,7 +430,7 @@
                 </form>
                 
                 <div class="card-footer">
-                    <p>Already have an account? <a href="/student-login/" class="signin-link">Sign In</a></p>
+                    <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
                 </div>
             </div>
         </div>
@@ -541,10 +543,6 @@
         
         <div id="toastContainer"></div>
         
-        <script>
-            // CSRF Token for AJAX requests
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        </script>
         <script src="/static/js/student_signup.js"></script>
     </body>
-</html>
+    </html>

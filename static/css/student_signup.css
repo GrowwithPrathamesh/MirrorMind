@@ -1,3 +1,4 @@
+/* student_signup.css */
 * {
     margin: 0;
     padding: 0;
@@ -420,7 +421,6 @@ body.no-scroll {
     grid-template-rows: auto 1fr;
 }
 
-
 .form-label {
     display: block;
     margin-bottom: 12px;
@@ -510,6 +510,33 @@ body.no-scroll {
     transform: translateY(-1px);
 }
 
+.btn-send-otp {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #00C6FF, #8B5CF6);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.btn-send-otp:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3);
+}
+
+.btn-send-otp:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .input-effects {
     position: absolute;
     bottom: 0;
@@ -538,7 +565,6 @@ body.no-scroll {
     transform: translateX(0);
 }
 
-/* Fixed toggle password button position */
 .toggle-password {
     position: absolute;
     right: 16px;
@@ -917,6 +943,13 @@ body.no-scroll {
 
 .otp-actions {
     margin-top: 24px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.otp-actions button {
+    min-width: 140px;
 }
 
 .security-container {
