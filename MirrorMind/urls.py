@@ -12,5 +12,10 @@ urlpatterns = [
     path("teacher-reset-password/", views.teacher_reset_password),
     path("student-login/", views.student_login),
     path("teacher-login/", views.teacher_login),
+<<<<<<< HEAD
 
+=======
+    path("send_email_otp/", views.send_email_otp),
+    path("email_otp_handler/", views.email_otp_handler),
+>>>>>>> e60b69195c275591289ce35296b3f923b7551852
 ]

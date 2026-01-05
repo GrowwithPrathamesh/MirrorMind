@@ -19,16 +19,9 @@ from students.models import Student, StudentFace
 from teachers.models import Teacher
 
 
-# ===============================
-# CONSTANTS & GLOBAL STORAGE
-# ===============================
-OTP_EXPIRY_SECONDS = 300
-otp_storage = {}   # email -> otp
+otp_storage = {}
 
 
-# ===============================
-# BASIC PAGES
-# ===============================
 def home(request):
     return render(request, "home.html")
 
@@ -259,15 +252,23 @@ def teacher_signup(request):
     return render(request, "teacher_signup.html")
 
 
-# ===============================
-# EMAIL OTP HANDLER
-# ===============================
-def send_email_otp(receiver_email, otp, purpose):
-    sender_email = "rakshak.connect@gmail.com"
-    sender_password = "vpxiebniktusbtxk"
 
-    subject = "MirrorMind OTP Verification"
-    body = f"Your OTP is: {otp}\nValid for few minutes only."
+def send_email_otp(receiver_email, otp, purpose="signup"):
+    sender_email = "rakshak.connect@gmail.com"
+    sender_password = "vpxiebniktusbtxk" 
+
+    subject = (
+        "BrainWave | Email Verification OTP"
+        if purpose == "signup"
+        else "BrainWave | Password Reset OTP"
+    )
+
+    body = f"""Your OTP is:
+
+{otp}
+
+Do not share this OTP with anyone.
+"""
 
     msg = MIMEText(body)
     msg["Subject"] = subject
@@ -284,29 +285,63 @@ def send_email_otp(receiver_email, otp, purpose):
         return False
 
 
+
+
+
 @csrf_exempt
 def email_otp_handler(request):
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    try:
         data = json.loads(request.body)
-        action = data.get("action")
-        email = data.get("email")
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    action = data.get("action")
+    email = data.get("email")
+    purpose = data.get("purpose")
+
+    if not action or not email or not purpose:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    if action == "send_otp":
+
+        if purpose == "signup" and User.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Email already registered"}, status=400)
+
+        if purpose == "forgot" and not User.objects.filter(email=email).exists():
+            return JsonResponse({"error": "Email not registered"}, status=400)
+
+        otp = str(random.randint(100000, 999999))
+        otp_storage[email] = otp
+
+        mail_sent = send_email_otp(email, otp, purpose)
+
+        if not mail_sent:
+            return JsonResponse({"error": "Failed to send OTP"}, status=500)
+
+
+        request.session[f"{purpose}_otp_time"] = timezone.now().isoformat()
+
+        return JsonResponse({"success": True})
+
+    elif action == "verify_otp":
         otp_input = data.get("otp")
-        purpose = data.get("purpose")
 
-        if action == "send_otp":
-            otp = str(random.randint(100000, 999999))
-            otp_storage[email] = otp
-            send_email_otp(email, otp, purpose)
-            return JsonResponse({"success": True})
-
-        if action == "verify_otp":
-            if otp_storage.get(email) == otp_input:
-                otp_storage.pop(email, None)
-                request.session[f"{purpose}_email_verified"] = email
-                return JsonResponse({"verified": True})
+        if not otp_input:
             return JsonResponse({"verified": False}, status=400)
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+        if otp_storage.get(email) == otp_input:
+            otp_storage.pop(email, None)
+
+            # ✅ STORE VERIFIED EMAIL IN SESSION
+            request.session["student_email_verified"] = email
+
+            return JsonResponse({"verified": True})
+
+        return JsonResponse({"verified": False})
+
 
 
 # ===============================
