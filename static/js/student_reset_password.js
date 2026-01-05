@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
     const emailStep = document.getElementById('emailStep');
     const otpStep = document.getElementById('otpStep');
     const passwordStep = document.getElementById('passwordStep');
@@ -27,11 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let otpCountdown = 60;
     let autoRedirectTimer = null;
     let autoRedirectCountdown = 5;
+    let currentEmail = '';
+    let otpVerificationTimeout = null;
     
-    // Initialize particles background
     initParticles();
     
-    // ------------------ Step Navigation ------------------
     function showStep(step) {
         currentStep = step;
         
@@ -66,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
         
-        // Animate step transition
         const activeStep = document.querySelector('.form-step.active');
         activeStep.style.animation = 'none';
         setTimeout(() => {
@@ -74,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 10);
     }
     
-    // ------------------ OTP Timer ------------------
     function startOtpTimer() {
         otpCountdown = 60;
         resendOtpBtn.disabled = true;
@@ -94,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
     
-    // ------------------ Auto Redirect Timer ------------------
     function startAutoRedirect() {
         autoRedirectCountdown = 5;
         
@@ -111,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
     
-    // ------------------ Send OTP ------------------
     document.getElementById('backToEmail').addEventListener('click', () => showStep(1));
     
     emailStep.addEventListener('submit', async function(e) {
@@ -123,55 +118,27 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        if (!validateEmail(email)) {
-            showToast('Please enter a valid email address', 'error');
-            return;
-        }
-        
+        currentEmail = email;
         otpEmailDisplay.textContent = maskEmail(email);
         
-        await sendOtp(email);
+        await callOtpHandler('send_otp', email, null);
     });
     
-    async function sendOtp(email) {
-        showLoading();
-        
-        // Simulate API call
-        setTimeout(() => {
-            hideLoading();
-            showStep(2);
-            showSuccessModal('OTP sent successfully! Check your email.');
-            
-            // Auto-focus first OTP input
-            setTimeout(() => {
-                otpDigits[0].focus();
-            }, 500);
-        }, 1500);
-    }
-    
-    // ------------------ Resend OTP ------------------
     resendOtpBtn.addEventListener('click', async function() {
-        if (resendOtpBtn.disabled) return;
-        
-        const email = emailStep.querySelector('input[name="email"]').value.trim();
-        if (!email) return;
+        if (resendOtpBtn.disabled || !currentEmail) return;
         
         resendOtpBtn.disabled = true;
         resendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
-        await sendOtp(email);
+        await callOtpHandler('send_otp', currentEmail, null);
         
         startOtpTimer();
     });
     
-    // ------------------ OTP Auto Verification ------------------
-    let otpVerificationTimeout = null;
-    
     otpDigits.forEach((digit, index) => {
-        digit.addEventListener('input', async function(e) {
+        digit.addEventListener('input', function(e) {
             const value = e.target.value;
             
-            // Only allow numbers
             if (!/^\d*$/.test(value)) {
                 e.target.value = '';
                 return;
@@ -180,21 +147,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value) {
                 e.target.classList.add('filled');
                 
-                // Move to next input
                 if (index < otpDigits.length - 1) {
                     otpDigits[index + 1].focus();
                 }
                 
-                // Update hidden OTP input
                 updateOtpInput();
                 
-                // Check if all digits are filled
                 const otp = Array.from(otpDigits).map(d => d.value).join('');
                 if (otp.length === 6) {
-                    // Auto-verify after a short delay
                     clearTimeout(otpVerificationTimeout);
                     otpVerificationTimeout = setTimeout(() => {
-                        autoVerifyOtp(otp);
+                        callOtpHandler('verify_otp', currentEmail, otp);
                     }, 500);
                 }
             }
@@ -227,9 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 updateOtpInput();
                 
-                // Auto-verify
                 setTimeout(() => {
-                    autoVerifyOtp(pasteData);
+                    callOtpHandler('verify_otp', currentEmail, pasteData);
                 }, 500);
             }
         });
@@ -238,28 +200,76 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateOtpInput() {
         const otp = Array.from(otpDigits).map(d => d.value).join('');
         otpInput.value = otp;
-        
-        // Enable/disable verify button
         verifyOtpBtn.disabled = otp.length !== 6;
     }
     
-    async function autoVerifyOtp(otp) {
-        showLoading('Verifying OTP...');
+    otpStep.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const otp = otpInput.value;
+        if (otp.length !== 6) return;
+        await callOtpHandler('verify_otp', currentEmail, otp);
+    });
+    
+    async function callOtpHandler(action, email, otp) {
+        showLoading();
+        toggleButtonLoading(action === 'send_otp' ? sendOtpBtn : verifyOtpBtn, true);
         
-        // Simulate API verification
-        setTimeout(() => {
-            hideLoading();
-            showStep(3);
-            showToast('OTP verified successfully!', 'success');
+        try {
+            const payload = {
+                action: action,
+                email: email,
+                purpose: 'reset'
+            };
             
-            // Auto-focus password input
-            setTimeout(() => {
-                newPasswordInput.focus();
-            }, 500);
-        }, 1500);
+            if (otp) {
+                payload.otp = otp;
+            }
+            
+            const response = await fetch('/email_otp_handler/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                if (action === 'send_otp') {
+                    showStep(2);
+                    showSuccessModal('OTP sent successfully! Check your email.');
+                    setTimeout(() => otpDigits[0].focus(), 500);
+                } else if (action === 'verify_otp') {
+                    hideLoading();
+                    showStep(3);
+                    showToast('OTP verified successfully!', 'success');
+                    setTimeout(() => newPasswordInput.focus(), 500);
+                }
+            } else {
+                showErrorModal(data.message || `Failed to ${action.replace('_', ' ')}`);
+                if (action === 'verify_otp') {
+                    otpDigits.forEach(digit => {
+                        digit.value = '';
+                        digit.classList.remove('filled');
+                    });
+                    updateOtpInput();
+                    otpDigits[0].focus();
+                }
+            }
+        } catch (error) {
+            showErrorModal('Network error. Please try again.');
+        } finally {
+            hideLoading();
+            toggleButtonLoading(action === 'send_otp' ? sendOtpBtn : verifyOtpBtn, false);
+            if (action === 'send_otp') {
+                resendOtpBtn.disabled = false;
+                resendOtpBtn.textContent = 'Resend OTP';
+            }
+        }
     }
     
-    // ------------------ Password Strength Check ------------------
     newPasswordInput.addEventListener('input', function() {
         const password = newPasswordInput.value;
         checkPasswordStrength(password);
@@ -278,7 +288,6 @@ document.addEventListener('DOMContentLoaded', function() {
             special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
         
-        // Update rules UI
         strengthRules.forEach(rule => {
             const ruleType = rule.dataset.rule;
             if (rules[ruleType]) {
@@ -291,7 +300,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Update strength bar and text
         const percentage = (score / 5) * 100;
         strengthFill.style.width = `${percentage}%`;
         
@@ -336,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // ------------------ Toggle Password Visibility ------------------
     document.querySelectorAll('.toggle-password').forEach(button => {
         button.addEventListener('click', function() {
             const targetId = this.dataset.target;
@@ -353,7 +360,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // ------------------ Reset Password ------------------
     document.getElementById('backToOtp').addEventListener('click', () => showStep(2));
     
     passwordStep.addEventListener('submit', async function(e) {
@@ -368,20 +374,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         showLoading('Resetting password...');
+        toggleButtonLoading(resetPasswordBtn, true);
         
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const response = await fetch('/student_reset_password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ 
+                    email: currentEmail,
+                    password: password 
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                hideLoading();
+                showStep(4);
+                showToast('Password reset successfully!', 'success');
+            } else {
+                showErrorModal(data.message || 'Failed to reset password');
+            }
+        } catch (error) {
+            showErrorModal('Network error. Please try again.');
+        } finally {
             hideLoading();
-            showStep(4);
-            showToast('Password reset successfully!', 'success');
-        }, 1500);
+            toggleButtonLoading(resetPasswordBtn, false);
+        }
     });
-    
-    // ------------------ Utility Functions ------------------
-    function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
     
     function maskEmail(email) {
         const [name, domain] = email.split('@');
@@ -391,7 +414,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return maskedName + '@' + domain;
     }
     
-    // ------------------ Modal Functions ------------------
     function showLoading(message = 'Processing...') {
         document.body.classList.add('no-scroll');
         document.getElementById('loadingModal').classList.add('active');
@@ -403,15 +425,35 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('loadingModal').classList.remove('active');
     }
     
+    function toggleButtonLoading(button, isLoading) {
+        const btnText = button.querySelector('.btn-text');
+        const btnLoader = button.querySelector('.btn-loader');
+        
+        if (isLoading) {
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-block';
+            button.disabled = true;
+        } else {
+            btnText.style.display = 'inline-block';
+            btnLoader.style.display = 'none';
+            button.disabled = false;
+        }
+    }
+    
     function showSuccessModal(message) {
         document.getElementById('successMessage').textContent = message;
         document.getElementById('successModal').classList.add('active');
         document.body.classList.add('no-scroll');
         
-        // Auto-hide after 3 seconds
         setTimeout(() => {
             hideModal('successModal');
         }, 3000);
+    }
+    
+    function showErrorModal(message) {
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorModal').classList.add('active');
+        document.body.classList.add('no-scroll');
     }
     
     function hideModal(modalId) {
@@ -419,7 +461,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.remove('no-scroll');
     }
     
-    // Close modals when clicking outside
     document.querySelectorAll('.modal-overlay').forEach(modal => {
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
@@ -429,7 +470,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // ------------------ Toast Notification ------------------
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');
         toast.className = `toast-notification ${type}`;
@@ -443,13 +483,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('toastContainer').appendChild(toast);
         
-        // Close button
         toast.querySelector('.toast-close').addEventListener('click', () => {
             toast.style.animation = 'toastSlideOut 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         });
         
-        // Auto-remove after 5 seconds
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.style.animation = 'toastSlideOut 0.3s ease';
@@ -458,7 +496,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
     
-    // ------------------ Particle Background ------------------
+    function getCSRFToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookieValue || '';
+    }
+    
     function initParticles() {
         const particleLayer = document.querySelector('.particle-layer');
         const particleCount = 30;
@@ -474,6 +519,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // ------------------ Initialize ------------------
     showStep(1);
 });
