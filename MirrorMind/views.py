@@ -62,35 +62,78 @@ def student_login(request):
 
 # ===============================
 # TEACHER LOGIN
-# ===============================
+@csrf_exempt  # remove this if you are handling CSRF properly via AJAX
 def teacher_login(request):
+    print("➡️ teacher_login view called")
+
     if request.method == "POST":
+        print("✅ POST request received")
+
         try:
             email = request.POST.get("email")
             password = request.POST.get("password")
 
+            print("📩 Email received:", email)
+            print("🔑 Password received:", "YES" if password else "NO")
+
             if not email or not password:
-                return JsonResponse({"success": False, "error": "Email and password required"}, status=400)
+                print("❌ Email or password missing")
+                return JsonResponse(
+                    {"success": False, "error": "Email and password are required"},
+                    status=400
+                )
 
             teacher = Teacher.objects.filter(email=email).first()
-            if not teacher:
-                return JsonResponse({"success": False, "error": "Teacher not found"}, status=404)
 
-            if not check_password(password, teacher.password):
-                return JsonResponse({"success": False, "error": "Invalid credentials"}, status=401)
+            if not teacher:
+                print("❌ Teacher not found for email:", email)
+                return JsonResponse(
+                    {"success": False, "error": "Teacher not found"},
+                    status=404
+                )
+
+            print("✅ Teacher found:", teacher.full_name())
+
 
             if not teacher.is_active:
-                return JsonResponse({"success": False, "error": "Account is inactive"}, status=403)
+                print("❌ Teacher account inactive:", email)
+                return JsonResponse(
+                    {"success": False, "error": "Account is inactive"},
+                    status=403
+                )
+
+            password_match = check_password(password, teacher.password)
+            print("🔐 Password match:", password_match)
+
+            if not password_match:
+                print("❌ Invalid password for:", email)
+                return JsonResponse(
+                    {"success": False, "error": "Invalid credentials"},
+                    status=401
+                )
 
             request.session["teacher_id"] = teacher.id
             request.session["user_type"] = "teacher"
 
-            return JsonResponse({"success": True, "message": "Teacher login successful"})
+            teacher.last_login = timezone.now()
+            teacher.save(update_fields=["last_login"])
+
+            print("✅ Teacher login successful:", email)
+            print("🧠 Session teacher_id:", request.session.get("teacher_id"))
+
+            return JsonResponse(
+                {"success": True, "message": "Teacher login successful"},
+                status=200
+            )
 
         except Exception as e:
-            print("TEACHER LOGIN ERROR:", e)
-            return JsonResponse({"success": False, "error": "Internal server error"}, status=500)
+            print("🔥 TEACHER LOGIN ERROR:", str(e))
+            return JsonResponse(
+                {"success": False, "error": "Internal server error"},
+                status=500
+            )
 
+    print("ℹ️ GET request – rendering login page")
     return render(request, "teacher_login.html")
 
 
