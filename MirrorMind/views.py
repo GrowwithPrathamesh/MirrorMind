@@ -135,19 +135,21 @@ def student_signup(request):
                 return JsonResponse({"error": "Terms not accepted"}, status=400)
 
             verified_email = request.session.get("student_email_verified")
-            otp_time = request.session.get("student_otp_time")
+            otp_verified_at = request.session.get("student_otp_verified_at")
 
             if not verified_email or verified_email != email:
-                return JsonResponse({"error": "Email not verified"}, status=403)
+                return JsonResponse({"error": "Email not verified. Please complete OTP verification."}, status=403)
 
-            if not otp_time:
-                return JsonResponse({"error": "OTP expired"}, status=403)
+            if not otp_verified_at:
+                return JsonResponse({"error": "OTP verification required"}, status=403)
 
-            otp_time = datetime.fromisoformat(otp_time)
-            if timezone.now() > otp_time + timedelta(minutes=10):
+            verified_time = datetime.fromisoformat(otp_verified_at)
+            expiry_time = verified_time + timedelta(minutes=2)
+
+            if timezone.now() > expiry_time:
                 request.session.pop("student_email_verified", None)
-                request.session.pop("student_otp_time", None)
-                return JsonResponse({"error": "OTP expired"}, status=403)
+                request.session.pop("student_otp_verified_at", None)
+                return JsonResponse({"error": "OTP verification expired. Please verify again."}, status=403)
 
             if Student.objects.filter(email=email).exists():
                 return JsonResponse({"error": "Email already registered"}, status=400)
@@ -178,7 +180,7 @@ def student_signup(request):
                 student = Student.objects.create(
                     username=enrollment_no,
                     email=email,
-                    password=password,
+                    password=make_password(password),
                     first_name=first_name,
                     last_name=last_name,
                     enrollment_no=enrollment_no,
@@ -203,7 +205,7 @@ def student_signup(request):
                 )
 
             request.session.pop("student_email_verified", None)
-            request.session.pop("student_otp_time", None)
+            request.session.pop("student_otp_verified_at", None)
 
             return JsonResponse({
                 "success": True,
@@ -290,7 +292,7 @@ def send_email_otp(receiver_email, otp, purpose="signup"):
 
 
 
-@csrf_exempt
+@csrf_protect
 def email_otp_handler(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method"}, status=405)
@@ -308,21 +310,25 @@ def email_otp_handler(request):
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
     if action == "send_otp":
-
-        if purpose == "signup" and User.objects.filter(email=email).exists():
+        if purpose == "signup" and Student.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email already registered"}, status=400)
 
-        if purpose == "forgot" and not User.objects.filter(email=email).exists():
+        if purpose == "forgot" and not Student.objects.filter(email=email).exists():
             return JsonResponse({"error": "Email not registered"}, status=400)
 
         otp = str(random.randint(100000, 999999))
-        otp_storage[email] = otp
+        expiry = timezone.now() + timedelta(minutes=2)
+
+        otp_storage[email] = {
+            "otp": otp,
+            "expiry": expiry,
+            "verified": False
+        }
 
         mail_sent = send_email_otp(email, otp, purpose)
 
         if not mail_sent:
             return JsonResponse({"error": "Failed to send OTP"}, status=500)
-
 
         request.session[f"{purpose}_otp_time"] = timezone.now().isoformat()
 
@@ -332,55 +338,79 @@ def email_otp_handler(request):
         otp_input = data.get("otp")
 
         if not otp_input:
-            return JsonResponse({"verified": False}, status=400)
+            return JsonResponse({"verified": False, "error": "OTP required"}, status=400)
 
-        if otp_storage.get(email) == otp_input:
+        otp_data = otp_storage.get(email)
+        if not otp_data:
+            return JsonResponse({"verified": False, "error": "OTP not found or expired"}, status=400)
+
+        if timezone.now() > otp_data["expiry"]:
             otp_storage.pop(email, None)
+            return JsonResponse({"verified": False, "error": "OTP expired"}, status=400)
 
-            # ✅ STORE VERIFIED EMAIL IN SESSION
-            request.session["student_email_verified"] = email
+        if otp_data["otp"] == otp_input:
+            otp_data["verified"] = True
+            otp_storage[email] = otp_data
+
+            if purpose == "signup":
+                request.session["student_email_verified"] = email
+                request.session["student_otp_verified_at"] = timezone.now().isoformat()
+            elif purpose == "forgot":
+                request.session["reset_email_verified"] = email
 
             return JsonResponse({"verified": True})
 
-        return JsonResponse({"verified": False})
+        return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
+
+    return JsonResponse({"error": "Invalid action"}, status=400)
 
 
 
 # ===============================
 # RESET PASSWORD
 # ===============================
-@csrf_exempt
+@csrf_protect
 def student_reset_password(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
 
-        if request.session.get("reset_email_verified") != data.get("email"):
-            return JsonResponse({"error": "OTP verification required"}, status=403)
+            if request.session.get("reset_email_verified") != data.get("email"):
+                return JsonResponse({"error": "OTP verification required"}, status=403)
 
-        student = Student.objects.filter(email=data.get("email")).first()
-        student.password = make_password(data.get("password"))
-        student.save(update_fields=["password"])
+            student = Student.objects.filter(email=data.get("email")).first()
+            student.password = make_password(data.get("password"))
+            student.save(update_fields=["password"])
 
-        request.session.pop("reset_email_verified", None)
-        return JsonResponse({"success": True})
+            request.session.pop("reset_email_verified", None)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            print("RESET PASSWORD ERROR:", e)
+            return JsonResponse({"error": "Internal server error"}, status=500)
 
     return render(request, "student_reset_password.html")
 
 
-@csrf_exempt
+
+
+@csrf_protect
 def teacher_reset_password(request):
     if request.method == "POST":
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
 
-        if request.session.get("reset_email_verified") != data.get("email"):
-            return JsonResponse({"error": "OTP verification required"}, status=403)
+            if request.session.get("reset_email_verified") != data.get("email"):
+                return JsonResponse({"error": "OTP verification required"}, status=403)
 
-        teacher = Teacher.objects.filter(email=data.get("email")).first()
-        teacher.password = make_password(data.get("password"))
-        teacher.save(update_fields=["password"])
+            teacher = Teacher.objects.filter(email=data.get("email")).first()
+            teacher.password = make_password(data.get("password"))
+            teacher.save(update_fields=["password"])
 
-        request.session.pop("reset_email_verified", None)
-        return JsonResponse({"success": True})
+            request.session.pop("reset_email_verified", None)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            print("RESET PASSWORD ERROR:", e)
+            return JsonResponse({"error": "Internal server error"}, status=500)
 
     return render(request, "teacher_reset_password.html")
 
