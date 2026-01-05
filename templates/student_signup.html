@@ -88,11 +88,9 @@
                     </div>
                 </div>
                 
-<<<<<<< HEAD
-                <form id="studentSignupForm" method="POST" action="{% url 'student_signup' %}">
-=======
                 <form id="studentSignupForm" method="POST">
->>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
+
+                <form id="studentSignupForm" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="face_image" name="face_image">
                     
@@ -460,11 +458,7 @@
                 </form>
                 
                 <div class="card-footer">
-<<<<<<< HEAD
-                    <p>Already have an account? <a href="{% url 'login' %}" class="signin-link">Sign In</a></p>
-=======
-                    <p>Already have an account? <a href="#" class="signin-link">Sign In</a></p>
->>>>>>> 4cd2a47fb587c3289f2b733b6a2fec32aa4e24d9
+                    <p>Already have an account? <a href="/student-login/" class="signin-link">Sign In</a></p>
                 </div>
             </div>
         </div>
