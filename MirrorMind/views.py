@@ -754,9 +754,6 @@ def teacher_reset_password(request):
                     "message": "OTP verified"
                 })
 
-            # =========================
-            # STEP 3 : RESET PASSWORD
-            # =========================
             elif action == "reset_password":
                 print("🔁 STEP 3 : RESET PASSWORD")
 
@@ -808,28 +805,37 @@ def teacher_reset_password(request):
 
 
 def check_student_exists(request):
-    """Check if email or enrollment already exists"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             email = data.get('email', '').strip()
-            enrollment = data.get('enrollment', '').strip()
-            
+            enrollment = data.get('enrollment_no', '').strip()
+       
+            if not email and not enrollment:
+                return JsonResponse(
+                    {'error': 'Email or enrollment required'},
+                    status=400
+                )
+
             email_exists = False
             enrollment_exists = False
-            
+
             if email:
                 email_exists = Student.objects.filter(email=email).exists()
-            
+
             if enrollment:
-                enrollment_exists = Student.objects.filter(enrollment_no=enrollment).exists()
-            
+                enrollment_exists = Student.objects.filter(
+                    enrollment_no=enrollment
+                ).exists()
+
             return JsonResponse({
                 'email_exists': email_exists,
                 'enrollment_exists': enrollment_exists
             })
-            
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-    
+
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+

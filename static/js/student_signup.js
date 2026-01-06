@@ -706,6 +706,11 @@ function initRealTimeValidation() {
     emailInput.addEventListener('input', function() {
         clearTimeout(emailTimeout);
         emailTimeout = setTimeout(async () => {
+            if (!validateEmail(email)) {
+                emailFeedback.className = 'validation-feedback';
+                return;
+            }
+
             const email = this.value.trim();
             if (email && validateEmail(email)) {
                 const isRegistered = await checkEmailRegistered(email);
@@ -727,6 +732,11 @@ function initRealTimeValidation() {
     enrollmentInput.addEventListener('input', function() {
         clearTimeout(enrollmentTimeout);
         enrollmentTimeout = setTimeout(async () => {
+            if (enrollment.length < 3) {
+                enrollmentFeedback.className = 'validation-feedback';
+                return;
+            }
+
             const enrollment = this.value.trim();
             if (enrollment) {
                 const isRegistered = await checkEnrollmentRegistered(enrollment);
@@ -757,7 +767,6 @@ async function checkEmailRegistered(email) {
             },
             body: JSON.stringify({
                 email: email,
-                enrollment: ''
             })
         });
         
@@ -779,7 +788,6 @@ async function checkEnrollmentRegistered(enrollment) {
                 'X-CSRFToken': csrfToken
             },
             body: JSON.stringify({
-                email: '',
                 enrollment: enrollment
             })
         });
