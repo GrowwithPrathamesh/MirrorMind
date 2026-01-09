@@ -105,11 +105,19 @@ function initFormNavigation() {
             const isAlreadyRegistered = await checkIfRegistered(email, enrollment);
             if (isAlreadyRegistered) {
                 showToast('Email or Enrollment already registered', 'error');
+
+                highlightInputError(document.getElementById('email'));
+                highlightInputError(document.getElementById('enrollment_no'));
+
+                shakeElement(document.getElementById('step1'));
+
                 continueBtn.innerHTML = originalText;
                 continueBtn.disabled = false;
-                return false;
+
+                // ❌ STOP USER HERE
+                return;
             }
-            
+
             const csrfToken = getCSRFToken();
             const response = await fetch('/email_otp_handler/', {
                 method: 'POST',
@@ -157,7 +165,7 @@ function initFormNavigation() {
                 },
                 body: JSON.stringify({
                     email: email,
-                    enrollment: enrollment
+                    enrollment_no: Number(enrollment)
                 })
             });
             
@@ -729,31 +737,31 @@ function initRealTimeValidation() {
         }, 500);
     });
     
-    enrollmentInput.addEventListener('input', function() {
+    enrollmentInput.addEventListener('input', function () {
         clearTimeout(enrollmentTimeout);
+
         enrollmentTimeout = setTimeout(async () => {
+            const enrollment = this.value.trim();   // ✅ first define
+
             if (enrollment.length < 3) {
                 enrollmentFeedback.className = 'validation-feedback';
                 return;
             }
 
-            const enrollment = this.value.trim();
-            if (enrollment) {
-                const isRegistered = await checkEnrollmentRegistered(enrollment);
-                if (isRegistered) {
-                    enrollmentFeedback.textContent = 'Enrollment already exists';
-                    enrollmentFeedback.className = 'validation-feedback invalid';
-                    highlightInputError(enrollmentInput);
-                } else {
-                    enrollmentFeedback.textContent = 'Enrollment available';
-                    enrollmentFeedback.className = 'validation-feedback valid';
-                    clearInputError(enrollmentInput);
-                }
+            const isRegistered = await checkEnrollmentRegistered(enrollment);
+
+            if (isRegistered) {
+                enrollmentFeedback.textContent = 'Enrollment already exists';
+                enrollmentFeedback.className = 'validation-feedback invalid';
+                highlightInputError(enrollmentInput);
             } else {
-                enrollmentFeedback.className = 'validation-feedback';
+                enrollmentFeedback.textContent = 'Enrollment available';
+                enrollmentFeedback.className = 'validation-feedback valid';
+                clearInputError(enrollmentInput);
             }
         }, 500);
     });
+
 }
 
 async function checkEmailRegistered(email) {
@@ -788,7 +796,7 @@ async function checkEnrollmentRegistered(enrollment) {
                 'X-CSRFToken': csrfToken
             },
             body: JSON.stringify({
-                enrollment: enrollment
+                enrollment_no: Number(enrollment)
             })
         });
         

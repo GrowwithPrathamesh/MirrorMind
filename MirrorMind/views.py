@@ -1,3 +1,4 @@
+import os
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.base import ContentFile
@@ -383,8 +384,9 @@ def teacher_signup(request):
 
 
 def send_email_otp(receiver_email, otp, purpose="signup"):
-    sender_email = "rakshak.connect@gmail.com"
-    sender_password = "vpxiebniktusbtxk" 
+
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
     subject = (
         "MirrorMind | Email Verification OTP"
@@ -401,12 +403,12 @@ def send_email_otp(receiver_email, otp, purpose="signup"):
 
     msg = MIMEText(body)
     msg["Subject"] = subject
-    msg["From"] = sender_email
+    msg["From"] = EMAIL_HOST_PASSWORD
     msg["To"] = receiver_email
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, sender_password)
+            server.login(EMAIL_HOST_PASSWORD, EMAIL_HOST_PASSWORD)
             server.send_message(msg)
         return True
     except Exception as e:
@@ -803,39 +805,34 @@ def teacher_reset_password(request):
     print("📄 Rendering teacher_reset_password.html")
     return render(request, "teacher_reset_password.html")
 
-
 def check_student_exists(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            print("RAW DATA FROM JS:", data)   # 🔥 ADD THIS
+
             email = data.get('email', '').strip()
-            enrollment = data.get('enrollment_no', '').strip()
-       
-            if not email and not enrollment:
-                return JsonResponse(
-                    {'error': 'Email or enrollment required'},
-                    status=400
-                )
+            enrollment_raw = data.get('enrollment_no', '')
+            print("ENROLLMENT RAW:", enrollment_raw, type(enrollment_raw))
 
-            email_exists = False
+            enrollment = None
+            if enrollment_raw != '':
+                enrollment = int(enrollment_raw)
+
+            print("ENROLLMENT FINAL:", enrollment, type(enrollment))
+
             enrollment_exists = False
-
-            if email:
-                email_exists = Student.objects.filter(email=email).exists()
-
-            if enrollment:
+            if enrollment is not None:
                 enrollment_exists = Student.objects.filter(
                     enrollment_no=enrollment
                 ).exists()
 
+            print("ENROLLMENT EXISTS:", enrollment_exists)
+
             return JsonResponse({
-                'email_exists': email_exists,
                 'enrollment_exists': enrollment_exists
             })
 
         except Exception as e:
+            print("ERROR:", e)
             return JsonResponse({'error': str(e)}, status=400)
-
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
