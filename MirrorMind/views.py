@@ -281,7 +281,7 @@ def student_signup(request):
 
                 student = Student.objects.create(
                     username=enrollment_no,
-                    email=email,
+                    email=email,    
                     password=make_password(password),
                     first_name=first_name,
                     last_name=last_name,
