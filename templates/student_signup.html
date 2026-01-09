@@ -23,36 +23,6 @@
     <div class="container">
         <div class="logo-header">
             <div class="logo-gradient">
-                <div class="logo-animation">
-                    <svg class="logo-svg" width="120" height="120" viewBox="0 0 120 120">
-                        <defs>
-                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#00C6FF">
-                                    <animate attributeName="stop-color" values="#00C6FF;#00F5D4;#8B5CF6;#22D3EE;#00C6FF" dur="4s" repeatCount="indefinite"/>
-                                </stop>
-                                <stop offset="100%" stop-color="#8B5CF6">
-                                    <animate attributeName="stop-color" values="#8B5CF6;#22D3EE;#00C6FF;#00F5D4;#8B5CF6" dur="4s" repeatCount="indefinite"/>
-                                </stop>
-                            </linearGradient>
-                            <filter id="glow">
-                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                <feMerge>
-                                    <feMergeNode in="coloredBlur"/>
-                                    <feMergeNode in="SourceGraphic"/>
-                                </feMerge>
-                            </filter>
-                        </defs>
-                        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#logoGradient)" stroke-width="3" stroke-dasharray="314" stroke-dashoffset="314">
-                            <animate attributeName="stroke-dashoffset" values="314;0;314" dur="3s" repeatCount="indefinite"/>
-                        </circle>
-                        <path d="M40,40 L80,40 L80,80 L40,80 Z" fill="none" stroke="url(#logoGradient)" stroke-width="3" stroke-linecap="round">
-                            <animateTransform attributeName="transform" type="rotate" from="0 60 60" to="360 60 60" dur="8s" repeatCount="indefinite"/>
-                        </path>
-                        <path d="M50,50 L70,50 L70,70 L50,70 Z" fill="none" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round">
-                            <animateTransform attributeName="transform" type="rotate" from="360 60 60" to="0 60 60" dur="6s" repeatCount="indefinite"/>
-                        </path>
-                    </svg>
-                </div>
                 <h1 class="logo-text">MirrorMind</h1>
             </div>
             <p class="tagline">AI-Powered Smart Classroom Registration</p>

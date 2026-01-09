@@ -303,16 +303,6 @@ body.no-scroll {
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.signup-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #00C6FF, #00F5D4, #8B5CF6, #22D3EE);
-    border-radius: 24px 24px 0 0;
-}
 
 .card-header {
     text-align: center;

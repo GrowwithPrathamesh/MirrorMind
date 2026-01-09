@@ -1,25 +1,29 @@
 import os
+import base64
+import json
+import random
+import smtplib
+
+from datetime import datetime, timedelta
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.cache import cache
 from django.utils import timezone
 
-from datetime import datetime, timedelta
-import base64
-import json
-import random
-import smtplib
 from email.mime.text import MIMEText
 
 from students.models import Student, StudentFace
 from teachers.models import Teacher
 
 
+# 🔒 CONSTANT
+OTP_EXPIRY_MINUTES = 5
+
+# ❗ Kept as requested (not used anymore)
 otp_storage = {}
 
 
@@ -63,7 +67,8 @@ def student_login(request):
 
 # ===============================
 # TEACHER LOGIN
-@csrf_exempt  # remove this if CSRF is handled via AJAX
+# ===============================
+@csrf_exempt
 def teacher_login(request):
     print("➡️ teacher_login view called")
 
@@ -79,36 +84,24 @@ def teacher_login(request):
 
             if not email or not password:
                 print("❌ Email or password missing")
-                return JsonResponse(
-                    {"success": False, "error": "Email and password are required"},
-                    status=400
-                )
+                return JsonResponse({"success": False, "error": "Email and password are required"}, status=400)
 
             teacher = Teacher.objects.filter(email=email).first()
 
             if not teacher:
                 print("❌ Teacher not found for email:", email)
-                return JsonResponse(
-                    {"success": False, "error": "Teacher not found"},
-                    status=404
-                )
+                return JsonResponse({"success": False, "error": "Teacher not found"}, status=404)
 
             print("✅ Teacher found:", teacher.full_name())
 
             if not teacher.is_active:
                 print("❌ Teacher account inactive:", email)
-                return JsonResponse(
-                    {"success": False, "error": "Account is inactive"},
-                    status=403
-                )
+                return JsonResponse({"success": False, "error": "Account is inactive"}, status=403)
 
-            # ❗ PLAIN TEXT PASSWORD CHECK (NO HASHING)
-            if password != teacher.password:
+            # ✅ FIXED PASSWORD CHECK
+            if not check_password(password, teacher.password):
                 print("❌ Invalid password for:", email)
-                return JsonResponse(
-                    {"success": False, "error": "Invalid credentials"},
-                    status=401
-                )
+                return JsonResponse({"success": False, "error": "Invalid credentials"}, status=401)
 
             request.session["teacher_id"] = teacher.id
             request.session["user_type"] = "teacher"
@@ -117,21 +110,12 @@ def teacher_login(request):
             teacher.save(update_fields=["last_login"])
 
             print("✅ Teacher login successful:", email)
-            print("🧠 Session teacher_id:", request.session.get("teacher_id"))
-
-            return JsonResponse(
-                {"success": True, "message": "Teacher login successful"},
-                status=200
-            )
+            return JsonResponse({"success": True, "message": "Teacher login successful"})
 
         except Exception as e:
             print("🔥 TEACHER LOGIN ERROR:", str(e))
-            return JsonResponse(
-                {"success": False, "error": "Internal server error"},
-                status=500
-            )
+            return JsonResponse({"success": False, "error": "Internal server error"}, status=500)
 
-    print("ℹ️ GET request – rendering login page")
     return render(request, "teacher_login.html")
 
 
@@ -260,12 +244,14 @@ def student_signup(request):
 
             print("📸 Parsing face image")
             try:
+                if ";base64," not in face_image_base64:
+                    raise ValueError("Missing base64 data")
                 format_part, imgstr = face_image_base64.split(";base64,")
                 print("format_part:", format_part)
 
                 if not format_part.startswith("data:image/"):
                     print("❌ Invalid image format")
-                    raise ValueError
+                    raise ValueError("Invalid image format")
 
                 ext = format_part.split("/")[-1]
                 print("image extension:", ext)
@@ -345,6 +331,8 @@ def student_signup(request):
     return render(request, "student_signup.html")
 
 
+
+
 # ===============================
 # TEACHER SIGNUP
 # ===============================
@@ -383,34 +371,106 @@ def teacher_signup(request):
 
 
 
-def send_email_otp(receiver_email, otp, purpose="signup"):
 
-    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-    subject = (
-        "MirrorMind | Email Verification OTP"
-        if purpose == "signup"
-        else "MirrorMind | Password Reset OTP"
-    )
+def send_email_otp(receiver_email, otp, purpose="signup", role="student"):
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")        # your gmail
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")  # app password
 
-    body = f"""Your OTP is:
+    # ---------- SUBJECT ----------
+    if purpose == "signup":
+        subject = f"MirrorMind | {role.capitalize()} Email Verification OTP"
+    else:
+        subject = f"MirrorMind | {role.capitalize()} Password Reset OTP"
 
-        {otp}
+    # ---------- BODY ----------
+    if purpose == "signup" and role == "student":
+        body = f"""
+Hello Student 👋,
 
-        Do not share this OTP with anyone.
-        """
+Welcome to MirrorMind 🎓
 
+Your Email Verification OTP is:
+
+🔐 {otp}
+
+Please enter this OTP to complete your student registration.
+This OTP is valid for 5 minutes.
+
+⚠️ Do not share this OTP with anyone.
+
+– MirrorMind Team
+"""
+
+    elif purpose == "signup" and role == "teacher":
+        body = f"""
+Hello Teacher 👨‍🏫,
+
+Welcome to MirrorMind – Smart Classroom Platform.
+
+Your Email Verification OTP is:
+
+🔐 {otp}
+
+Verify your email to activate your teacher account.
+This OTP is valid for 5 minutes.
+
+⚠️ Do not share this OTP with anyone.
+
+– MirrorMind Team
+"""
+
+    elif purpose == "forgot" and role == "student":
+        body = f"""
+Hello Student 👋,
+
+We received a request to reset your MirrorMind password.
+
+Your Password Reset OTP is:
+
+🔐 {otp}
+
+Use this OTP to set a new password.
+This OTP is valid for 5 minutes.
+
+If you did not request this, please ignore this email.
+
+– MirrorMind Team
+"""
+
+    elif purpose == "forgot" and role == "teacher":
+        body = f"""
+Hello Teacher 👨‍🏫,
+
+A password reset request was initiated for your MirrorMind account.
+
+Your Password Reset OTP is:
+
+🔐 {otp}
+
+Use this OTP to reset your password.
+This OTP is valid for 5 minutes.
+
+If this wasn't you, please ignore this email.
+
+– MirrorMind Team
+"""
+
+    else:
+        return False
+
+    # ---------- EMAIL SEND ----------
     msg = MIMEText(body)
     msg["Subject"] = subject
-    msg["From"] = EMAIL_HOST_PASSWORD
+    msg["From"] = EMAIL_HOST_USER
     msg["To"] = receiver_email
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(EMAIL_HOST_PASSWORD, EMAIL_HOST_PASSWORD)
+            server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
             server.send_message(msg)
         return True
+
     except Exception as e:
         print("EMAIL OTP ERROR:", e)
         return False
@@ -419,6 +479,7 @@ def send_email_otp(receiver_email, otp, purpose="signup"):
 
 @csrf_protect
 def email_otp_handler(request):
+    # ✅ STRICT POST CHECK
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
@@ -429,63 +490,94 @@ def email_otp_handler(request):
 
     action = data.get("action")
     email = data.get("email")
-    purpose = data.get("purpose")
+    purpose = data.get("purpose")   # signup | forgot
+    role = data.get("role", "student")  # student | teacher
 
     if not action or not email or not purpose:
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
+    # =========================
+    # SEND OTP
+    # =========================
     if action == "send_otp":
-        if purpose == "signup" and Student.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email already registered"}, status=400)
 
-        if purpose == "forgot" and not Student.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email not registered"}, status=400)
+        # 🔍 EMAIL EXISTENCE CHECK
+        if purpose == "signup":
+            if role == "student" and Student.objects.filter(email=email).exists():
+                return JsonResponse({"error": "Email already registered"}, status=400)
+
+            if role == "teacher" and Teacher.objects.filter(email=email).exists():
+                return JsonResponse({"error": "Email already registered"}, status=400)
+
+        if purpose == "forgot":
+            if role == "student" and not Student.objects.filter(email=email).exists():
+                return JsonResponse({"error": "Email not registered"}, status=400)
+
+            if role == "teacher" and not Teacher.objects.filter(email=email).exists():
+                return JsonResponse({"error": "Email not registered"}, status=400)
 
         otp = str(random.randint(100000, 999999))
-        expiry = timezone.now() + timedelta(minutes=2)
+        expiry = timezone.now() + timedelta(minutes=5)
 
-        otp_storage[email] = {
-            "otp": otp,
-            "expiry": expiry,
-            "verified": False
-        }
+        # ✅ SESSION-BASED OTP (SAFE)
+        request.session["otp_email"] = email
+        request.session["otp_code"] = otp
+        request.session["otp_expiry"] = expiry.isoformat()
+        request.session["otp_purpose"] = purpose
+        request.session["otp_role"] = role
 
-        mail_sent = send_email_otp(email, otp, purpose)
+        mail_sent = send_email_otp(email, otp, purpose, role)
 
         if not mail_sent:
             return JsonResponse({"error": "Failed to send OTP"}, status=500)
 
-        request.session[f"{purpose}_otp_time"] = timezone.now().isoformat()
-
         return JsonResponse({"success": True})
 
+
+    # =========================
+    # VERIFY OTP
+    # =========================
     elif action == "verify_otp":
         otp_input = data.get("otp")
 
         if not otp_input:
             return JsonResponse({"verified": False, "error": "OTP required"}, status=400)
 
-        otp_data = otp_storage.get(email)
-        if not otp_data:
-            return JsonResponse({"verified": False, "error": "OTP not found or expired"}, status=400)
+        session_otp = request.session.get("otp_code")
+        session_email = request.session.get("otp_email")
+        session_expiry = request.session.get("otp_expiry")
+        session_purpose = request.session.get("otp_purpose")
+        session_role = request.session.get("otp_role")
 
-        if timezone.now() > otp_data["expiry"]:
-            otp_storage.pop(email, None)
+        if not all([session_otp, session_email, session_expiry]):
+            return JsonResponse({"verified": False, "error": "OTP expired or not sent"}, status=400)
+
+        if email != session_email:
+            return JsonResponse({"verified": False, "error": "Email mismatch"}, status=400)
+
+        if timezone.now() > datetime.fromisoformat(session_expiry):
+            request.session.flush()
             return JsonResponse({"verified": False, "error": "OTP expired"}, status=400)
 
-        if otp_data["otp"] == otp_input:
-            otp_data["verified"] = True
-            otp_storage[email] = otp_data
+        if otp_input != session_otp:
+            return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
 
-            if purpose == "signup":
+        # ✅ MARK VERIFIED
+        if session_purpose == "signup":
+            if session_role == "student":
                 request.session["student_email_verified"] = email
                 request.session["student_otp_verified_at"] = timezone.now().isoformat()
-            elif purpose == "forgot":
-                request.session["reset_email_verified"] = email
+            else:
+                request.session["teacher_email_verified"] = email
 
-            return JsonResponse({"verified": True})
+        elif session_purpose == "forgot":
+            request.session["reset_email_verified"] = email
 
-        return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
+        # 🧹 CLEAN OTP SESSION
+        request.session.pop("otp_code", None)
+        request.session.pop("otp_expiry", None)
+
+        return JsonResponse({"verified": True})
 
     return JsonResponse({"error": "Invalid action"}, status=400)
 
@@ -529,14 +621,16 @@ def student_reset_password(request):
                 otp = str(random.randint(100000, 999999))
                 expiry = timezone.now() + timedelta(minutes=5)
 
+                # ✅ SESSION-BASED OTP
                 request.session["reset_otp"] = otp
                 request.session["reset_otp_email"] = email
                 request.session["reset_otp_expiry"] = expiry.isoformat()
+                request.session["reset_otp_role"] = "student"
 
                 print("🔐 OTP Generated:", otp)
                 print("⏰ OTP Expiry:", expiry)
 
-                email_status = send_email_otp(email, otp, purpose="forgot")
+                email_status = send_email_otp(email, otp, purpose="forgot", role="student")
                 print("📤 Email send status:", email_status)
 
                 if not email_status:
@@ -575,11 +669,9 @@ def student_reset_password(request):
 
                 if timezone.now() > datetime.fromisoformat(session_expiry):
                     print("❌ OTP expired by time")
-
                     request.session.pop("reset_otp", None)
                     request.session.pop("reset_otp_email", None)
                     request.session.pop("reset_otp_expiry", None)
-
                     return JsonResponse({"error": "OTP expired"}, status=403)
 
                 if otp_input != session_otp:
@@ -587,7 +679,6 @@ def student_reset_password(request):
                     return JsonResponse({"error": "Invalid OTP"}, status=403)
 
                 request.session["reset_email_verified"] = email
-
                 request.session.pop("reset_otp", None)
                 request.session.pop("reset_otp_expiry", None)
 
@@ -651,7 +742,9 @@ def student_reset_password(request):
     return render(request, "student_reset_password.html")
 
 
-
+# ===============================
+# TEACHER RESET PASSWORD
+# ===============================
 @csrf_protect
 def teacher_reset_password(request):
     print("➡️ teacher_reset_password VIEW CALLED")
@@ -687,14 +780,16 @@ def teacher_reset_password(request):
                 otp = str(random.randint(100000, 999999))
                 expiry = timezone.now() + timedelta(minutes=5)
 
+                # ✅ SESSION-BASED OTP
                 request.session["reset_otp"] = otp
                 request.session["reset_otp_email"] = email
                 request.session["reset_otp_expiry"] = expiry.isoformat()
+                request.session["reset_otp_role"] = "teacher"
 
                 print("🔐 OTP Generated:", otp)
                 print("⏰ OTP Expiry:", expiry)
 
-                email_status = send_email_otp(email, otp, purpose="forgot")
+                email_status = send_email_otp(email, otp, purpose="forgot", role="teacher")
                 print("📤 Email send status:", email_status)
 
                 if not email_status:
@@ -733,11 +828,9 @@ def teacher_reset_password(request):
 
                 if timezone.now() > datetime.fromisoformat(session_expiry):
                     print("❌ OTP expired by time")
-
                     request.session.pop("reset_otp", None)
                     request.session.pop("reset_otp_email", None)
                     request.session.pop("reset_otp_expiry", None)
-
                     return JsonResponse({"error": "OTP expired"}, status=403)
 
                 if otp_input != session_otp:
@@ -745,7 +838,6 @@ def teacher_reset_password(request):
                     return JsonResponse({"error": "Invalid OTP"}, status=403)
 
                 request.session["reset_email_verified"] = email
-
                 request.session.pop("reset_otp", None)
                 request.session.pop("reset_otp_expiry", None)
 
@@ -756,6 +848,9 @@ def teacher_reset_password(request):
                     "message": "OTP verified"
                 })
 
+            # =========================
+            # STEP 3 : RESET PASSWORD
+            # =========================
             elif action == "reset_password":
                 print("🔁 STEP 3 : RESET PASSWORD")
 
@@ -804,6 +899,8 @@ def teacher_reset_password(request):
 
     print("📄 Rendering teacher_reset_password.html")
     return render(request, "teacher_reset_password.html")
+
+
 
 def check_student_exists(request):
     if request.method == 'POST':
