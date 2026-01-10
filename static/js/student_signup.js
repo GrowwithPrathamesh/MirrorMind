@@ -96,28 +96,38 @@ function initFormNavigation() {
             return false;
         }
         
+        if (!validateEmail(email)) {
+            showToast('Please enter a valid email address', 'error');
+            highlightInputError(document.getElementById('email'));
+            return false;
+        }
+        
+        if (enrollment.length < 3) {
+            showToast('Enrollment number is too short', 'error');
+            highlightInputError(document.getElementById('enrollment_no'));
+            return false;
+        }
+        
         const continueBtn = document.getElementById('step1Continue');
         const originalText = continueBtn.innerHTML;
-        continueBtn.innerHTML = '<div class="spinner"></div> Sending OTP...';
+        continueBtn.innerHTML = '<div class="spinner"></div> Checking...';
         continueBtn.disabled = true;
         
         try {
-            const isAlreadyRegistered = await checkIfRegistered(email, enrollment);
-            if (isAlreadyRegistered) {
-                showToast('Email or Enrollment already registered', 'error');
-
+            // Only check email registration (enrollment check removed)
+            const emailRegistered = await checkEmailRegistered(email);
+            
+            if (emailRegistered) {
+                showToast('Email already registered', 'error');
                 highlightInputError(document.getElementById('email'));
-                highlightInputError(document.getElementById('enrollment_no'));
-
+                document.getElementById('email_feedback').textContent = 'Email already registered';
+                document.getElementById('email_feedback').className = 'validation-feedback invalid';
                 shakeElement(document.getElementById('step1'));
-
                 continueBtn.innerHTML = originalText;
                 continueBtn.disabled = false;
-
-                // ❌ STOP USER HERE
                 return;
             }
-
+            
             const csrfToken = getCSRFToken();
             const response = await fetch('/email_otp_handler/', {
                 method: 'POST',
@@ -151,29 +161,6 @@ function initFormNavigation() {
             showToast('Failed to send OTP. Please try again.', 'error');
             continueBtn.innerHTML = originalText;
             continueBtn.disabled = false;
-        }
-    }
-    
-    async function checkIfRegistered(email, enrollment) {
-        try {
-            const csrfToken = getCSRFToken();
-            const response = await fetch('/check_student_exists/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    email: email,
-                    enrollment_no: Number(enrollment)
-                })
-            });
-            
-            const data = await response.json();
-            return data.email_exists || data.enrollment_exists;
-        } catch (error) {
-            console.error('Error checking registration:', error);
-            return false;
         }
     }
     
@@ -272,6 +259,9 @@ function validateField(field) {
             if (!field.value.trim()) {
                 isValid = false;
                 errorMessage = 'Enrollment number is required';
+            } else if (field.value.trim().length < 3) {
+                isValid = false;
+                errorMessage = 'Enrollment number is too short';
             }
             break;
             
@@ -347,7 +337,7 @@ function validateStep2() {
 }
 
 function validateStep3() {
-    const faceCaptured = document.getElementById('captureSuccess').style.display === 'flex';
+    const faceCaptured = document.getElementById('captureSuccess').style.display !== 'none';
     
     if (!faceCaptured) {
         showToast('Please capture your face before continuing', 'error');
@@ -709,59 +699,44 @@ function initRealTimeValidation() {
     const emailFeedback = document.getElementById('email_feedback');
     const enrollmentFeedback = document.getElementById('enrollment_feedback');
     
-    let emailTimeout, enrollmentTimeout;
+    let emailTimeout;
     
     emailInput.addEventListener('input', function() {
         clearTimeout(emailTimeout);
         emailTimeout = setTimeout(async () => {
+            const email = this.value.trim();
             if (!validateEmail(email)) {
                 emailFeedback.className = 'validation-feedback';
                 return;
             }
 
-            const email = this.value.trim();
-            if (email && validateEmail(email)) {
-                const isRegistered = await checkEmailRegistered(email);
-                if (isRegistered) {
-                    emailFeedback.textContent = 'Email already registered';
-                    emailFeedback.className = 'validation-feedback invalid';
-                    highlightInputError(emailInput);
-                } else {
-                    emailFeedback.textContent = 'Email available';
-                    emailFeedback.className = 'validation-feedback valid';
-                    clearInputError(emailInput);
-                }
+            const isRegistered = await checkEmailRegistered(email);
+            if (isRegistered) {
+                emailFeedback.textContent = 'Email already registered';
+                emailFeedback.className = 'validation-feedback invalid';
+                highlightInputError(emailInput);
             } else {
-                emailFeedback.className = 'validation-feedback';
+                emailFeedback.textContent = 'Email available';
+                emailFeedback.className = 'validation-feedback valid';
+                clearInputError(emailInput);
             }
         }, 500);
     });
     
     enrollmentInput.addEventListener('input', function () {
-        clearTimeout(enrollmentTimeout);
-
-        enrollmentTimeout = setTimeout(async () => {
-            const enrollment = this.value.trim();   // ✅ first define
-
-            if (enrollment.length < 3) {
-                enrollmentFeedback.className = 'validation-feedback';
-                return;
-            }
-
-            const isRegistered = await checkEnrollmentRegistered(enrollment);
-
-            if (isRegistered) {
-                enrollmentFeedback.textContent = 'Enrollment already exists';
-                enrollmentFeedback.className = 'validation-feedback invalid';
-                highlightInputError(enrollmentInput);
-            } else {
-                enrollmentFeedback.textContent = 'Enrollment available';
-                enrollmentFeedback.className = 'validation-feedback valid';
-                clearInputError(enrollmentInput);
-            }
-        }, 500);
+        const enrollment = this.value.trim();
+        if (enrollment.length >= 3) {
+            enrollmentFeedback.textContent = 'Enrollment accepted';
+            enrollmentFeedback.className = 'validation-feedback valid';
+            clearInputError(enrollmentInput);
+        } else if (enrollment.length > 0) {
+            enrollmentFeedback.textContent = 'Enrollment too short';
+            enrollmentFeedback.className = 'validation-feedback invalid';
+            highlightInputError(enrollmentInput);
+        } else {
+            enrollmentFeedback.className = 'validation-feedback';
+        }
     });
-
 }
 
 async function checkEmailRegistered(email) {
@@ -779,31 +754,9 @@ async function checkEmailRegistered(email) {
         });
         
         const data = await response.json();
-        return data.email_exists;
+        return data.email_exists === true;
     } catch (error) {
         console.error('Error checking email:', error);
-        return false;
-    }
-}
-
-async function checkEnrollmentRegistered(enrollment) {
-    try {
-        const csrfToken = getCSRFToken();
-        const response = await fetch('/check_student_exists/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                enrollment_no: Number(enrollment)
-            })
-        });
-        
-        const data = await response.json();
-        return data.enrollment_exists;
-    } catch (error) {
-        console.error('Error checking enrollment:', error);
         return false;
     }
 }
@@ -921,15 +874,19 @@ function initPasswordStrength() {
 function initFaceCapture() {
     const captureBtn = document.getElementById('captureFaceBtn');
     const takePhotoBtn = document.getElementById('takePhotoBtn');
+    const retakePhotoBtn = document.getElementById('retakePhotoBtn');
     const webcamPreview = document.getElementById('webcamPreview');
     const webcamVideo = document.getElementById('webcamVideo');
     const webcamCanvas = document.getElementById('webcamCanvas');
     const captureSuccess = document.getElementById('captureSuccess');
     const continueAfterCapture = document.getElementById('continueAfterCapture');
     const webcamPlaceholder = document.querySelector('.webcam-placeholder');
+    const capturedPreview = document.getElementById('capturedPreview');
+    const cameraPreviewSection = document.getElementById('cameraPreviewSection');
     
     let stream = null;
     let isCameraActive = false;
+    let capturedImageData = null;
     
     if (!captureBtn) return;
     
@@ -941,6 +898,10 @@ function initFaceCapture() {
     
     takePhotoBtn.addEventListener('click', function() {
         captureFace();
+    });
+    
+    retakePhotoBtn.addEventListener('click', function() {
+        retakePhoto();
     });
     
     async function startCamera() {
@@ -987,49 +948,46 @@ function initFaceCapture() {
             console.error('Error accessing camera:', error);
             showToast('Failed to access camera. Please check permissions.', 'error');
             
-            captureBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg> Start Camera';
+            captureBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/></svg> Start Camera';
             captureBtn.disabled = false;
         }
     }
     
     function captureFace() {
-        if (webcamVideo.videoWidth === 0 || webcamVideo.videoHeight === 0) {
-            showToast("Camera not ready. Please wait a second.", "error");
-            return;
-        }
-
         if (!stream || !isCameraActive) return;
         
-        const context = webcamCanvas.getContext('2d');
+        // Ensure canvas is properly sized
         webcamCanvas.width = webcamVideo.videoWidth;
         webcamCanvas.height = webcamVideo.videoHeight;
+        
+        const context = webcamCanvas.getContext('2d');
         context.drawImage(webcamVideo, 0, 0, webcamCanvas.width, webcamCanvas.height);
         
-        const imageData = webcamCanvas.toDataURL('image/jpeg', 0.9);
+        // Convert canvas to base64 image
+        capturedImageData = webcamCanvas.toDataURL('image/jpeg', 0.9);
 
-        if (imageData === "data:," || imageData.length < 100) {
+        // Validate image data
+        if (!capturedImageData || capturedImageData.length < 100) {
             showToast("Face capture failed. Please try again.", "error");
             return;
         }
 
+        // Store in hidden input
+        document.getElementById('face_image').value = capturedImageData;
         
-        document.getElementById('face_image').value = imageData;
+        // Display captured image preview
+        capturedPreview.src = capturedImageData;
+        cameraPreviewSection.style.display = 'block';
         
+        // Update UI states
         captureSuccess.style.display = 'flex';
         continueAfterCapture.disabled = false;
-        
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
-            isCameraActive = false;
-        }
-        
-        webcamVideo.style.display = 'none';
-        webcamPlaceholder.style.display = 'flex';
         takePhotoBtn.style.display = 'none';
-        captureBtn.style.display = 'block';
-        captureBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg> Start Camera';
         
+        // Show camera feed to indicate it's still active
+        webcamVideo.style.display = 'block';
+        
+        // Create flash effect
         const flash = document.createElement('div');
         flash.style.position = 'absolute';
         flash.style.top = '0';
@@ -1039,7 +997,7 @@ function initFaceCapture() {
         flash.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
         flash.style.borderRadius = '24px';
         flash.style.animation = 'fadeIn 0.2s ease-out forwards';
-        flash.style.zIndex = '1';
+        flash.style.zIndex = '2';
         webcamPreview.appendChild(flash);
         
         setTimeout(() => {
@@ -1047,8 +1005,51 @@ function initFaceCapture() {
             setTimeout(() => flash.remove(), 300);
         }, 200);
         
-        showToast('Face captured successfully!', 'success');
+        showToast('Face captured successfully! You can retake if needed.', 'success');
     }
+    
+    function retakePhoto() {
+        // Hide preview section
+        cameraPreviewSection.style.display = 'none';
+        captureSuccess.style.display = 'none';
+        continueAfterCapture.disabled = true;
+        
+        // Clear stored image
+        capturedImageData = null;
+        document.getElementById('face_image').value = '';
+        capturedPreview.src = '';
+        
+        // Show take photo button
+        takePhotoBtn.style.display = 'block';
+        
+        // Show camera feed
+        webcamVideo.style.display = 'block';
+        
+        showToast('Ready to capture again. Position your face in the frame.', 'info');
+    }
+    
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            isCameraActive = false;
+        }
+        
+        webcamVideo.style.display = 'none';
+        webcamVideo.srcObject = null;
+        webcamPlaceholder.style.display = 'flex';
+        captureBtn.style.display = 'block';
+        captureBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/></svg> Start Camera';
+        takePhotoBtn.style.display = 'none';
+        webcamPreview.classList.remove('active');
+    }
+    
+    // Clean up camera when leaving step 3
+    document.addEventListener('navigateStep', function(e) {
+        if (e.detail && e.detail.step !== 3) {
+            stopCamera();
+        }
+    });
 }
 
 function initOTPHandling() {
@@ -1072,7 +1073,6 @@ function initOTPHandling() {
             updateOTPValue();
             hideValidationError('otp_error');
 
-            // ✅ AUTO VERIFY WHEN OTP COMPLETE
             if (isOTPComplete()) {
                 verifyOTP();
             }
@@ -1362,7 +1362,7 @@ function initFormSubmission() {
             const data = await response.json();
             
             if (response.ok && data.success) {
-                showToast('Registration successful! Redirecting to dashboard...', 'success');
+                showToast('Registration successful! Redirecting to Login...', 'success');
                 
                 setTimeout(() => {
                     window.location.href = '/student-login/';
@@ -1389,7 +1389,7 @@ function initFormSubmission() {
 }
 
 function initToastSystem() {
-    // Toast system already initialized
+    // Toast system is already initialized
 }
 
 function showToast(message, type = 'info') {

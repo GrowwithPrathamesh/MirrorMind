@@ -23,12 +23,16 @@ from teachers.models import Teacher
 # 🔒 CONSTANT
 OTP_EXPIRY_MINUTES = 5
 
-# ❗ Kept as requested (not used anymore)
+
+
 otp_storage = {}
 
 
 def home(request):
     return render(request, "home.html")
+
+
+
 
 
 # ===============================
@@ -63,6 +67,11 @@ def student_login(request):
             return JsonResponse({"success": False, "error": "Internal server error"}, status=500)
 
     return render(request, "student_login.html")
+
+
+
+
+
 
 
 # ===============================
@@ -119,173 +128,110 @@ def teacher_login(request):
     return render(request, "teacher_login.html")
 
 
+
+
+
 # ===============================
 # STUDENT SIGNUP
 # ===============================
 @csrf_protect
 def student_signup(request):
-    print("➡️ student_signup view called")
-
     if request.method == "POST":
-        print("✅ REQUEST METHOD = POST")
-
         try:
-            print("🔹 Entered TRY block")
-
             data = request.POST
-            print("📦 request.POST data:", data)
-
             first_name = data.get("first_name", "").strip()
-            print("first_name:", first_name)
-
             last_name = data.get("last_name", "").strip()
-            print("last_name:", last_name)
-
             email = data.get("email", "").strip()
-            print("email:", email)
-
             enrollment_no = data.get("enrollment_no", "").strip()
-            print("enrollment_no:", enrollment_no)
-
             department = data.get("department", "").strip()
-            print("department:", department)
-
             dob_raw = data.get("dob", "").strip()
-            print("dob_raw:", dob_raw)
-
             password = data.get("password", "")
-            print("password present:", bool(password))
-
             confirm_password = data.get("confirm_password", "")
-            print("confirm_password present:", bool(confirm_password))
-
             terms_accepted = data.get("terms")
-            print("terms_accepted:", terms_accepted)
-
             parent_name = data.get("parent_name", "").strip()
-            print("parent_name:", parent_name)
-
             parent_email = data.get("parent_email", "").strip()
-            print("parent_email:", parent_email)
-
             parent_mobile = data.get("parent_mobile", "").strip()
-            print("parent_mobile:", parent_mobile)
-
             face_image_base64 = data.get("face_image")
-            print("face_image_base64 present:", bool(face_image_base64))
 
-            print("🔍 Checking required fields")
-            if not all([
-                first_name, last_name, email,
-                enrollment_no, department,
-                dob_raw, password, confirm_password
-            ]):
-                print("❌ Missing required fields")
+            # --------------------------
+            # Required fields validation
+            # --------------------------
+            if not all([first_name, last_name, email, department, dob_raw, password, confirm_password]):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
 
-            print("🔍 Checking password match")
             if password != confirm_password:
-                print("❌ Passwords do not match")
                 return JsonResponse({"error": "Passwords do not match"}, status=400)
 
-            print("🔍 Checking terms acceptance")
+            if Student.objects.filter(email=email).exists():
+                return JsonResponse({"error": "Email already registered"}, status=400)
+
             if not terms_accepted:
-                print("❌ Terms not accepted")
                 return JsonResponse({"error": "Terms not accepted"}, status=400)
 
+            # --------------------------
+            # OTP verification check
+            # --------------------------
             verified_email = request.session.get("student_email_verified")
             otp_verified_at = request.session.get("student_otp_verified_at")
 
-            print("📧 verified_email from session:", verified_email)
-            print("⏱️ otp_verified_at from session:", otp_verified_at)
-
             if not verified_email or verified_email != email:
-                print("❌ Email not verified or mismatch")
-                return JsonResponse(
-                    {"error": "Email not verified. Please complete OTP verification."},
-                    status=403
-                )
+                return JsonResponse({"error": "Email not verified. Please complete OTP verification."}, status=403)
 
             if not otp_verified_at:
-                print("❌ OTP verification timestamp missing")
                 return JsonResponse({"error": "OTP verification required"}, status=403)
 
-            print("⏳ Parsing OTP verified time")
             verified_time = datetime.fromisoformat(otp_verified_at)
             expiry_time = verified_time + timedelta(minutes=2)
 
-            print("verified_time:", verified_time)
-            print("expiry_time:", expiry_time)
-            print("current_time:", timezone.now())
-
             if timezone.now() > expiry_time:
-                print("❌ OTP expired")
                 request.session.pop("student_email_verified", None)
                 request.session.pop("student_otp_verified_at", None)
-                return JsonResponse(
-                    {"error": "OTP verification expired. Please verify again."},
-                    status=403
-                )
+                return JsonResponse({"error": "OTP verification expired. Please verify again."}, status=403)
 
-            print("🔍 Checking duplicate email")
-            if Student.objects.filter(email=email).exists():
-                print("❌ Email already registered")
-                return JsonResponse({"error": "Email already registered"}, status=400)
-
-            print("🔍 Checking duplicate enrollment")
-            if Student.objects.filter(enrollment_no=enrollment_no).exists():
-                print("❌ Enrollment already exists")
-                return JsonResponse({"error": "Enrollment already exists"}, status=400)
-
-            print("📸 Checking face image")
+            # --------------------------
+            # Face capture validation
+            # --------------------------
             if not face_image_base64:
-                print("❌ Face image missing")
                 return JsonResponse({"error": "Face capture required"}, status=400)
 
-            print("📸 Parsing face image")
             try:
                 if ";base64," not in face_image_base64:
                     raise ValueError("Missing base64 data")
                 format_part, imgstr = face_image_base64.split(";base64,")
-                print("format_part:", format_part)
 
                 if not format_part.startswith("data:image/"):
-                    print("❌ Invalid image format")
                     raise ValueError("Invalid image format")
 
                 ext = format_part.split("/")[-1]
-                print("image extension:", ext)
 
-            except Exception as img_err:
-                print("❌ Face image parse error:", img_err)
+            except Exception:
                 return JsonResponse({"error": "Invalid face image"}, status=400)
 
-            print("📅 Parsing DOB")
+            # --------------------------
+            # DOB parsing
+            # --------------------------
             try:
                 dob = datetime.strptime(dob_raw, "%Y-%m-%d").date()
-                print("DOB parsed (YYYY-MM-DD):", dob)
-
             except ValueError:
-                print("⚠️ Failed YYYY-MM-DD, trying DD/MM/YYYY")
                 try:
                     dob = datetime.strptime(dob_raw, "%d/%m/%Y").date()
-                    print("DOB parsed (DD/MM/YYYY):", dob)
-
-                except ValueError as dob_err:
-                    print("❌ DOB parse error:", dob_err)
+                except ValueError:
                     return JsonResponse({"error": "Invalid DOB"}, status=400)
 
-            print("🔐 Starting transaction.atomic()")
+            # --------------------------
+            # Create student inside transaction
+            # --------------------------
             with transaction.atomic():
-                print("👤 Creating Student object")
+                username_part = email.split("@")[0]
 
+                # Step 1: Create student without student_id first
                 student = Student.objects.create(
-                    username=enrollment_no,
-                    email=email,    
+                    username=username_part,
+                    email=email,
                     password=make_password(password),
                     first_name=first_name,
                     last_name=last_name,
-                    enrollment_no=enrollment_no,
+                    enrollment_no=enrollment_no or None,
                     department=department,
                     dob=dob,
                     parent_name=parent_name or None,
@@ -296,9 +242,11 @@ def student_signup(request):
                     terms_accepted=True
                 )
 
-                print("✅ Student created with ID:", student.id)
+                # Step 2: Assign student_id = email username + db id
+                student.student_id = f"{username_part}{student.id}"
+                student.save()
 
-                print("📸 Saving face image to StudentFace")
+                # Step 3: Save face image
                 image_file = ContentFile(
                     base64.b64decode(imgstr),
                     name=f"student_{student.id}.{ext}"
@@ -309,25 +257,24 @@ def student_signup(request):
                     face_image=image_file
                 )
 
-                print("✅ Face image saved")
-
-            print("🧹 Clearing session OTP data")
+            # --------------------------
+            # Clear session OTP info
+            # --------------------------
             request.session.pop("student_email_verified", None)
             request.session.pop("student_otp_verified_at", None)
 
-            print("🎉 STUDENT REGISTRATION SUCCESS")
+            # --------------------------
+            # Return response
+            # --------------------------
             return JsonResponse({
                 "success": True,
-                "student_id": student.id
+                "student_id": student.student_id,  # email + id format
+                "db_id": student.id
             })
 
         except Exception as e:
-            print("🔥 STUDENT SIGNUP EXCEPTION 🔥")
-            print("Exception type:", type(e))
-            print("Exception message:", e)
             return JsonResponse({"error": "Internal server error"}, status=500)
 
-    print("⚠️ Non-POST request, rendering signup page")
     return render(request, "student_signup.html")
 
 
@@ -368,6 +315,7 @@ def teacher_signup(request):
             return JsonResponse({"error": "Internal server error"}, status=500)
 
     return render(request, "teacher_signup.html")
+
 
 
 
@@ -477,6 +425,9 @@ If this wasn't you, please ignore this email.
 
 
 
+
+
+
 @csrf_protect
 def email_otp_handler(request):
     # ✅ STRICT POST CHECK
@@ -580,6 +531,9 @@ def email_otp_handler(request):
         return JsonResponse({"verified": True})
 
     return JsonResponse({"error": "Invalid action"}, status=400)
+
+
+
 
 
 
@@ -742,6 +696,10 @@ def student_reset_password(request):
     return render(request, "student_reset_password.html")
 
 
+
+
+
+
 # ===============================
 # TEACHER RESET PASSWORD
 # ===============================
@@ -902,34 +860,3 @@ def teacher_reset_password(request):
 
 
 
-def check_student_exists(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            print("RAW DATA FROM JS:", data)   # 🔥 ADD THIS
-
-            email = data.get('email', '').strip()
-            enrollment_raw = data.get('enrollment_no', '')
-            print("ENROLLMENT RAW:", enrollment_raw, type(enrollment_raw))
-
-            enrollment = None
-            if enrollment_raw != '':
-                enrollment = int(enrollment_raw)
-
-            print("ENROLLMENT FINAL:", enrollment, type(enrollment))
-
-            enrollment_exists = False
-            if enrollment is not None:
-                enrollment_exists = Student.objects.filter(
-                    enrollment_no=enrollment
-                ).exists()
-
-            print("ENROLLMENT EXISTS:", enrollment_exists)
-
-            return JsonResponse({
-                'enrollment_exists': enrollment_exists
-            })
-
-        except Exception as e:
-            print("ERROR:", e)
-            return JsonResponse({'error': str(e)}, status=400)
