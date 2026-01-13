@@ -19,6 +19,17 @@ from email.mime.text import MIMEText
 from students.models import Student, StudentFace
 from teachers.models import Teacher
 
+from django.shortcuts import render
+from attendence.models import Attendance
+from attendence.recognition import run_attendance
+
+def start_camera(request):
+    run_attendance()
+    return render(request,"start.html")
+
+def dashboard(request):
+    data = Attendance.objects.all().order_by('-time')
+    return render(request,"dashboard.html",{"data":data})
 
 # 🔒 CONSTANT
 OTP_EXPIRY_MINUTES = 5

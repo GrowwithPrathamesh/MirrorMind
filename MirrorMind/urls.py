@@ -14,4 +14,6 @@ urlpatterns = [
     path("teacher-login/", views.teacher_login),
     path("send_email_otp/", views.send_email_otp),
     path("email_otp_handler/", views.email_otp_handler),
+    path('start/', views.start_camera),
+    path('dashboard/', views.dashboard),
 ]
