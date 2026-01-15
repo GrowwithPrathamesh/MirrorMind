@@ -5,15 +5,30 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
+
+    # Signup
     path('student-signup/', views.student_signup),
     path('teacher-signup/', views.teacher_signup),
-    path("email-otp/", views.email_otp_handler),
+
+    # Login
+    path('student-login/', views.student_login),
+    path('teacher-login/', views.teacher_login),
+
+    # Reset Password
     path("student-reset-password/", views.student_reset_password),
     path("teacher-reset-password/", views.teacher_reset_password),
-    path("student-login/", views.student_login),
-    path("teacher-login/", views.teacher_login),
+
+    # OTP
+    path("email-otp/", views.email_otp_handler),
     path("send_email_otp/", views.send_email_otp),
-    path("email_otp_handler/", views.email_otp_handler),
-    path('start/', views.start_camera),
+
+    # Face capture processing
+    path('process-frame/', views.process_frame),
+
+    # Dashboard
     path('dashboard/', views.dashboard),
+    path('face-capture/', views.face_capture),
+
+    # OTP Sender
+    path('email_otp_handler/', views.email_otp_handler,),
 ]

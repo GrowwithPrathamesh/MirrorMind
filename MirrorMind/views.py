@@ -16,6 +16,8 @@ from django.utils import timezone
 
 from email.mime.text import MIMEText
 
+from requests import request
+
 from students.models import Student, StudentFace
 from teachers.models import Teacher
 
@@ -23,9 +25,27 @@ from django.shortcuts import render
 from attendence.models import Attendance
 from attendence.recognition import run_attendance
 
-def start_camera(request):
-    run_attendance()
-    return render(request,"start.html")
+
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from django.db import transaction
+from django.utils import timezone
+
+from datetime import datetime, timedelta
+
+import cv2
+import numpy as np
+import os
+import pickle
+import base64
+import json
+
+
+
+
+
+
 
 def dashboard(request):
     data = Attendance.objects.all().order_by('-time')
@@ -33,6 +53,17 @@ def dashboard(request):
 
 # 🔒 CONSTANT
 OTP_EXPIRY_MINUTES = 5
+
+
+
+
+# ==============================
+# IN-MEMORY FACE STORAGE
+# ==============================
+faces_data_store = {}
+face_counter = {}
+
+
 
 
 
@@ -162,7 +193,7 @@ def student_signup(request):
             parent_name = data.get("parent_name", "").strip()
             parent_email = data.get("parent_email", "").strip()
             parent_mobile = data.get("parent_mobile", "").strip()
-            face_image_base64 = data.get("face_image")
+            # face_image_base64 = data.get("face_image")
 
             # --------------------------
             # Required fields validation
@@ -192,7 +223,7 @@ def student_signup(request):
                 return JsonResponse({"error": "OTP verification required"}, status=403)
 
             verified_time = datetime.fromisoformat(otp_verified_at)
-            expiry_time = verified_time + timedelta(minutes=2)
+            expiry_time = verified_time + timedelta(minutes=5)
 
             if timezone.now() > expiry_time:
                 request.session.pop("student_email_verified", None)
@@ -202,21 +233,21 @@ def student_signup(request):
             # --------------------------
             # Face capture validation
             # --------------------------
-            if not face_image_base64:
-                return JsonResponse({"error": "Face capture required"}, status=400)
+            # if not face_image_base64:
+            #     return JsonResponse({"error": "Face capture required"}, status=400)
 
-            try:
-                if ";base64," not in face_image_base64:
-                    raise ValueError("Missing base64 data")
-                format_part, imgstr = face_image_base64.split(";base64,")
+            # try:
+            #     if ";base64," not in face_image_base64:
+            #         raise ValueError("Missing base64 data")
+            #     format_part, imgstr = face_image_base64.split(";base64,")
 
-                if not format_part.startswith("data:image/"):
-                    raise ValueError("Invalid image format")
+            #     if not format_part.startswith("data:image/"):
+            #         raise ValueError("Invalid image format")
 
-                ext = format_part.split("/")[-1]
+            #     ext = format_part.split("/")[-1]
 
-            except Exception:
-                return JsonResponse({"error": "Invalid face image"}, status=400)
+            # except Exception:
+            #     return JsonResponse({"error": "Invalid face image"}, status=400)
 
             # --------------------------
             # DOB parsing
@@ -249,24 +280,28 @@ def student_signup(request):
                     parent_email=parent_email or None,
                     parent_mobile=parent_mobile or None,
                     email_verified=True,
-                    face_registered=True,
+                    face_registered=False,
                     terms_accepted=True
                 )
 
-                # Step 2: Assign student_id = email username + db id
+                # Step 2: Assign student_id =    email username + db id
                 student.student_id = f"{username_part}{student.id}"
                 student.save()
 
-                # Step 3: Save face image
-                image_file = ContentFile(
-                    base64.b64decode(imgstr),
-                    name=f"student_{student.id}.{ext}"
-                )
+                # After student.student_id is saved
+                request.session["face_student_id"] = student.student_id
 
-                StudentFace.objects.create(
-                    student=student,
-                    face_image=image_file
-                )
+
+                # Step 3: Save face image
+                # image_file = ContentFile(
+                #     base64.b64decode(imgstr),
+                #     name=f"student_{student.id}.{ext}"
+                # )
+
+                # StudentFace.objects.create(
+                #     student=student,
+                #     face_image=image_file
+                # )
 
             # --------------------------
             # Clear session OTP info
@@ -279,14 +314,126 @@ def student_signup(request):
             # --------------------------
             return JsonResponse({
                 "success": True,
-                "student_id": student.student_id,  # email + id format
-                "db_id": student.id
+                "student_id": student.student_id,
+                "redirect": "/face-capture/"
             })
 
         except Exception as e:
             return JsonResponse({"error": "Internal server error"}, status=500)
 
     return render(request, "student_signup.html")
+
+
+
+
+
+
+def face_capture(request):
+    student_id = request.session.get("face_student_id")
+
+    if not student_id:
+        return redirect("student_signup")
+
+    return render(request, "face_capture.html", {
+        "student_id": student_id
+    })
+
+
+
+# ==============================
+# FACE FRAME PROCESSING
+# ==============================
+@csrf_exempt
+def process_frame(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        student_id = data.get("student_id")
+        image_data = data.get("image")
+
+        if not student_id or not image_data:
+            return JsonResponse({"error": "Invalid data"}, status=400)
+
+        # -------- PATH SETUP --------
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        DATA_DIR = os.path.join(BASE_DIR, "data")
+        os.makedirs(DATA_DIR, exist_ok=True)
+
+        cascade_path = os.path.join(DATA_DIR, "haarcascade_frontalface_default.xml")
+        facedetect = cv2.CascadeClassifier(cascade_path)
+
+        # -------- INIT STORAGE --------
+        if student_id not in faces_data_store:
+            faces_data_store[student_id] = []
+            face_counter[student_id] = 0
+
+        # -------- IMAGE DECODE --------
+        img_str = image_data.split(",")[1]
+        img_bytes = base64.b64decode(img_str)
+        np_arr = np.frombuffer(img_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        h, w = gray.shape
+
+        faces = facedetect.detectMultiScale(
+            gray,
+            scaleFactor=1.3,
+            minNeighbors=5,
+            minSize=(int(w * 0.3), int(h * 0.3))
+        )
+
+
+        # -------- COLLECT FACES --------
+        for (x, y, fw, fh) in faces:
+            if face_counter[student_id] < 100:
+                crop = frame[y:y+fh, x:x+fw]
+                resized = cv2.resize(crop, (50, 50))
+                faces_data_store[student_id].append(resized)
+                face_counter[student_id] += 1
+
+        # -------- SAVE TRAINING DATA --------
+        if face_counter[student_id] == 100:
+            faces_np = np.asarray(faces_data_store[student_id]).reshape(100, -1)
+
+            faces_path = os.path.join(DATA_DIR, "faces_data.pkl")
+            labels_path = os.path.join(DATA_DIR, "labels.pkl")
+
+            if os.path.exists(faces_path):
+                with open(faces_path, "rb") as f:
+                    old_faces = pickle.load(f)
+                faces_np = np.append(old_faces, faces_np, axis=0)
+
+            with open(faces_path, "wb") as f:
+                pickle.dump(faces_np, f)
+
+            Student.objects.filter(student_id=student_id).update(face_registered=True)
+
+            if os.path.exists(labels_path):
+                with open(labels_path, "rb") as f:
+                    labels = pickle.load(f)
+            else:
+                labels = []
+
+            labels.extend([student_id] * 100)
+
+            with open(labels_path, "wb") as f:
+                pickle.dump(labels, f)
+
+            # CLEAR MEMORY + SESSION
+            del faces_data_store[student_id]
+            del face_counter[student_id]
+            request.session.pop("face_student_id", None)
+
+        return JsonResponse({
+            "count": face_counter.get(student_id, 100),
+            "faces_detected": len(faces)
+        })
+
+    except Exception:
+        return JsonResponse({"error": "Face processing failed"}, status=500)
 
 
 
@@ -442,104 +589,102 @@ If this wasn't you, please ignore this email.
 @csrf_protect
 def email_otp_handler(request):
     # ✅ STRICT POST CHECK
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method"}, status=405)
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        action = data.get("action")
+        email = data.get("email")
+        purpose = data.get("purpose")   # signup | forgot
+        role = data.get("role", "student")  # student | teacher
 
-    action = data.get("action")
-    email = data.get("email")
-    purpose = data.get("purpose")   # signup | forgot
-    role = data.get("role", "student")  # student | teacher
+        if not action or not email or not purpose:
+            return JsonResponse({"error": "Missing required fields"}, status=400)
 
-    if not action or not email or not purpose:
-        return JsonResponse({"error": "Missing required fields"}, status=400)
+        # =========================
+        # SEND OTP
+        # =========================
+        if action == "send_otp":
 
-    # =========================
-    # SEND OTP
-    # =========================
-    if action == "send_otp":
+            # 🔍 EMAIL EXISTENCE CHECK
+            if purpose == "signup":
+                if role == "student" and Student.objects.filter(email=email).exists():
+                    return JsonResponse({"error": "Email already registered"}, status=400)
 
-        # 🔍 EMAIL EXISTENCE CHECK
-        if purpose == "signup":
-            if role == "student" and Student.objects.filter(email=email).exists():
-                return JsonResponse({"error": "Email already registered"}, status=400)
+                if role == "teacher" and Teacher.objects.filter(email=email).exists():
+                    return JsonResponse({"error": "Email already registered"}, status=400)
 
-            if role == "teacher" and Teacher.objects.filter(email=email).exists():
-                return JsonResponse({"error": "Email already registered"}, status=400)
+            if purpose == "forgot":
+                if role == "student" and not Student.objects.filter(email=email).exists():
+                    return JsonResponse({"error": "Email not registered"}, status=400)
 
-        if purpose == "forgot":
-            if role == "student" and not Student.objects.filter(email=email).exists():
-                return JsonResponse({"error": "Email not registered"}, status=400)
+                if role == "teacher" and not Teacher.objects.filter(email=email).exists():
+                    return JsonResponse({"error": "Email not registered"}, status=400)
 
-            if role == "teacher" and not Teacher.objects.filter(email=email).exists():
-                return JsonResponse({"error": "Email not registered"}, status=400)
+            otp = str(random.randint(100000, 999999))
+            expiry = timezone.now() + timedelta(minutes=5)
 
-        otp = str(random.randint(100000, 999999))
-        expiry = timezone.now() + timedelta(minutes=5)
+            # ✅ SESSION-BASED OTP (SAFE)
+            request.session["otp_email"] = email
+            request.session["otp_code"] = otp
+            request.session["otp_expiry"] = expiry.isoformat()
+            request.session["otp_purpose"] = purpose
+            request.session["otp_role"] = role
 
-        # ✅ SESSION-BASED OTP (SAFE)
-        request.session["otp_email"] = email
-        request.session["otp_code"] = otp
-        request.session["otp_expiry"] = expiry.isoformat()
-        request.session["otp_purpose"] = purpose
-        request.session["otp_role"] = role
+            mail_sent = send_email_otp(email, otp, purpose, role)
 
-        mail_sent = send_email_otp(email, otp, purpose, role)
+            if not mail_sent:
+                return JsonResponse({"error": "Failed to send OTP"}, status=500)
 
-        if not mail_sent:
-            return JsonResponse({"error": "Failed to send OTP"}, status=500)
-
-        return JsonResponse({"success": True})
+            return JsonResponse({"success": True})
 
 
-    # =========================
-    # VERIFY OTP
-    # =========================
-    elif action == "verify_otp":
-        otp_input = data.get("otp")
+        # =========================
+        # VERIFY OTP
+        # =========================
+        elif action == "verify_otp":
+            otp_input = data.get("otp")
 
-        if not otp_input:
-            return JsonResponse({"verified": False, "error": "OTP required"}, status=400)
+            if not otp_input:
+                return JsonResponse({"verified": False, "error": "OTP required"}, status=400)
 
-        session_otp = request.session.get("otp_code")
-        session_email = request.session.get("otp_email")
-        session_expiry = request.session.get("otp_expiry")
-        session_purpose = request.session.get("otp_purpose")
-        session_role = request.session.get("otp_role")
+            session_otp = request.session.get("otp_code")
+            session_email = request.session.get("otp_email")
+            session_expiry = request.session.get("otp_expiry")
+            session_purpose = request.session.get("otp_purpose")
+            session_role = request.session.get("otp_role")
 
-        if not all([session_otp, session_email, session_expiry]):
-            return JsonResponse({"verified": False, "error": "OTP expired or not sent"}, status=400)
+            if not all([session_otp, session_email, session_expiry]):
+                return JsonResponse({"verified": False, "error": "OTP expired or not sent"}, status=400)
 
-        if email != session_email:
-            return JsonResponse({"verified": False, "error": "Email mismatch"}, status=400)
+            if email != session_email:
+                return JsonResponse({"verified": False, "error": "Email mismatch"}, status=400)
 
-        if timezone.now() > datetime.fromisoformat(session_expiry):
-            request.session.flush()
-            return JsonResponse({"verified": False, "error": "OTP expired"}, status=400)
+            if timezone.now() > datetime.fromisoformat(session_expiry):
+                request.session.flush()
+                return JsonResponse({"verified": False, "error": "OTP expired"}, status=400)
 
-        if otp_input != session_otp:
-            return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
+            if otp_input != session_otp:
+                return JsonResponse({"verified": False, "error": "Invalid OTP"}, status=400)
 
-        # ✅ MARK VERIFIED
-        if session_purpose == "signup":
-            if session_role == "student":
-                request.session["student_email_verified"] = email
-                request.session["student_otp_verified_at"] = timezone.now().isoformat()
-            else:
-                request.session["teacher_email_verified"] = email
+            # ✅ MARK VERIFIED
+            if session_purpose == "signup":
+                if session_role == "student":
+                    request.session["student_email_verified"] = email
+                    request.session["student_otp_verified_at"] = timezone.now().isoformat()
+                else:
+                    request.session["teacher_email_verified"] = email
 
-        elif session_purpose == "forgot":
-            request.session["reset_email_verified"] = email
+            elif session_purpose == "forgot":
+                request.session["reset_email_verified"] = email
 
-        # 🧹 CLEAN OTP SESSION
-        request.session.pop("otp_code", None)
-        request.session.pop("otp_expiry", None)
+            # 🧹 CLEAN OTP SESSION
+            request.session.pop("otp_code", None)
+            request.session.pop("otp_expiry", None)
 
-        return JsonResponse({"verified": True})
+            return JsonResponse({"verified": True})
 
     return JsonResponse({"error": "Invalid action"}, status=400)
 
@@ -871,3 +1016,7 @@ def teacher_reset_password(request):
 
 
 
+
+
+def face_capture(request):
+    return render(request, "face_capture.html")

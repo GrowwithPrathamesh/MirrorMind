@@ -8,15 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initCalendarPicker();
     initPasswordToggle();
     initPasswordStrength();
-    initFaceCapture();
     initOTPHandling();
     initTermsHandling();
     initFormSubmission();
     initToastSystem();
     initInteractiveEffects();
-    initRealTimeValidation();
-    
-    addParticles();
 });
 
 function initParticlesBackground() {
@@ -51,7 +47,8 @@ function initFormNavigation() {
     const progressFill = document.getElementById('progressFill');
     
     function updateProgress(step) {
-        const progressPercentage = ((step - 1) / 3) * 100;
+        // Updated for 3 steps instead of 4
+        const progressPercentage = ((step - 1) / 2) * 100;
         progressFill.style.width = `${progressPercentage}%`;
         
         progressSteps.forEach((stepEl, index) => {
@@ -110,24 +107,10 @@ function initFormNavigation() {
         
         const continueBtn = document.getElementById('step1Continue');
         const originalText = continueBtn.innerHTML;
-        continueBtn.innerHTML = '<div class="spinner"></div> Checking...';
+        continueBtn.innerHTML = '<div class="spinner"></div> Sending OTP...';
         continueBtn.disabled = true;
         
         try {
-            // Only check email registration (enrollment check removed)
-            const emailRegistered = await checkEmailRegistered(email);
-            
-            if (emailRegistered) {
-                showToast('Email already registered', 'error');
-                highlightInputError(document.getElementById('email'));
-                document.getElementById('email_feedback').textContent = 'Email already registered';
-                document.getElementById('email_feedback').className = 'validation-feedback invalid';
-                shakeElement(document.getElementById('step1'));
-                continueBtn.innerHTML = originalText;
-                continueBtn.disabled = false;
-                return;
-            }
-            
             const csrfToken = getCSRFToken();
             const response = await fetch('/email_otp_handler/', {
                 method: 'POST',
@@ -173,13 +156,6 @@ function initFormNavigation() {
         
         if (step === 3) {
             setTimeout(() => {
-                const captureBtn = document.getElementById('captureFaceBtn');
-                if (captureBtn) captureBtn.click();
-            }, 500);
-        }
-        
-        if (step === 4) {
-            setTimeout(() => {
                 document.getElementById('password').focus();
             }, 300);
         }
@@ -190,11 +166,9 @@ function initFormNavigation() {
             case 1:
                 return validateStep1();
             case 2:
-                return true;
+                return true; // OTP validation handled separately
             case 3:
                 return validateStep3();
-            case 4:
-                return validateStep4();
             default:
                 return true;
         }
@@ -332,23 +306,7 @@ function validateStep1() {
     return isValid;
 }
 
-function validateStep2() {
-    return true;
-}
-
 function validateStep3() {
-    const faceCaptured = document.getElementById('captureSuccess').style.display !== 'none';
-    
-    if (!faceCaptured) {
-        showToast('Please capture your face before continuing', 'error');
-        shakeElement(document.getElementById('step3'));
-        return false;
-    }
-    
-    return true;
-}
-
-function validateStep4() {
     let isValid = true;
     
     const password = document.getElementById('password');
@@ -368,9 +326,23 @@ function validateStep4() {
         hideValidationError('confirm_password_error');
     }
     
+    const termsCheckbox = document.getElementById('terms');
+    if (!termsCheckbox.checked) {
+        const termsContainer = document.getElementById('termsContainer');
+        termsContainer.querySelector('.terms-checkbox').classList.add('error');
+        termsContainer.querySelector('.terms-error').classList.add('visible');
+        shakeElement(termsContainer);
+        showToast('Please accept the terms and conditions', 'error');
+        isValid = false;
+    } else {
+        const termsContainer = document.getElementById('termsContainer');
+        termsContainer.querySelector('.terms-checkbox').classList.remove('error');
+        termsContainer.querySelector('.terms-error').classList.remove('visible');
+    }
+    
     if (!isValid) {
-        showToast('Please fix the password errors', 'error');
-        shakeElement(document.getElementById('step4'));
+        showToast('Please fix the errors in the form', 'error');
+        shakeElement(document.getElementById('step3'));
     }
     
     return isValid;
@@ -647,118 +619,50 @@ function initCalendarPicker() {
         return null;
     }
     
+    function calculateAge(dob) {
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        const ageDisplay = document.getElementById('ageDisplay');
+        ageDisplay.textContent = `${age} years`;
+        
+        const dobContainer = document.getElementById('dob').parentElement;
+        dobContainer.classList.add('has-age');
+        
+        const parentSection = document.getElementById('parentSection');
+        if (age < 10) {
+            parentSection.classList.add('active');
+            ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.required = true;
+                    field.disabled = false;
+                }
+            });
+        } else {
+            parentSection.classList.remove('active');
+            ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.required = false;
+                    field.disabled = true;
+                    field.value = '';
+                    hideValidationError(fieldId + '_error');
+                }
+            });
+        }
+        
+        window.calculatedAge = age;
+        return age;
+    }
+    
     populateYearSelect();
     renderCalendar();
-}
-
-function calculateAge(dob) {
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
-    }
-    
-    const ageDisplay = document.getElementById('ageDisplay');
-    ageDisplay.textContent = `${age} years`;
-    
-    const dobContainer = document.getElementById('dob').parentElement;
-    dobContainer.classList.add('has-age');
-    
-    const parentSection = document.getElementById('parentSection');
-    if (age < 10) {
-        parentSection.classList.add('active');
-        ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.required = true;
-                field.disabled = false;
-            }
-        });
-    } else {
-        parentSection.classList.remove('active');
-        ['parent_name', 'parent_email', 'parent_mobile'].forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.required = false;
-                field.disabled = true;
-                field.value = '';
-                hideValidationError(fieldId + '_error');
-            }
-        });
-    }
-    
-    window.calculatedAge = age;
-    return age;
-}
-
-function initRealTimeValidation() {
-    const emailInput = document.getElementById('email');
-    const enrollmentInput = document.getElementById('enrollment_no');
-    const emailFeedback = document.getElementById('email_feedback');
-    const enrollmentFeedback = document.getElementById('enrollment_feedback');
-    
-    let emailTimeout;
-    
-    emailInput.addEventListener('input', function() {
-        clearTimeout(emailTimeout);
-        emailTimeout = setTimeout(async () => {
-            const email = this.value.trim();
-            if (!validateEmail(email)) {
-                emailFeedback.className = 'validation-feedback';
-                return;
-            }
-
-            const isRegistered = await checkEmailRegistered(email);
-            if (isRegistered) {
-                emailFeedback.textContent = 'Email already registered';
-                emailFeedback.className = 'validation-feedback invalid';
-                highlightInputError(emailInput);
-            } else {
-                emailFeedback.textContent = 'Email available';
-                emailFeedback.className = 'validation-feedback valid';
-                clearInputError(emailInput);
-            }
-        }, 500);
-    });
-    
-    enrollmentInput.addEventListener('input', function () {
-        const enrollment = this.value.trim();
-        if (enrollment.length >= 3) {
-            enrollmentFeedback.textContent = 'Enrollment accepted';
-            enrollmentFeedback.className = 'validation-feedback valid';
-            clearInputError(enrollmentInput);
-        } else if (enrollment.length > 0) {
-            enrollmentFeedback.textContent = 'Enrollment too short';
-            enrollmentFeedback.className = 'validation-feedback invalid';
-            highlightInputError(enrollmentInput);
-        } else {
-            enrollmentFeedback.className = 'validation-feedback';
-        }
-    });
-}
-
-async function checkEmailRegistered(email) {
-    try {
-        const csrfToken = getCSRFToken();
-        const response = await fetch('/check_student_exists/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify({
-                email: email,
-            })
-        });
-        
-        const data = await response.json();
-        return data.email_exists === true;
-    } catch (error) {
-        console.error('Error checking email:', error);
-        return false;
-    }
 }
 
 function getCSRFToken() {
@@ -867,187 +771,6 @@ function initPasswordStrength() {
             passwordMatch.innerHTML = '<svg class="match-icon" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg><span>Passwords don\'t match</span>';
             passwordMatch.style.color = '#FF6B6B';
             showValidationError('confirm_password_error', 'Passwords do not match');
-        }
-    });
-}
-
-function initFaceCapture() {
-    const captureBtn = document.getElementById('captureFaceBtn');
-    const takePhotoBtn = document.getElementById('takePhotoBtn');
-    const retakePhotoBtn = document.getElementById('retakePhotoBtn');
-    const webcamPreview = document.getElementById('webcamPreview');
-    const webcamVideo = document.getElementById('webcamVideo');
-    const webcamCanvas = document.getElementById('webcamCanvas');
-    const captureSuccess = document.getElementById('captureSuccess');
-    const continueAfterCapture = document.getElementById('continueAfterCapture');
-    const webcamPlaceholder = document.querySelector('.webcam-placeholder');
-    const capturedPreview = document.getElementById('capturedPreview');
-    const cameraPreviewSection = document.getElementById('cameraPreviewSection');
-    
-    let stream = null;
-    let isCameraActive = false;
-    let capturedImageData = null;
-    
-    if (!captureBtn) return;
-    
-    captureBtn.addEventListener('click', async function() {
-        if (!isCameraActive) {
-            await startCamera();
-        }
-    });
-    
-    takePhotoBtn.addEventListener('click', function() {
-        captureFace();
-    });
-    
-    retakePhotoBtn.addEventListener('click', function() {
-        retakePhoto();
-    });
-    
-    async function startCamera() {
-        try {
-            webcamPreview.classList.add('active');
-            
-            const originalText = captureBtn.innerHTML;
-            captureBtn.innerHTML = '<div class="spinner"></div> Starting Camera...';
-            captureBtn.disabled = true;
-            
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: 640 },
-                    height: { ideal: 480 },
-                    facingMode: 'user'
-                },
-                audio: false
-            });
-            
-            webcamVideo.srcObject = stream;
-            webcamVideo.style.display = 'block';
-            webcamPlaceholder.style.display = 'none';
-            
-            webcamVideo.onloadedmetadata = () => {
-                webcamCanvas.width = webcamVideo.videoWidth;
-                webcamCanvas.height = webcamVideo.videoHeight;
-            };
-            
-            webcamVideo.onplaying = () => {
-                webcamCanvas.width = webcamVideo.videoWidth;
-                webcamCanvas.height = webcamVideo.videoHeight;
-            };
-
-            
-            captureBtn.innerHTML = originalText;
-            captureBtn.disabled = false;
-            captureBtn.style.display = 'none';
-            takePhotoBtn.style.display = 'block';
-            
-            isCameraActive = true;
-            
-            showToast('Camera started. Position your face in the frame.', 'success');
-        } catch (error) {
-            console.error('Error accessing camera:', error);
-            showToast('Failed to access camera. Please check permissions.', 'error');
-            
-            captureBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/></svg> Start Camera';
-            captureBtn.disabled = false;
-        }
-    }
-    
-    function captureFace() {
-        if (!stream || !isCameraActive) return;
-        
-        // Ensure canvas is properly sized
-        webcamCanvas.width = webcamVideo.videoWidth;
-        webcamCanvas.height = webcamVideo.videoHeight;
-        
-        const context = webcamCanvas.getContext('2d');
-        context.drawImage(webcamVideo, 0, 0, webcamCanvas.width, webcamCanvas.height);
-        
-        // Convert canvas to base64 image
-        capturedImageData = webcamCanvas.toDataURL('image/jpeg', 0.9);
-
-        // Validate image data
-        if (!capturedImageData || capturedImageData.length < 100) {
-            showToast("Face capture failed. Please try again.", "error");
-            return;
-        }
-
-        // Store in hidden input
-        document.getElementById('face_image').value = capturedImageData;
-        
-        // Display captured image preview
-        capturedPreview.src = capturedImageData;
-        cameraPreviewSection.style.display = 'block';
-        
-        // Update UI states
-        captureSuccess.style.display = 'flex';
-        continueAfterCapture.disabled = false;
-        takePhotoBtn.style.display = 'none';
-        
-        // Show camera feed to indicate it's still active
-        webcamVideo.style.display = 'block';
-        
-        // Create flash effect
-        const flash = document.createElement('div');
-        flash.style.position = 'absolute';
-        flash.style.top = '0';
-        flash.style.left = '0';
-        flash.style.width = '100%';
-        flash.style.height = '100%';
-        flash.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
-        flash.style.borderRadius = '24px';
-        flash.style.animation = 'fadeIn 0.2s ease-out forwards';
-        flash.style.zIndex = '2';
-        webcamPreview.appendChild(flash);
-        
-        setTimeout(() => {
-            flash.style.animation = 'fadeOut 0.3s ease-out forwards';
-            setTimeout(() => flash.remove(), 300);
-        }, 200);
-        
-        showToast('Face captured successfully! You can retake if needed.', 'success');
-    }
-    
-    function retakePhoto() {
-        // Hide preview section
-        cameraPreviewSection.style.display = 'none';
-        captureSuccess.style.display = 'none';
-        continueAfterCapture.disabled = true;
-        
-        // Clear stored image
-        capturedImageData = null;
-        document.getElementById('face_image').value = '';
-        capturedPreview.src = '';
-        
-        // Show take photo button
-        takePhotoBtn.style.display = 'block';
-        
-        // Show camera feed
-        webcamVideo.style.display = 'block';
-        
-        showToast('Ready to capture again. Position your face in the frame.', 'info');
-    }
-    
-    function stopCamera() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
-            isCameraActive = false;
-        }
-        
-        webcamVideo.style.display = 'none';
-        webcamVideo.srcObject = null;
-        webcamPlaceholder.style.display = 'flex';
-        captureBtn.style.display = 'block';
-        captureBtn.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24"><path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/></svg> Start Camera';
-        takePhotoBtn.style.display = 'none';
-        webcamPreview.classList.remove('active');
-    }
-    
-    // Clean up camera when leaving step 3
-    document.addEventListener('navigateStep', function(e) {
-        if (e.detail && e.detail.step !== 3) {
-            stopCamera();
         }
     });
 }
@@ -1166,11 +889,6 @@ function initOTPHandling() {
             console.error('Error verifying OTP:', error);
             showToast('Failed to verify OTP. Please try again.', 'error');
         }
-    }
-    
-    const verifyBtn = document.getElementById('verifyOTPBtn');
-    if (verifyBtn) {
-        verifyBtn.addEventListener('click', verifyOTP);
     }
     
     resendOtpBtn.addEventListener('click', async function() {
@@ -1331,17 +1049,6 @@ function initFormSubmission() {
         
         if (!validateStep1()) return;
         if (!validateStep3()) return;
-        if (!validateStep4()) return;
-        
-        const termsCheckbox = document.getElementById('terms');
-        if (!termsCheckbox.checked) {
-            const termsContainer = document.getElementById('termsContainer');
-            termsContainer.querySelector('.terms-checkbox').classList.add('error');
-            termsContainer.querySelector('.terms-error').classList.add('visible');
-            shakeElement(termsContainer);
-            showToast('Please accept the terms and conditions', 'error');
-            return;
-        }
         
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<div class="spinner"></div> Processing...';
@@ -1362,17 +1069,23 @@ function initFormSubmission() {
             const data = await response.json();
             
             if (response.ok && data.success) {
-                showToast('Registration successful! Redirecting to Login...', 'success');
+                showToast('Registration successful! Redirecting to Face Capture...', 'success');
                 
+                // Redirect to face-capture page after successful registration
                 setTimeout(() => {
-                    window.location.href = '/student-login/';
+                    window.location.href = '/face-capture/';
                 }, 1500);
             } else {
                 showToast(data.error || 'Registration failed', 'error');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 
-                if (data.error && data.error.includes('OTP') || data.error.includes('verified')) {
+                // Handle specific errors
+                if (data.error && data.error.includes('email')) {
+                    showValidationError('email_error', 'Email already registered');
+                    highlightInputError(document.getElementById('email'));
+                    navigateToStep(1);
+                } else if (data.error && data.error.includes('OTP') || data.error.includes('verified')) {
                     showToast('OTP verification expired. Please restart registration.', 'error');
                     setTimeout(() => {
                         window.location.reload();
@@ -1476,6 +1189,12 @@ style.textContent = `
     @keyframes fadeOut {
         from { opacity: 1; }
         to { opacity: 0; }
+    }
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
     }
 `;
 document.head.appendChild(style);

@@ -54,7 +54,6 @@ class Student(models.Model):
         return f"{self.first_name} {self.last_name} | {self.enrollment_no}"
 
 
-
 class StudentFace(models.Model):
     student = models.OneToOneField(
         Student,
@@ -68,15 +67,4 @@ class StudentFace(models.Model):
         blank=True
     )
 
-    face_encoding = models.BinaryField(
-        null=True,
-        blank=True,
-        help_text="Pickled numpy array of face embedding"
-    )
-
-    liveness_passed = models.BooleanField(default=False)
-
     captured_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Face | {self.student.email}"
