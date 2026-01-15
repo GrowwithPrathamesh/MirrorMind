@@ -1020,3 +1020,44 @@ def teacher_reset_password(request):
 
 def face_capture(request):
     return render(request, "face_capture.html")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@csrf_exempt
+def check_student_exists(request):
+
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+
+        if email and Student.objects.filter(email=email).exists():
+            return JsonResponse({"exists": True})
+        else:
+            return JsonResponse({"exists": False})
+    
+    # For non-POST requests
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+

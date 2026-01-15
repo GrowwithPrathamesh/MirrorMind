@@ -31,4 +31,5 @@ urlpatterns = [
 
     # OTP Sender
     path('email_otp_handler/', views.email_otp_handler,),
+    path("check_student_exists/", views.check_student_exists),
 ]
