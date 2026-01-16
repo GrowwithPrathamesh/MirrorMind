@@ -290,6 +290,9 @@ def student_signup(request):
 
                 # After student.student_id is saved
                 request.session["face_student_id"] = student.student_id
+                request.session.modified = True   # 🔥 MUST
+                request.session.save()            # 🔥 MUST
+
 
 
                 # Step 3: Save face image

@@ -1060,6 +1060,7 @@ function initFormSubmission() {
             
             const response = await fetch('/student-signup/', {
                 method: 'POST',
+                credentials: 'same-origin',
                 body: formData,
                 headers: {
                     'X-CSRFToken': csrfToken

@@ -502,19 +502,18 @@
 
 
 <script>
+    console.log("STUDENT_ID =", STUDENT_ID);
+
     const STUDENT_ID = "{{ student_id }}";
 </script>
 
-
 <script>
 
-if (!STUDENT_ID) {
-    setTimeout(() => {
-        showToast("Session expired. Please register again.", "error");
-        window.location.href = "/student-signup/";
-    }, 500);
-    throw new Error("Invalid session"); // ⬅️ STOP further JS execution
-}
+// if (!STUDENT_ID) {
+//     setTimeout(() => {
+//         showToast("Session expired. Please register again.", "error");
+//         window.location.href = "/student-signup/";
+//     }, 500);}
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("overlay");
@@ -711,6 +710,7 @@ function sendFrame(){
 
     fetch("/process-frame/",{
         method:"POST",
+        credentials: 'same-origin',
         headers:{
             "Content-Type":"application/json",
             "X-CSRFToken": getCookie("csrftoken")

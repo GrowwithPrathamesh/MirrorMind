@@ -15,21 +15,17 @@ urlpatterns = [
     path('teacher-login/', views.teacher_login),
 
     # Reset Password
-    path("student-reset-password/", views.student_reset_password),
-    path("teacher-reset-password/", views.teacher_reset_password),
+    path('student-reset-password/', views.student_reset_password),
+    path('teacher-reset-password/', views.teacher_reset_password),
 
-    # OTP
-    path("email-otp/", views.email_otp_handler),
-    path("send_email_otp/", views.send_email_otp),
+    # ✅ ONLY ONE OTP ENDPOINT
+    path('email_otp_handler/', views.email_otp_handler),
 
-    # Face capture processing
+    # Face
     path('process-frame/', views.process_frame),
-
-    # Dashboard
-    path('dashboard/', views.dashboard),
     path('face-capture/', views.face_capture),
 
-    # OTP Sender
-    path('email_otp_handler/', views.email_otp_handler,),
-    path("check_student_exists/", views.check_student_exists),
+    # Utils
+    path('check_student_exists/', views.check_student_exists),
+    path('dashboard/', views.dashboard),
 ]
