@@ -57,11 +57,26 @@ OTP_EXPIRY_MINUTES = 5
 
 
 
-# ==============================
-# IN-MEMORY FACE STORAGE
-# ==============================
-faces_data_store = {}
-face_counter = {}
+
+# =====================================================
+# PATHS & FACE SETUP
+# =====================================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
+
+FACES_PKL = os.path.join(DATA_DIR, "faces_data.pkl")
+LABELS_PKL = os.path.join(DATA_DIR, "labels.pkl")
+
+
+# =====================================================
+# TEMP FACE STORAGE (RAM)
+# =====================================================
+faces_data_store = {}   # student_id -> list of faces
+face_counter = {}       # student_id -> count
 
 
 
@@ -229,29 +244,6 @@ def student_signup(request):
                 request.session.pop("student_email_verified", None)
                 request.session.pop("student_otp_verified_at", None)
                 return JsonResponse({"error": "OTP verification expired. Please verify again."}, status=403)
-
-            # --------------------------
-            # Face capture validation
-            # --------------------------
-            # if not face_image_base64:
-            #     return JsonResponse({"error": "Face capture required"}, status=400)
-
-            # try:
-            #     if ";base64," not in face_image_base64:
-            #         raise ValueError("Missing base64 data")
-            #     format_part, imgstr = face_image_base64.split(";base64,")
-
-            #     if not format_part.startswith("data:image/"):
-            #         raise ValueError("Invalid image format")
-
-            #     ext = format_part.split("/")[-1]
-
-            # except Exception:
-            #     return JsonResponse({"error": "Invalid face image"}, status=400)
-
-            # --------------------------
-            # DOB parsing
-            # --------------------------
             try:
                 dob = datetime.strptime(dob_raw, "%Y-%m-%d").date()
             except ValueError:
@@ -293,22 +285,6 @@ def student_signup(request):
                 request.session.modified = True   # 🔥 MUST
                 request.session.save()            # 🔥 MUST
 
-
-
-                # Step 3: Save face image
-                # image_file = ContentFile(
-                #     base64.b64decode(imgstr),
-                #     name=f"student_{student.id}.{ext}"
-                # )
-
-                # StudentFace.objects.create(
-                #     student=student,
-                #     face_image=image_file
-                # )
-
-            # --------------------------
-            # Clear session OTP info
-            # --------------------------
             request.session.pop("student_email_verified", None)
             request.session.pop("student_otp_verified_at", None)
 
@@ -331,6 +307,9 @@ def student_signup(request):
 
 
 
+# =====================================================
+# FACE CAPTURE PAGE
+# =====================================================
 def face_capture(request):
     student_id = request.session.get("face_student_id")
 
@@ -342,10 +321,9 @@ def face_capture(request):
     })
 
 
-
-# ==============================
+# =====================================================
 # FACE FRAME PROCESSING
-# ==============================
+# =====================================================
 @csrf_exempt
 def process_frame(request):
     if request.method != "POST":
@@ -359,86 +337,70 @@ def process_frame(request):
         if not student_id or not image_data:
             return JsonResponse({"error": "Invalid data"}, status=400)
 
-        # -------- PATH SETUP --------
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        DATA_DIR = os.path.join(BASE_DIR, "data")
-        os.makedirs(DATA_DIR, exist_ok=True)
-
-        cascade_path = os.path.join(DATA_DIR, "haarcascade_frontalface_default.xml")
-        facedetect = cv2.CascadeClassifier(cascade_path)
-
-        # -------- INIT STORAGE --------
+        # INIT STORAGE
         if student_id not in faces_data_store:
             faces_data_store[student_id] = []
             face_counter[student_id] = 0
 
-        # -------- IMAGE DECODE --------
+        # DECODE IMAGE
         img_str = image_data.split(",")[1]
         img_bytes = base64.b64decode(img_str)
         np_arr = np.frombuffer(img_bytes, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        h, w = gray.shape
-
-        faces = facedetect.detectMultiScale(
+        faces = face_cascade.detectMultiScale(
             gray,
             scaleFactor=1.3,
             minNeighbors=5,
-            minSize=(int(w * 0.3), int(h * 0.3))
+            minSize=(80, 80)
         )
 
-
-        # -------- COLLECT FACES --------
-        for (x, y, fw, fh) in faces:
+        # COLLECT FACES
+        for (x, y, w, h) in faces:
             if face_counter[student_id] < 100:
-                crop = frame[y:y+fh, x:x+fw]
+                crop = frame[y:y+h, x:x+w]
                 resized = cv2.resize(crop, (50, 50))
                 faces_data_store[student_id].append(resized)
                 face_counter[student_id] += 1
 
-        # -------- SAVE TRAINING DATA --------
-        if face_counter[student_id] == 100:
+        # SAVE WHEN COMPLETE
+        if face_counter[student_id] >= 100:
             faces_np = np.asarray(faces_data_store[student_id]).reshape(100, -1)
 
-            faces_path = os.path.join(DATA_DIR, "faces_data.pkl")
-            labels_path = os.path.join(DATA_DIR, "labels.pkl")
-
-            if os.path.exists(faces_path):
-                with open(faces_path, "rb") as f:
+            if os.path.exists(FACES_PKL):
+                with open(FACES_PKL, "rb") as f:
                     old_faces = pickle.load(f)
                 faces_np = np.append(old_faces, faces_np, axis=0)
 
-            with open(faces_path, "wb") as f:
+            with open(FACES_PKL, "wb") as f:
                 pickle.dump(faces_np, f)
 
-            Student.objects.filter(student_id=student_id).update(face_registered=True)
-
-            if os.path.exists(labels_path):
-                with open(labels_path, "rb") as f:
+            if os.path.exists(LABELS_PKL):
+                with open(LABELS_PKL, "rb") as f:
                     labels = pickle.load(f)
             else:
                 labels = []
 
             labels.extend([student_id] * 100)
 
-            with open(labels_path, "wb") as f:
+            with open(LABELS_PKL, "wb") as f:
                 pickle.dump(labels, f)
 
-            # CLEAR MEMORY + SESSION
+            Student.objects.filter(student_id=student_id).update(face_registered=True)
+
+            # CLEANUP
             del faces_data_store[student_id]
             del face_counter[student_id]
             request.session.pop("face_student_id", None)
 
         return JsonResponse({
-            "count": face_counter.get(student_id, 100),
-            "faces_detected": len(faces)
+            "faces_detected": len(faces),
+            "count": face_counter.get(student_id, 100)
         })
 
     except Exception:
         return JsonResponse({"error": "Face processing failed"}, status=500)
-
-
 
 
 # ===============================
@@ -1018,11 +980,6 @@ def teacher_reset_password(request):
     return render(request, "teacher_reset_password.html")
 
 
-
-
-
-def face_capture(request):
-    return render(request, "face_capture.html")
 
 
 
