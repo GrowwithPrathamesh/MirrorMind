@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- ⚠️ CSS UNCHANGED -->
 <style>
     /* ---------- Base Styles ---------- */
     :root {
@@ -464,11 +465,6 @@
     </div>
     <p class="subtitle">Face Registration System</p>
 
-    <!-- <div class="input-group">
-        <input type="text" id="name" placeholder="Enter Your Full Name">
-        <i class="fas fa-user input-icon"></i>
-    </div> -->
-
     <div class="video-box">
         <video id="video" autoplay playsinline></video>
         <canvas id="overlay"></canvas>
@@ -486,233 +482,72 @@
         <i class="fas fa-camera button-icon"></i>
         Start Face Capture
     </button>
-
-    <!-- <div class="note">
-        <p><i class="fas fa-video"></i> Allow camera permission when prompted</p>
-        <p><i class="fas fa-user-check"></i> Keep your face centered inside the frame</p>
-        <p><i class="fas fa-flag-checkered"></i> Auto stops after 100 successful captures</p>
-        <p><i class="fas fa-lightbulb"></i> Ensure good lighting for best results</p>
-    </div> -->
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer">
-    <!-- Toasts will be inserted here -->
-</div>
-
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
-    const STUDENT_ID = "{{ student_id }}";
-    console.log("STUDENT_ID =", STUDENT_ID);
+const STUDENT_ID = "{{ student_id }}";
 </script>
 
-
 <script>
-
-// if (!STUDENT_ID) {
-//     setTimeout(() => {
-//         showToast("Session expired. Please register again.", "error");
-//         window.location.href = "/student-signup/";
-//     }, 500);}
-
 const video = document.getElementById("video");
 const canvas = document.getElementById("overlay");
 const ctx = canvas.getContext("2d");
 const counterText = document.getElementById("counter");
 const startBtn = document.getElementById("startBtn");
-//const nameInput = document.getElementById("name");
 const toastContainer = document.getElementById("toastContainer");
 const progressBar = document.getElementById("progressBar");
 const counterContainer = document.querySelector('.counter-container');
 
 let interval = null;
 let running = false;
-let lastFaceBoxes = [];
 
-// Enhanced face box drawing function
-function drawFaceBoxes(faces) {
-    // Clear previous drawings
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (faces.length === 0) return;
-    
-    lastFaceBoxes = faces;
-    
-    // Draw each face box with enhanced effects
-    faces.forEach(face => {
-        const time = Date.now() / 100;
-        const grow = Math.sin(time) * 4; // Pulsating effect
-        
-        // Draw outer glow
-        ctx.shadowColor = '#00ffcc';
-        ctx.shadowBlur = 20;
-        ctx.strokeStyle = '#00ffcc';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(
-            face.x - grow - 2, 
-            face.y - grow - 2, 
-            face.w + grow * 2 + 4, 
-            face.h + grow * 2 + 4
-        );
-        
-        // Draw inner box
-        ctx.shadowBlur = 10;
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(
-            face.x - grow, 
-            face.y - grow, 
-            face.w + grow * 2, 
-            face.h + grow * 2
-        );
-        
-        // Draw corner markers
-        const cornerSize = 12 + Math.sin(time * 1.5) * 2;
-        const cornerColor = `hsl(${time * 10 % 360}, 100%, 60%)`;
-        
-        // Top-left
-        drawCorner(face.x - grow, face.y - grow, cornerSize, cornerColor, 'tl');
-        // Top-right
-        drawCorner(face.x + face.w + grow, face.y - grow, cornerSize, cornerColor, 'tr');
-        // Bottom-left
-        drawCorner(face.x - grow, face.y + face.h + grow, cornerSize, cornerColor, 'bl');
-        // Bottom-right
-        drawCorner(face.x + face.w + grow, face.y + face.h + grow, cornerSize, cornerColor, 'br');
-        
-        // Draw face label
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(0, 255, 204, 0.8)';
-        ctx.font = 'bold 16px Poppins';
-        ctx.textAlign = 'center';
-        ctx.fillText(
-            'FACE DETECTED', 
-            face.x + face.w / 2, 
-            face.y - 10 - grow
-        );
-    });
-    
-    // Reset shadow for next frame
-    ctx.shadowBlur = 0;
-}
-
-// Draw corner markers
-function drawCorner(x, y, size, color, type) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    
-    if (type === 'tl') {
-        // Top-left corner (right angle)
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + size, y);
-        ctx.lineTo(x, y + size);
-    } else if (type === 'tr') {
-        // Top-right corner
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - size, y);
-        ctx.lineTo(x, y + size);
-    } else if (type === 'bl') {
-        // Bottom-left corner
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + size, y);
-        ctx.lineTo(x, y - size);
-    } else if (type === 'br') {
-        // Bottom-right corner
-        ctx.moveTo(x, y);
-        ctx.lineTo(x - size, y);
-        ctx.lineTo(x, y - size);
-    }
-    
-    ctx.closePath();
-    ctx.fill();
-}
-
-// Start camera
+/* CAMERA */
 navigator.mediaDevices.getUserMedia({
     video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
 })
-.then(stream => {
-    video.srcObject = stream;
-    showToast("Camera ready! Click start to capture face.", "success");
-})
-.catch(() => {
-    showToast("Camera permission denied! Please allow camera access.", "error");
-});
+.then(stream => video.srcObject = stream)
+.catch(() => showToast("Camera permission denied", "error"));
 
-// Resize canvas when video loads
 video.addEventListener("loadedmetadata", () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 });
 
-// Enhanced toast function
-function showToast(msg, type = "info") {
-    const icons = {
-        success: "fas fa-check-circle",
-        error: "fas fa-exclamation-circle",
-        warning: "fas fa-exclamation-triangle",
-        info: "fas fa-info-circle"
-    };
-    
+/* TOAST */
+function showToast(msg, type="info"){
     const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="${icons[type]}"></i>
-        <span>${msg}</span>
-    `;
-    
+    toast.className = `toast ${type} show`;
+    toast.innerHTML = `<i class="fas fa-info-circle"></i><span>${msg}</span>`;
     toastContainer.appendChild(toast);
-    
-    // Trigger reflow
-    toast.offsetHeight;
-    
-    // Show toast
-    toast.classList.add("show");
-    
-    // Remove toast after delay
-    setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 500);
-    }, 3000);
+    setTimeout(()=>toast.remove(), 3000);
 }
 
-// Start capture
+/* START */
 function startCapture(){
-    // if(nameInput.value.trim() === ""){
-    //     showToast("Please enter your name to begin", "warning");
-    //     nameInput.focus();
-    //     return;
-    // }
     if(running) return;
 
     running = true;
     startBtn.disabled = true;
-    startBtn.innerHTML = '<i class="fas fa-spinner fa-spin button-icon"></i> Capturing Faces...';
+    startBtn.innerHTML = "Capturing Faces...";
     counterText.innerText = "0 / 100";
     progressBar.style.width = "0%";
     counterContainer.classList.add("active");
-    
-    // Reset face boxes
-    lastFaceBoxes = [];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    showToast("Starting secure face capture...", "success");
+
     interval = setInterval(sendFrame, 200);
 }
 
-// Send frame to backend
+/* 🔥 FIXED FRAME SENDER */
 function sendFrame(){
-    // Draw current video frame to canvas
+    if(!running) return;
+
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    fetch("/process-frame/",{
-        method:"POST",
-        credentials: 'same-origin',
-        headers:{
-            "Content-Type":"application/json",
+    fetch("/process-frame/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
             "X-CSRFToken": getCookie("csrftoken")
         },
         body: JSON.stringify({
@@ -722,77 +557,47 @@ function sendFrame(){
     })
     .then(res => res.json())
     .then(data => {
-        // Update counter
+
         counterText.innerText = data.count + " / 100";
-        
-        // Update progress bar
-        const progressPercent = Math.min(100, (data.count / 100) * 100);
-        progressBar.style.width = `${progressPercent}%`;
-        
-        // Clear previous face boxes
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Show progress toast at milestones
-        if (data.count === 25) {
-            showToast("Great! 25% complete", "success");
-        } else if (data.count === 50) {
-            showToast("Halfway there! Keep going", "success");
-        } else if (data.count === 75) {
-            showToast("Almost done! 75% complete", "success");
-        }
-        
-        // Stop when done
-        if(data.count >= 100){
-            clearInterval(interval);
-            running = false;
-            startBtn.disabled = false;
-            startBtn.innerHTML = '<i class="fas fa-camera button-icon"></i> Start Face Capture';
-            counterContainer.classList.remove("active");
-            showToast("✅ Face Capture Completed Successfully!", "success");
-            
-            // Add a celebration effect
-        setTimeout(() => {
-            window.location.href = data.redirect || "/student-login/";
-        }, 1500);
+        progressBar.style.width = (data.count) + "%";
+
+        /* ✅ CRITICAL FIX */
+        if(data.done === true){
+            stopCapture();
+            showToast("✅ Face Capture Completed!", "success");
+            setTimeout(()=>{
+                window.location.href = "/student-login/";
+            }, 1200);
         }
     })
-    .catch(err => {
-        console.error(err);
-        showToast("Connection error. Please try again.", "error");
+    .catch(()=>{
+        stopCapture();
+        showToast("Network error", "error");
     });
 }
 
-// CSRF helper
+/* STOP */
+function stopCapture(){
+    clearInterval(interval);
+    running = false;
+    startBtn.disabled = false;
+    startBtn.innerHTML = "Start Face Capture";
+    counterContainer.classList.remove("active");
+}
+
+/* CSRF */
 function getCookie(name){
     let cookieValue = null;
     if(document.cookie){
-        document.cookie.split(";").forEach(cookie=>{
-            cookie = cookie.trim();
-            if(cookie.startsWith(name + "=")){
-                cookieValue = cookie.substring(name.length + 1);
+        document.cookie.split(";").forEach(c=>{
+            c = c.trim();
+            if(c.startsWith(name+"=")){
+                cookieValue = c.substring(name.length+1);
             }
         });
     }
     return cookieValue;
 }
-
-// Add continuous face box animation when no frames are being processed
-function animateFaceBoxes() {
-    if (!running && lastFaceBoxes.length > 0) {
-        drawFaceBoxes(lastFaceBoxes);
-    }
-    requestAnimationFrame(animateFaceBoxes);
-}
-
-// Start animation loop
-animateFaceBoxes();
-
-// Add focus effect to input on page load
-// window.addEventListener('load', () => {
-//     setTimeout(() => {
-//         nameInput.focus();
-//     }, 800);
-// });
 </script>
 
 </body>

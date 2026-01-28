@@ -58,9 +58,6 @@ OTP_EXPIRY_MINUTES = 5
 
 
 
-# =====================================================
-# PATHS & FACE SETUP
-# =====================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -71,12 +68,11 @@ face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
 FACES_PKL = os.path.join(DATA_DIR, "faces_data.pkl")
 LABELS_PKL = os.path.join(DATA_DIR, "labels.pkl")
 
+# TEMP STORAGE (RAM)
+faces_data_store = {}   # student_id -> list
+face_counter = {}       # student_id -> int
+face_saved = set()      # 🔥 PREVENT MULTIPLE SAVES
 
-# =====================================================
-# TEMP FACE STORAGE (RAM)
-# =====================================================
-faces_data_store = {}   # student_id -> list of faces
-face_counter = {}       # student_id -> count
 
 
 
@@ -337,16 +333,25 @@ def process_frame(request):
         if not student_id or not image_data:
             return JsonResponse({"error": "Invalid data"}, status=400)
 
+        # 🔴 STOP if already saved
+        if student_id in face_saved:
+            return JsonResponse({
+                "faces_detected": 0,
+                "count": 100,
+                "done": True
+            })
+
         # INIT STORAGE
         if student_id not in faces_data_store:
             faces_data_store[student_id] = []
             face_counter[student_id] = 0
 
         # DECODE IMAGE
-        img_str = image_data.split(",")[1]
-        img_bytes = base64.b64decode(img_str)
-        np_arr = np.frombuffer(img_bytes, np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        img_bytes = base64.b64decode(image_data.split(",")[1])
+        frame = cv2.imdecode(
+            np.frombuffer(img_bytes, np.uint8),
+            cv2.IMREAD_COLOR
+        )
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(
@@ -356,26 +361,30 @@ def process_frame(request):
             minSize=(80, 80)
         )
 
-        # COLLECT FACES
+        # COLLECT UP TO 100 FACES ONLY
         for (x, y, w, h) in faces:
-            if face_counter[student_id] < 100:
-                crop = frame[y:y+h, x:x+w]
-                resized = cv2.resize(crop, (50, 50))
-                faces_data_store[student_id].append(resized)
-                face_counter[student_id] += 1
+            if face_counter[student_id] >= 100:
+                break
 
-        # SAVE WHEN COMPLETE
-        if face_counter[student_id] >= 100:
+            crop = frame[y:y+h, x:x+w]
+            resized = cv2.resize(crop, (50, 50))
+            faces_data_store[student_id].append(resized)
+            face_counter[student_id] += 1
+
+        # 🔥 SAVE EXACTLY ONCE
+        if face_counter[student_id] == 100:
             faces_np = np.asarray(faces_data_store[student_id]).reshape(100, -1)
 
+            # SAVE FACES
             if os.path.exists(FACES_PKL):
                 with open(FACES_PKL, "rb") as f:
                     old_faces = pickle.load(f)
-                faces_np = np.append(old_faces, faces_np, axis=0)
+                faces_np = np.vstack((old_faces, faces_np))
 
             with open(FACES_PKL, "wb") as f:
                 pickle.dump(faces_np, f)
 
+            # SAVE LABELS
             if os.path.exists(LABELS_PKL):
                 with open(LABELS_PKL, "rb") as f:
                     labels = pickle.load(f)
@@ -387,20 +396,34 @@ def process_frame(request):
             with open(LABELS_PKL, "wb") as f:
                 pickle.dump(labels, f)
 
-            Student.objects.filter(student_id=student_id).update(face_registered=True)
+            # DB UPDATE
+            Student.objects.filter(student_id=student_id).update(
+                face_registered=True
+            )
 
             # CLEANUP
+            face_saved.add(student_id)
             del faces_data_store[student_id]
             del face_counter[student_id]
             request.session.pop("face_student_id", None)
 
+            return JsonResponse({
+                "faces_detected": len(faces),
+                "count": 100,
+                "done": True
+            })
+
         return JsonResponse({
             "faces_detected": len(faces),
-            "count": face_counter.get(student_id, 100)
+            "count": face_counter[student_id],
+            "done": False
         })
 
-    except Exception:
+    except Exception as e:
+        print("FACE ERROR:", e)
         return JsonResponse({"error": "Face processing failed"}, status=500)
+
+
 
 
 # ===============================
