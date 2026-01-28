@@ -58,8 +58,8 @@ OTP_EXPIRY_MINUTES = 5
 
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+FACES_DIR = r"D:\Django Projects\MirrorMind\Faces"
+DATA_DIR = os.path.join(FACES_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
