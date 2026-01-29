@@ -51,7 +51,7 @@ class Student(models.Model):
         return self.age() is not None and self.age() < 10
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} | {self.email} | {self.student_id}"
+        return f"{self.first_name} {self.last_name} | {self.email}"
 
 
 class StudentFace(models.Model):
