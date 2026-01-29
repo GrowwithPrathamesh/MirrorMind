@@ -9,7 +9,7 @@ class Student(models.Model):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
 
-    enrollment_no = models.CharField(max_length=50, unique=True)
+    enrollment_no = models.CharField(max_length=50, unique=False)
 
     student_id = models.CharField(max_length=200, unique=True, blank=True, null=True)
 
@@ -51,7 +51,7 @@ class Student(models.Model):
         return self.age() is not None and self.age() < 10
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} | {self.enrollment_no}"
+        return f"{self.first_name} {self.last_name} | {self.email} | {self.student_id}"
 
 
 class StudentFace(models.Model):

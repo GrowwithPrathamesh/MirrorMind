@@ -253,10 +253,12 @@ def student_signup(request):
             # --------------------------
             with transaction.atomic():
                 username_part = email.split("@")[0]
+                username = f"{username_part}_{int(timezone.now().timestamp())}"
+
 
                 # Step 1: Create student without student_id first
                 student = Student.objects.create(
-                    username=username_part,
+                    username=username,
                     email=email,
                     password=make_password(password),
                     first_name=first_name,
@@ -271,6 +273,7 @@ def student_signup(request):
                     face_registered=False,
                     terms_accepted=True
                 )
+
 
                 # Step 2: Assign student_id =    email username + db id
                 student.student_id = f"{username_part}{student.id}"
@@ -294,7 +297,8 @@ def student_signup(request):
             })
 
         except Exception as e:
-            return JsonResponse({"error": "Internal server error"}, status=500)
+            print("STUDENT SIGNUP ERROR:", e)
+            return JsonResponse({"error": str(e)}, status=500)
 
     return render(request, "student_signup.html")
 
