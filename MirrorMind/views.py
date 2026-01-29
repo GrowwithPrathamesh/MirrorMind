@@ -7,7 +7,6 @@ import smtplib
 from datetime import datetime, timedelta
 
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -21,12 +20,9 @@ from requests import request
 from students.models import Student, StudentFace
 from teachers.models import Teacher
 
-from django.shortcuts import render
 from attendence.models import Attendance
 from attendence.recognition import run_attendance
 
-
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.db import transaction
