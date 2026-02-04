@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial;
+            background: #f4f6f8;
+        }
+        video {
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 14px 24px;
+            font-size: 16px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+        }
+        h3 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📸 Face Attendance</h2>
+
+<video id="video" autoplay></video>
+<canvas id="canvas" style="display:none;"></canvas>
+
+<br>
+<button onclick="takeAttendance()">Mark Attendance</button>
+
+<h3 id="result">Waiting...</h3>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const result = document.getElementById("result");
+
+// Start camera (mobile + laptop)
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => video.srcObject = stream)
+.catch(() => alert("Camera access denied"));
+
+function takeAttendance() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+
+    const imageData = canvas.toDataURL("image/jpeg");
+
+    fetch("/attendance/mark/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "image=" + encodeURIComponent(imageData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            result.innerText = "✅ " + data.name + " @ " + data.time;
+        } else {
+            result.innerText = "❌ Face not detected";
+        }
+    });
+}
+</script>
+
+</body>
+</html>

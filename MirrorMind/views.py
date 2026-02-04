@@ -1057,3 +1057,110 @@ def check_student_exists(request):
     # For non-POST requests
     return JsonResponse({"error": "Invalid request method"}, status=400)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import base64
+import pickle
+import cv2
+import numpy as np
+import os
+import csv
+from datetime import datetime
+
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+from sklearn.neighbors import KNeighborsClassifier
+
+from .face_config import face_cascade, FACES_PKL, LABELS_PKL
+
+
+# -------------------------------
+# Load trained data ONCE
+# -------------------------------
+with open(FACES_PKL, "rb") as f:
+    FACES = pickle.load(f)
+
+with open(LABELS_PKL, "rb") as f:
+    LABELS = pickle.load(f)
+
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(FACES, LABELS)
+
+# -------------------------------
+# Attendance folder
+# -------------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ATTENDANCE_DIR = os.path.join(BASE_DIR, "Attendance")
+os.makedirs(ATTENDANCE_DIR, exist_ok=True)
+
+COL_NAMES = ["NAME", "TIME"]
+
+
+def attendance_page(request):
+    return render(request, "attendance.html")
+
+
+@csrf_exempt
+def mark_attendance(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+    image_data = request.POST.get("image")
+
+    if not image_data:
+        return JsonResponse({"error": "No image received"}, status=400)
+
+    # Decode base64 image
+    image_bytes = base64.b64decode(image_data.split(",")[1])
+    np_arr = np.frombuffer(image_bytes, np.uint8)
+    frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+    if len(faces) == 0:
+        return JsonResponse({"status": "no_face"})
+
+    (x, y, w, h) = faces[0]
+    face_img = frame[y:y+h, x:x+w]
+    resized = cv2.resize(face_img, (50, 50)).flatten().reshape(1, -1)
+
+    name = knn.predict(resized)[0]
+
+    now = datetime.now()
+    date_str = now.strftime("%d-%m-%Y")
+    time_str = now.strftime("%H:%M:%S")
+
+    file_path = os.path.join(
+        ATTENDANCE_DIR,
+        f"Attendance_{date_str}.csv"
+    )
+
+    file_exists = os.path.isfile(file_path)
+
+    with open(file_path, "a", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        if not file_exists:
+            writer.writerow(COL_NAMES)
+        writer.writerow([name, time_str])
+
+    return JsonResponse({
+        "status": "success",
+        "name": name,
+        "time": time_str
+    })

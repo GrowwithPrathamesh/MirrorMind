@@ -28,4 +28,14 @@ urlpatterns = [
     # Utils
     path('check_student_exists/', views.check_student_exists),
     path('dashboard/', views.dashboard),
+
+
+
+
+
+
+
+
+    path("attendance/", views.attendance_page),
+    path("attendance/mark/", views.mark_attendance),
 ]
