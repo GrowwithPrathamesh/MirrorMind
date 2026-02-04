@@ -37,6 +37,8 @@ import pickle
 import base64
 import json
 
+from pathlib import Path
+
 
 
 
@@ -51,18 +53,29 @@ def dashboard(request):
 OTP_EXPIRY_MINUTES = 5
 
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
+FACES_DIR = BASE_DIR / "Faces"
+DATA_DIR = FACES_DIR / "data"
+# FACES_DATA_DIR = DATA_DIR / "faces"
 
+# ✅ Create folders properly
+FACES_DIR.mkdir(exist_ok=True)
+DATA_DIR.mkdir(exist_ok=True)
+# FACES_DATA_DIR.mkdir(exist_ok=True)
 
-FACES_DIR = r"D:\Django Projects\MirrorMind\Faces"
-DATA_DIR = os.path.join(FACES_DIR, "data")
-os.makedirs(DATA_DIR, exist_ok=True)
-
+# ✅ Haar cascade
 CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 face_cascade = cv2.CascadeClassifier(CASCADE_PATH)
 
-FACES_PKL = os.path.join(DATA_DIR, "faces_data.pkl")
-LABELS_PKL = os.path.join(DATA_DIR, "labels.pkl")
+# ✅ Pickle files (Path-style, SAFE)
+FACES_PKL = DATA_DIR / "faces_data.pkl"
+LABELS_PKL = DATA_DIR / "labels.pkl"
+
+# ✅ If any library needs string paths
+FACES_PKL = str(FACES_PKL)
+LABELS_PKL = str(LABELS_PKL)
+
 
 # TEMP STORAGE (RAM)
 faces_data_store = {}   # student_id -> list
