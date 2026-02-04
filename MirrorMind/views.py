@@ -3,10 +3,16 @@ import base64
 import json
 import random
 import smtplib
+import csv
+import pickle
+import cv2
+import numpy as np
 
+from pathlib import Path
 from datetime import datetime, timedelta
 
 from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -14,7 +20,6 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 
 from email.mime.text import MIMEText
-
 from requests import request
 
 from students.models import Student, StudentFace
@@ -23,23 +28,11 @@ from teachers.models import Teacher
 from attendence.models import Attendance
 from attendence.recognition import run_attendance
 
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from django.db import transaction
-from django.utils import timezone
+from sklearn.neighbors import KNeighborsClassifier
 
-from datetime import datetime, timedelta
+from .face_config import face_cascade, FACES_PKL, LABELS_PKL
 
-import cv2
-import numpy as np
-import os
-import pickle
-import base64
-import json
-
-from pathlib import Path
-
-
+otp_storage = {}
 
 
 
@@ -48,6 +41,8 @@ from pathlib import Path
 def dashboard(request):
     data = Attendance.objects.all().order_by('-time')
     return render(request,"dashboard.html",{"data":data})
+
+
 
 # 🔒 CONSTANT
 OTP_EXPIRY_MINUTES = 5
@@ -76,7 +71,6 @@ LABELS_PKL = DATA_DIR / "labels.pkl"
 FACES_PKL = str(FACES_PKL)
 LABELS_PKL = str(LABELS_PKL)
 
-
 # TEMP STORAGE (RAM)
 faces_data_store = {}   # student_id -> list
 face_counter = {}       # student_id -> int
@@ -87,14 +81,8 @@ face_saved = set()      # 🔥 PREVENT MULTIPLE SAVES
 
 
 
-otp_storage = {}
-
-
 def home(request):
-    return render(request, "home.html")
-
-
-
+    return render(request, "index.html")
 
 
 # ===============================
@@ -129,10 +117,6 @@ def student_login(request):
             return JsonResponse({"success": False, "error": "Internal server error"}, status=500)
 
     return render(request, "student_login.html")
-
-
-
-
 
 
 
@@ -310,131 +294,6 @@ def student_signup(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return render(request, "student_signup.html")
-
-
-
-
-
-
-# =====================================================
-# FACE CAPTURE PAGE
-# =====================================================
-def face_capture(request):
-    student_id = request.session.get("face_student_id")
-
-    if not student_id:
-        return redirect("student_signup")
-
-    return render(request, "face_capture.html", {
-        "student_id": student_id
-    })
-
-
-# =====================================================
-# FACE FRAME PROCESSING
-# =====================================================
-@csrf_exempt
-def process_frame(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request"}, status=405)
-
-    try:
-        data = json.loads(request.body)
-        student_id = data.get("student_id")
-        image_data = data.get("image")
-
-        if not student_id or not image_data:
-            return JsonResponse({"error": "Invalid data"}, status=400)
-
-        # 🔴 STOP if already saved
-        if student_id in face_saved:
-            return JsonResponse({
-                "faces_detected": 0,
-                "count": 100,
-                "done": True
-            })
-
-        # INIT STORAGE
-        if student_id not in faces_data_store:
-            faces_data_store[student_id] = []
-            face_counter[student_id] = 0
-
-        # DECODE IMAGE
-        img_bytes = base64.b64decode(image_data.split(",")[1])
-        frame = cv2.imdecode(
-            np.frombuffer(img_bytes, np.uint8),
-            cv2.IMREAD_COLOR
-        )
-
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(
-            gray,
-            scaleFactor=1.3,
-            minNeighbors=5,
-            minSize=(80, 80)
-        )
-
-        # COLLECT UP TO 100 FACES ONLY
-        for (x, y, w, h) in faces:
-            if face_counter[student_id] >= 100:
-                break
-
-            crop = frame[y:y+h, x:x+w]
-            resized = cv2.resize(crop, (50, 50))
-            faces_data_store[student_id].append(resized)
-            face_counter[student_id] += 1
-
-        # 🔥 SAVE EXACTLY ONCE
-        if face_counter[student_id] == 100:
-            faces_np = np.asarray(faces_data_store[student_id]).reshape(100, -1)
-
-            # SAVE FACES
-            if os.path.exists(FACES_PKL):
-                with open(FACES_PKL, "rb") as f:
-                    old_faces = pickle.load(f)
-                faces_np = np.vstack((old_faces, faces_np))
-
-            with open(FACES_PKL, "wb") as f:
-                pickle.dump(faces_np, f)
-
-            # SAVE LABELS
-            if os.path.exists(LABELS_PKL):
-                with open(LABELS_PKL, "rb") as f:
-                    labels = pickle.load(f)
-            else:
-                labels = []
-
-            labels.extend([student_id] * 100)
-
-            with open(LABELS_PKL, "wb") as f:
-                pickle.dump(labels, f)
-
-            # DB UPDATE
-            Student.objects.filter(student_id=student_id).update(
-                face_registered=True
-            )
-
-            # CLEANUP
-            face_saved.add(student_id)
-            del faces_data_store[student_id]
-            del face_counter[student_id]
-            request.session.pop("face_student_id", None)
-
-            return JsonResponse({
-                "faces_detected": len(faces),
-                "count": 100,
-                "done": True
-            })
-
-        return JsonResponse({
-            "faces_detected": len(faces),
-            "count": face_counter[student_id],
-            "done": False
-        })
-
-    except Exception as e:
-        print("FACE ERROR:", e)
-        return JsonResponse({"error": "Face processing failed"}, status=500)
 
 
 
@@ -1018,31 +877,6 @@ def teacher_reset_password(request):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @csrf_exempt
 def check_student_exists(request):
 
@@ -1069,24 +903,128 @@ def check_student_exists(request):
 
 
 
+# =====================================================
+# FACE CAPTURE PAGE
+# =====================================================
+def face_capture(request):
+    student_id = request.session.get("face_student_id")
+
+    if not student_id:
+        return redirect("student_signup")
+
+    return render(request, "face_capture.html", {
+        "student_id": student_id
+    })
+
+
+# =====================================================
+# FACE FRAME PROCESSING
+# =====================================================
+@csrf_exempt
+def process_frame(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        student_id = data.get("student_id")
+        image_data = data.get("image")
+
+        if not student_id or not image_data:
+            return JsonResponse({"error": "Invalid data"}, status=400)
+
+        # 🔴 STOP if already saved
+        if student_id in face_saved:
+            return JsonResponse({
+                "faces_detected": 0,
+                "count": 100,
+                "done": True
+            })
+
+        # INIT STORAGE
+        if student_id not in faces_data_store:
+            faces_data_store[student_id] = []
+            face_counter[student_id] = 0
+
+        # DECODE IMAGE
+        img_bytes = base64.b64decode(image_data.split(",")[1])
+        frame = cv2.imdecode(
+            np.frombuffer(img_bytes, np.uint8),
+            cv2.IMREAD_COLOR
+        )
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(
+            gray,
+            scaleFactor=1.3,
+            minNeighbors=5,
+            minSize=(80, 80)
+        )
+
+        # COLLECT UP TO 100 FACES ONLY
+        for (x, y, w, h) in faces:
+            if face_counter[student_id] >= 100:
+                break
+
+            crop = frame[y:y+h, x:x+w]
+            resized = cv2.resize(crop, (50, 50))
+            faces_data_store[student_id].append(resized)
+            face_counter[student_id] += 1
+
+        # 🔥 SAVE EXACTLY ONCE
+        if face_counter[student_id] == 100:
+            faces_np = np.asarray(faces_data_store[student_id]).reshape(100, -1)
+
+            # SAVE FACES
+            if os.path.exists(FACES_PKL):
+                with open(FACES_PKL, "rb") as f:
+                    old_faces = pickle.load(f)
+                faces_np = np.vstack((old_faces, faces_np))
+
+            with open(FACES_PKL, "wb") as f:
+                pickle.dump(faces_np, f)
+
+            # SAVE LABELS
+            if os.path.exists(LABELS_PKL):
+                with open(LABELS_PKL, "rb") as f:
+                    labels = pickle.load(f)
+            else:
+                labels = []
+
+            labels.extend([student_id] * 100)
+
+            with open(LABELS_PKL, "wb") as f:
+                pickle.dump(labels, f)
+
+            # DB UPDATE
+            Student.objects.filter(student_id=student_id).update(
+                face_registered=True
+            )
+
+            # CLEANUP
+            face_saved.add(student_id)
+            del faces_data_store[student_id]
+            del face_counter[student_id]
+            request.session.pop("face_student_id", None)
+
+            return JsonResponse({
+                "faces_detected": len(faces),
+                "count": 100,
+                "done": True
+            })
+
+        return JsonResponse({
+            "faces_detected": len(faces),
+            "count": face_counter[student_id],
+            "done": False
+        })
+
+    except Exception as e:
+        print("FACE ERROR:", e)
+        return JsonResponse({"error": "Face processing failed"}, status=500)
 
 
 
-import base64
-import pickle
-import cv2
-import numpy as np
-import os
-import csv
-from datetime import datetime
-
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-
-from sklearn.neighbors import KNeighborsClassifier
-
-from .face_config import face_cascade, FACES_PKL, LABELS_PKL
 
 
 # -------------------------------
@@ -1161,10 +1099,15 @@ def mark_attendance(request):
     date_str = now.strftime("%d-%m-%Y")
     time_str = now.strftime("%H:%M:%S")
 
+    # subject-wise folder
+    subject_dir = os.path.join(ATTENDANCE_DIR, subject)
+    os.makedirs(subject_dir, exist_ok=True)
+
     file_path = os.path.join(
-        ATTENDANCE_DIR,
+        subject_dir,
         f"Attendance_{date_str}.csv"
     )
+
 
     file_exists = os.path.isfile(file_path)
 
