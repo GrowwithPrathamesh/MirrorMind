@@ -1,58 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Attendance</title>
+    <title>Face Attendance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .card {
+            width: 95%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 18px;
+            padding: 20px 18px 26px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin: 0;
             text-align: center;
-            font-family: Arial;
-            background: #f4f6f8;
+            color: #4a4a4a;
         }
-        video {
-            width: 90%;
-            max-width: 400px;
+
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .instructions {
+            background: #f5f7fb;
             border-radius: 12px;
-            margin-top: 20px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 14px;
         }
+
+        .instructions strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .instructions ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .camera-box {
+            position: relative;
+            margin-top: 16px;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 14px;
+            background: #000;
+        }
+
+        .camera-status {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
         button {
-            padding: 14px 24px;
+            width: 100%;
+            margin-top: 18px;
+            padding: 14px;
             font-size: 16px;
-            margin-top: 20px;
+            font-weight: 600;
             border: none;
-            border-radius: 8px;
-            background: #4CAF50;
-            color: white;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        h3 {
-            margin-top: 20px;
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 15px;
+            min-height: 22px;
+            transition: all 0.3s ease;
+        }
+
+        .success {
+            color: #2e7d32;
+            animation: pop 0.4s ease;
+        }
+
+        .error {
+            color: #c62828;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            50% { transform: translateX(4px); }
+            75% { transform: translateX(-4px); }
+            100% { transform: translateX(0); }
+        }
+
+        footer {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
-<h2>📸 Face Attendance</h2>
+<div class="card">
+    <h2>📸 Face Attendance</h2>
+    <div class="subtitle">AI-powered attendance system</div>
 
-<video id="video" autoplay></video>
-<canvas id="canvas" style="display:none;"></canvas>
+    <div class="instructions">
+        <strong>📝 Instructions</strong>
+        <ul>
+            <li>Ensure your face is clearly visible</li>
+            <li>Good lighting is recommended</li>
+            <li>Remove mask / cap if possible</li>
+            <li>Look straight into the camera</li>
+        </ul>
+    </div>
 
-<br>
-<button onclick="takeAttendance()">Mark Attendance</button>
+    <div class="camera-box">
+        <video id="video" autoplay playsinline></video>
+        <div class="camera-status" id="cameraStatus">🔄 Starting camera...</div>
+    </div>
 
-<h3 id="result">Waiting...</h3>
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <button onclick="takeAttendance()">✅ Mark Attendance</button>
+
+    <div id="result" class="result">Waiting for action…</div>
+
+    <footer>
+        Powered by MirrorMind AI
+    </footer>
+</div>
 
 <script>
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const result = document.getElementById("result");
+const cameraStatus = document.getElementById("cameraStatus");
 
-// Start camera (mobile + laptop)
+// Start camera
 navigator.mediaDevices.getUserMedia({ video: true })
-.then(stream => video.srcObject = stream)
-.catch(() => alert("Camera access denied"));
+.then(stream => {
+    video.srcObject = stream;
+    cameraStatus.innerText = "📷 Camera ready";
+})
+.catch(() => {
+    cameraStatus.innerText = "❌ Camera access denied";
+});
 
 function takeAttendance() {
+    result.className = "result";
+    result.innerText = "⏳ Processing...";
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
@@ -71,10 +221,16 @@ function takeAttendance() {
     .then(res => res.json())
     .then(data => {
         if (data.status === "success") {
-            result.innerText = "✅ " + data.name + " @ " + data.time;
+            result.classList.add("success");
+            result.innerText = "✅ " + data.name + " marked @ " + data.time;
         } else {
-            result.innerText = "❌ Face not detected";
+            result.classList.add("error");
+            result.innerText = "❌ Face not recognized. Try again.";
         }
+    })
+    .catch(() => {
+        result.classList.add("error");
+        result.innerText = "⚠️ Server error. Please retry.";
     });
 }
 </script>

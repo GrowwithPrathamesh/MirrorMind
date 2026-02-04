@@ -1108,7 +1108,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ATTENDANCE_DIR = os.path.join(BASE_DIR, "Attendance")
 os.makedirs(ATTENDANCE_DIR, exist_ok=True)
 
-COL_NAMES = ["NAME", "TIME"]
+COL_NAMES = [" SUBJECT ", " ENROLLMENT ", " NAME ", " TIME "]
 
 
 def attendance_page(request):
@@ -1121,6 +1121,8 @@ def mark_attendance(request):
         return JsonResponse({"error": "Invalid request"}, status=400)
 
     image_data = request.POST.get("image")
+    subject = request.POST.get("subject", "Unknown")
+
 
     if not image_data:
         return JsonResponse({"error": "No image received"}, status=400)
@@ -1142,6 +1144,19 @@ def mark_attendance(request):
 
     name = knn.predict(resized)[0]
 
+
+    # name = predicted student_id / username
+    student_id = name  
+
+    try:
+        student = Student.objects.get(student_id=student_id)
+        student_name = f"{student.first_name} {student.last_name}"
+        enrollment_no = student.enrollment_no
+    except Student.DoesNotExist:
+        student_name = "Unknown"
+        enrollment_no = "Unknown"
+
+
     now = datetime.now()
     date_str = now.strftime("%d-%m-%Y")
     time_str = now.strftime("%H:%M:%S")
@@ -1157,10 +1172,19 @@ def mark_attendance(request):
         writer = csv.writer(csvfile)
         if not file_exists:
             writer.writerow(COL_NAMES)
-        writer.writerow([name, time_str])
 
-    return JsonResponse({
+        writer.writerow([
+            subject,
+            student_name,
+            enrollment_no,
+            time_str
+        ])
+
+
+        return JsonResponse({
         "status": "success",
-        "name": name,
+        "name": student_name,
+        "enrollment": enrollment_no,
         "time": time_str
     })
+
