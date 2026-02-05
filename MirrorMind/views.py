@@ -78,9 +78,6 @@ face_saved = set()      # 🔥 PREVENT MULTIPLE SAVES
 
 
 
-
-
-
 def home(request):
     return render(request, "index.html")
 
@@ -88,33 +85,39 @@ def home(request):
 # ===============================
 # STUDENT LOGIN
 # ===============================
+
 def student_login(request):
     if request.method == "POST":
-        try:
-            email = request.POST.get("email")
-            password = request.POST.get("password")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
 
-            if not email or not password:
-                return JsonResponse({"success": False, "error": "Email and password required"}, status=400)
+        if not email or not password:
+            return render(request, "student_login.html", {
+                "error": "Email and password are required"
+            })
 
-            student = Student.objects.filter(email=email).first()
-            if not student:
-                return JsonResponse({"success": False, "error": "Student not found"}, status=404)
+        student = Student.objects.filter(email=email).first()
 
-            if not check_password(password, student.password):
-                return JsonResponse({"success": False, "error": "Invalid credentials"}, status=401)
+        if not student:
+            return render(request, "student_login.html", {
+                "error": "Student not found"
+            })
 
-            if not student.is_active:
-                return JsonResponse({"success": False, "error": "Account is inactive"}, status=403)
+        if not check_password(password, student.password):
+            return render(request, "student_login.html", {
+                "error": "Invalid credentials"
+            })
 
-            request.session["student_id"] = student.id
-            request.session["user_type"] = "student"
+        if not student.is_active:
+            return render(request, "student_login.html", {
+                "error": "Account is inactive"
+            })
 
-            return JsonResponse({"success": True, "message": "Student login successful"})
+        # Create session
+        request.session["student_id"] = student.id
+        request.session["user_type"] = "student"
 
-        except Exception as e:
-            print("STUDENT LOGIN ERROR:", e)
-            return JsonResponse({"success": False, "error": "Internal server error"}, status=500)
+        return redirect("/student/dashboard/")
 
     return render(request, "student_login.html")
 

@@ -6,6 +6,8 @@ class Student(models.Model):
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)  # store hashed password
 
+    is_active = models.BooleanField(default=True)
+
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
 
