@@ -117,11 +117,10 @@ def student_login(request):
         request.session["student_id"] = student.id
         request.session["user_type"] = "student"
 
-        return redirect("/student/dashboard/")
+        # Redirect with success parameter
+        return redirect("/student/dashboard/?success=true")
 
     return render(request, "student_login.html")
-
-
 
 # ===============================
 # TEACHER LOGIN

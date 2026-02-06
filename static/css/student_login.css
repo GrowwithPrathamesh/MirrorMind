@@ -796,6 +796,11 @@ body.no-scroll {
 
 .validation-error.active {
     display: block;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border-left: 3px solid #FF6B6B;
 }
 
 @keyframes shake {
@@ -836,7 +841,7 @@ body.no-scroll {
     box-shadow: 
         0 8px 20px rgba(0, 198, 255, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.1);
-    z-index: 1;
+    z-index: 100;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -885,14 +890,40 @@ body.no-scroll {
     transform: translateX(4px);
 }
 
-.spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid rgba(15, 23, 42, 0.3);
-    border-top: 3px solid #0F172A;
+/* Button Loading State - FIXED */
+.btn-primary.loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.btn-primary.loading .btn-text {
+    display: inline !important;
+    margin-left: 8px;
+}
+
+.btn-primary.loading .btn-icon {
+    display: none !important;
+}
+
+.btn-primary.loading .spinner {
+    display: block !important;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #ffffff;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-left: 12px;
+    margin-right: 0;
+}
+
+.spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -901,7 +932,7 @@ body.no-scroll {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* Card footer moved up and border removed */
@@ -938,7 +969,7 @@ body.no-scroll {
     width: 100%;
 }
 
-/* Enhanced Toast System (Same as Signup) */
+/* Enhanced Toast System */
 #toastContainer {
     position: fixed;
     top: 20px;
@@ -948,6 +979,7 @@ body.no-scroll {
     flex-direction: column;
     gap: 12px;
     max-width: 380px;
+    pointer-events: none;
 }
 
 .toast {
@@ -1101,17 +1133,26 @@ body.no-scroll {
 }
 
 /* Form submission loading state */
-.form-submitting .btn-text {
-    display: none;
+.form-submitting {
+    pointer-events: none !important;
+    opacity: 0.8 !important;
 }
 
-.form-submitting .spinner {
-    display: block;
+.form-submitting::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.01);
+    z-index: 50;
+    pointer-events: none;
 }
 
 /* Form error state */
 .form-error .input-field input {
-    border-color: #FF6B6B;
+    border-color: #FF6B6B !important;
     animation: inputError 0.6s ease;
 }
 
@@ -1321,5 +1362,93 @@ body.no-scroll {
     }
     to {
         opacity: 1;
+    }
+}
+
+/* =========================================================
+   CRITICAL FIXES FOR BUTTON STUCK ISSUE
+========================================================= */
+
+/* Force button to always reset on page load */
+body.loaded #loginBtn,
+#loginBtn {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    pointer-events: auto !important;
+}
+
+/* Button reset state */
+#loginBtn:not(.loading) .spinner {
+    display: none !important;
+}
+
+#loginBtn:not(.loading) .btn-text {
+    display: inline !important;
+}
+
+#loginBtn:not(.loading) .btn-icon {
+    display: block !important;
+}
+
+/* Page load animation fix */
+.page-transition-overlay {
+    z-index: 9999 !important;
+}
+
+/* Prevent form submission double click */
+#studentLoginForm.submitting {
+    position: relative;
+}
+
+#studentLoginForm.submitting::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.01);
+    z-index: 50;
+    pointer-events: none;
+}
+
+/* Input field reset */
+.input-field input:disabled {
+    background-color: rgba(242, 245, 249, 0.5) !important;
+    cursor: not-allowed !important;
+}
+
+/* Success redirect animation */
+.redirecting {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Toast styling for success - updated */
+.toast.success {
+    border-left-color: #00F5D4 !important;
+    background: rgba(0, 245, 212, 0.05) !important;
+}
+
+.toast.success .toast-icon svg {
+    fill: #00F5D4 !important;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 576px) {
+    #loginBtn {
+        width: 100% !important;
+        padding: 14px 20px !important;
+    }
+    
+    #loginBtn.loading .spinner {
+        width: 18px;
+        height: 18px;
     }
 }
